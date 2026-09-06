@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gold: #C5A059;
+  --color-gold-light: #D4B577;
+  --color-gold-dark: #9a7846;
+  --color-dark-bg: #0A0A0B;
+  --color-dark-surface: #151517;
+  --color-dark-border: rgba(255, 255, 255, 0.05);
+}
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-[#E0E0E0] antialiased font-sans selection:bg-gold selection:text-black;
+  }
+}
+
+.bg-hero-pattern {
+  background-image: url('https://i.ibb.co/2wv5tXZ/Chat-GPT-Image-Sep-6-2026-02-27-50-PM.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 2px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #C5A059; }

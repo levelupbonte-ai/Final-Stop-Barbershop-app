@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Function to check if user is an admin
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /reservations/{reservationId} {
+      // Users can read their own reservations, admins can read all
+      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
+      // Any authenticated user can create a reservation for themselves
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      // Users can update their own reservations (e.g. status to cancelled), admins can update any
+      allow update: if request.auth != null && (
+        isAdmin() || 
+        (request.auth.uid == resource.data.userId && request.resource.data.userId == resource.data.userId)
+      );
+      // Only admins can delete reservations
+      allow delete: if isAdmin();
+    }
+    
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+  }
+}

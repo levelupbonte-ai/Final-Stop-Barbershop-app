@@ -1,0 +1,10 @@
+{
+  "name": "Barber Shop Elite",
+  "description": "Un site premium pour un salon de barbier, avec réservation, galerie, et itinéraires.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
