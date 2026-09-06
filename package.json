@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",
+    "@types/mapbox-gl": "^3.5.0",
     "@vis.gl/react-google-maps": "^1.10.0",
     "@vitejs/plugin-react": "^5.0.4",
     "clsx": "^2.1.1",
@@ -22,6 +23,7 @@
     "firebase": "^12.18.0",
     "firebase-admin": "^14.3.0",
     "lucide-react": "^0.546.0",
+    "mapbox-gl": "^3.30.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
@@ -30,6 +32,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/geojson": "^7946.0.16",
     "@types/google.maps": "^3.66.2",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",

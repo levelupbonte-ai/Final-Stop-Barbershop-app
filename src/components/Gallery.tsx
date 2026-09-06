@@ -1,34 +1,34 @@
 export default function Gallery() {
   const images = [
     { 
-      src: 'https://i.ibb.co/zhXtNXB4/Chat-GPT-Image-Sep-6-2026-03-38-30-PM-1.png', 
-      alt: 'Coupe Haute Précision & Finition',
+      src: 'https://i.ibb.co/20Ns74Tz/Chat-GPT-Image-6-sept-2026-15-53-44.png', 
+      alt: 'Skin Fade & Dégradé Américain',
       category: 'Coupe & Style'
     },
     { 
+      src: 'https://i.ibb.co/xq8zMm2t/Chat-GPT-Image-6-sept-2026-15-55-41.png', 
+      alt: 'Finition Ciseaux & Texture',
+      category: 'Coupe Signature'
+    },
+    { 
+      src: 'https://i.ibb.co/cXxD5MpB/Chat-GPT-Image-6-sept-2026-15-56-42.png', 
+      alt: 'Sculpture & Tracé Barbe Précision',
+      category: 'Soin Barbe'
+    },
+    { 
+      src: 'https://i.ibb.co/zhXtNXB4/Chat-GPT-Image-Sep-6-2026-03-38-30-PM-1.png', 
+      alt: 'Dégradé Progressif & Lignes Nettes',
+      category: 'Haute Précision'
+    },
+    { 
       src: 'https://i.ibb.co/d4N6qCDJ/Chat-GPT-Image-Sep-6-2026-03-39-13-PM-1.png', 
-      alt: 'Sculpture & Lignes de Barbe',
+      alt: 'Rituel Barbe & Rasage Traditionnel',
       category: 'Barbe Tradition'
     },
     { 
       src: 'https://i.ibb.co/HTWwwJNz/Chat-GPT-Image-Sep-6-2026-03-11-02-PM-1.png', 
-      alt: 'Atmosphère & Fauteuils Traditionnels',
+      alt: 'Ambiance Salon & Fauteuils Cuir Vintage',
       category: 'Le Salon'
-    },
-    { 
-      src: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 
-      alt: 'Soin Signature Visage & Serviette Chaude',
-      category: 'Soins Signature'
-    },
-    { 
-      src: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 
-      alt: 'Rasage à l\'Ancienne & Coupe-Chou',
-      category: 'Artisanat'
-    },
-    { 
-      src: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', 
-      alt: 'Huiles & Cires Premiums Artisanales',
-      category: 'Gamme Exclusive'
     },
   ];
 

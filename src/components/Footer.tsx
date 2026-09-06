@@ -1,8 +1,8 @@
-import { Instagram, Facebook, Twitter, MapPin, Phone, Mail } from 'lucide-react';
+import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0F0F10] pt-20 pb-10 border-t border-white/10">
+    <footer className="bg-[#0F0F10] pt-20 pb-10 border-t border-white/10 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           
@@ -75,23 +75,43 @@ export default function Footer() {
                   +1 (619) 886-1267
                 </a>
               </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-gold shrink-0" />
-                <span className="uppercase">contact@finalstopbarbershop.com</span>
+              <li className="flex items-start gap-3 min-w-0">
+                <Mail className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                <a 
+                  href="mailto:contact@finalstopbarbershop.com" 
+                  className="hover:text-gold transition-colors break-all text-[11px] leading-relaxed block"
+                >
+                  contact@finalstopbarbershop.com
+                </a>
               </li>
             </ul>
           </div>
 
         </div>
 
-        <div className="pt-8 border-t border-white/10 text-center flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-widest opacity-60">
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} Barber Shop. Tous droits réservés.
+            &copy; {new Date().getFullYear()} Final Stop Barber Shop. Tous droits réservés.
           </p>
+
+          {/* Professional Powered by LevelUp badge */}
+          <div>
+            <a
+              href="https://levelup-ecosystem.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#151517] hover:bg-[#1e1e22] border border-white/10 hover:border-gold/50 text-gray-300 hover:text-white transition-all shadow-md group"
+            >
+              <span className="text-gray-500 font-normal lowercase tracking-wider text-[10px]">powered by</span>
+              <span className="text-gold font-black tracking-widest uppercase text-[11px] group-hover:text-gold-light transition-colors">LevelUp</span>
+              <ExternalLink className="w-3 h-3 text-gold/80 group-hover:text-gold transition-transform group-hover:translate-x-0.5" />
+            </a>
+          </div>
+
           <div className="flex gap-4">
             <a href="#" className="hover:text-white transition-colors">Mentions légales</a>
             <span className="opacity-40">|</span>
-            <a href="#" className="hover:text-white transition-colors">Politique de confidentialité</a>
+            <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
           </div>
         </div>
       </div>
