@@ -16,6 +16,11 @@ import BookingPage from './pages/BookingPage';
 import RoutePlannerPage from './pages/RoutePlannerPage';
 import CheckStatusModal from './components/CheckStatusModal';
 import WalkInHubModal, { ModalMode } from './components/WalkInHubModal';
+import ClientStatusHub from './components/ClientStatusHub';
+import OwnerWaitlistModal from './components/OwnerWaitlistModal';
+import WelcomePromoModal from './components/WelcomePromoModal';
+import CallShopModal from './components/CallShopModal';
+import { getIsWaitlistOpen } from './lib/waitlistService';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'booking' | 'route'>(() => {
@@ -26,7 +31,44 @@ export default function App() {
 
   // Modals state for menu action items
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [statusQuery, setStatusQuery] = useState('');
   const [hubMode, setHubMode] = useState<ModalMode>(null);
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+
+  // Shop Owner-controlled waitlist state (Default: closed until owner opens it)
+  const [isWaitlistOpen, setIsWaitlistOpen] = useState<boolean>(getIsWaitlistOpen);
+  const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
+
+  // Global call modal listener
+  useEffect(() => {
+    const handleOpenCall = () => setIsCallModalOpen(true);
+    window.addEventListener('open-call-modal', handleOpenCall);
+    return () => window.removeEventListener('open-call-modal', handleOpenCall);
+  }, []);
+
+  // Timed VIP Welcome Promo Pop-up (strictly 5 seconds after arrival)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPromoModalOpen(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleWaitlistChange = (e: any) => {
+      if (e.detail && typeof e.detail.isOpen === 'boolean') {
+        setIsWaitlistOpen(e.detail.isOpen);
+      }
+    };
+    window.addEventListener('waitlist-status-changed', handleWaitlistChange);
+    return () => window.removeEventListener('waitlist-status-changed', handleWaitlistChange);
+  }, []);
+
+  const handleOpenCheckStatus = (initialQuery?: string) => {
+    setStatusQuery(initialQuery || '');
+    setIsStatusModalOpen(true);
+  };
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -74,9 +116,11 @@ export default function App() {
       {/* Top Navbar with Client Services (Status check, Waitlist, VIP Club) */}
       <Navbar 
         onNavigateToBooking={navigateToBooking}
-        onOpenCheckStatus={() => setIsStatusModalOpen(true)}
+        onOpenCheckStatus={() => handleOpenCheckStatus()}
         onOpenWaitlist={() => setHubMode('waitlist')}
-        onOpenPromo={() => setHubMode('promo')}
+        onOpenPromo={() => setIsPromoModalOpen(true)}
+        onOpenCallModal={() => setIsCallModalOpen(true)}
+        isWaitlistOpen={isWaitlistOpen}
       />
 
       {/* Hero section with Book Appointment & Explore Our Work */}
@@ -84,35 +128,78 @@ export default function App() {
 
       <main>
         {/* Barbers craft specialties and rates */}
-        <TeamAndPricing />
+        <TeamAndPricing onNavigateToBooking={() => navigateToBooking()} />
         
+        {/* Client Status Hub & Live Queue */}
+        <ClientStatusHub 
+          onOpenCheckStatus={handleOpenCheckStatus}
+          onOpenWaitlist={() => setHubMode('waitlist')}
+          onOpenPromo={() => setIsPromoModalOpen(true)}
+          isWaitlistOpen={isWaitlistOpen}
+          onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
+          onNavigateToBooking={navigateToBooking}
+        />
+
         {/* Realizations portfolio */}
         <Gallery />
         
+        {/* Location & Map Section with interactive map & route planner */}
+        <MapSection onNavigateToRoutePlanner={navigateToRoutePlanner} />
+
         {/* Google Reviews testimonials */}
         <Testimonials />
         
-        {/* FAQ section */}
+        {/* FAQ section (last) */}
         <FAQ />
-        
-        {/* Location & Map Section with route planner trigger */}
-        <MapSection onNavigateToRoutePlanner={navigateToRoutePlanner} />
       </main>
 
-      <Footer onNavigateToBooking={navigateToBooking} />
+      <Footer 
+        onNavigateToBooking={navigateToBooking} 
+        onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
+      />
 
       {/* 1. Dedicated 'Check My Status' Modal */}
       <CheckStatusModal 
         isOpen={isStatusModalOpen}
-        onClose={() => setIsStatusModalOpen(false)}
+        onClose={() => {
+          setIsStatusModalOpen(false);
+          setStatusQuery('');
+        }}
         onOpenWaitlist={() => setHubMode('waitlist')}
+        initialQuery={statusQuery}
+        isWaitlistOpen={isWaitlistOpen}
+        onNavigateToBooking={navigateToBooking}
       />
 
-      {/* 2. Walk-in Waitlist & VIP Promo Modal */}
+      {/* 2. Walk-in Waitlist Modal */}
       <WalkInHubModal 
         mode={hubMode}
         onClose={() => setHubMode(null)}
-        onOpenStatusCheck={() => setIsStatusModalOpen(true)}
+        onOpenStatusCheck={() => handleOpenCheckStatus()}
+        isWaitlistOpen={isWaitlistOpen}
+        onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
+        onNavigateToBooking={navigateToBooking}
+      />
+
+      {/* 3. Shop Owner Waitlist Control Modal */}
+      <OwnerWaitlistModal 
+        isOpen={isOwnerModalOpen}
+        onClose={() => setIsOwnerModalOpen(false)}
+        isWaitlistOpen={isWaitlistOpen}
+        onStatusChange={(newState) => setIsWaitlistOpen(newState)}
+      />
+
+      {/* 4. Timed Welcome VIP 15% Off Pop-up Modal */}
+      <WelcomePromoModal 
+        isOpen={isPromoModalOpen}
+        onClose={() => setIsPromoModalOpen(false)}
+        onNavigateToBooking={navigateToBooking}
+      />
+
+      {/* 5. Direct Phone Lines Modal (2 shop numbers) */}
+      <CallShopModal 
+        isOpen={isCallModalOpen}
+        onClose={() => setIsCallModalOpen(false)}
       />
     </div>
   );

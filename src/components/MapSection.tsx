@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { MapPin, Navigation, Phone, ExternalLink, Clock } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
+import { getMapboxToken } from '../lib/mapboxConfig';
 
 const SHOP_LOCATION = {
   lat: 32.7572493,
@@ -25,13 +26,11 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
     if (!mapContainer.current) return;
     if (mapRef.current) return;
 
-    const userToken = import.meta.env.VITE_MAPBOX_TOKEN;
-    if (userToken) {
-      mapboxgl.accessToken = userToken;
-    }
+    const token = getMapboxToken();
+    mapboxgl.accessToken = token;
 
-    // Modern Dark Mapbox Style with raster fallback if token is not configured
-    const darkStyle: any = userToken
+    // Modern Dark Mapbox Style with fallback if token is not configured
+    const darkStyle: any = token
       ? 'mapbox://styles/mapbox/dark-v11'
       : {
           version: 8,
@@ -151,10 +150,15 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
             <div className="w-12 h-12 bg-black border border-white/10 flex items-center justify-center mb-4 text-gold">
               <Phone className="w-5 h-5" />
             </div>
-            <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-2">Phone & SMS</h4>
-            <p className="text-xs text-gray-300 font-mono">
-              <a href="tel:16198861267" className="text-gold hover:underline font-bold">+1 (619) 886-1267</a>
-            </p>
+            <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-2">Phone Lines (2 Direct)</h4>
+            <div className="text-xs text-gray-300 font-mono space-y-1">
+              <div>
+                <a href="tel:16198861267" className="text-gold hover:underline font-bold block">+1 (619) 886-1267</a>
+              </div>
+              <div>
+                <a href="tel:16199287084" className="text-gold hover:underline font-bold block">+1 (619) 928-7084</a>
+              </div>
+            </div>
             <span className="text-[11px] text-gray-500 mt-1">Direct Call / Text</span>
           </div>
 

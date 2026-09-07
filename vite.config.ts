@@ -11,6 +11,20 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    define: {
+      'process.env.MAPBOX_ACCESS_TOKEN': JSON.stringify(
+        process.env.MAPBOX_ACCESS_TOKEN ||
+        process.env.VITE_MAPBOX_ACCESS_TOKEN ||
+        process.env.VITE_MAPBOX_TOKEN ||
+        ''
+      ),
+      'process.env.VITE_MAPBOX_TOKEN': JSON.stringify(
+        process.env.VITE_MAPBOX_TOKEN ||
+        process.env.VITE_MAPBOX_ACCESS_TOKEN ||
+        process.env.MAPBOX_ACCESS_TOKEN ||
+        ''
+      ),
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.

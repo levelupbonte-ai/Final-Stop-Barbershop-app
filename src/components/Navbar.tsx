@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Calendar, Phone } from 'lucide-react';
+import { Menu, X, Calendar, Phone, Search, Users } from 'lucide-react';
 
 interface NavbarProps {
   onNavigateToBooking?: () => void;
+  onOpenCheckStatus?: () => void;
+  onOpenWaitlist?: () => void;
+  onOpenPromo?: () => void;
+  onOpenCallModal?: () => void;
+  isWaitlistOpen?: boolean;
 }
 
 export default function Navbar({ 
   onNavigateToBooking,
+  onOpenCheckStatus,
+  onOpenWaitlist,
+  onOpenPromo,
+  onOpenCallModal,
+  isWaitlistOpen = false,
 }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -51,7 +61,7 @@ export default function Navbar({
               <li key={link.name}>
                 <a 
                   href={link.href} 
-                  className="text-xs uppercase tracking-widest font-medium text-gray-300 hover:text-gold transition-colors font-mono"
+                  className="text-xs uppercase tracking-widest font-medium text-gray-300 hover:text-gold transition-colors"
                 >
                   {link.name}
                 </a>
@@ -60,20 +70,23 @@ export default function Navbar({
           </ul>
         </div>
 
-        {/* Clean Top Action: Book Appointment CTA */}
+        {/* Clean Top Action: Call & Book Appointment CTA */}
         <div className="hidden sm:flex items-center gap-3">
-          <a
-            href="tel:16198861267"
-            className="text-xs font-mono text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5 px-3 py-2"
+          <button
+            type="button"
+            onClick={onOpenCallModal}
+            className="text-xs font-medium text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5 px-3 py-2 cursor-pointer bg-transparent border-none"
+            title="Call Shop (Choose from 2 lines)"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
             <span className="hidden xl:inline">+1 (619) 886-1267</span>
-          </a>
+            <span className="xl:hidden">Call</span>
+          </button>
 
           <button
             type="button"
             onClick={onNavigateToBooking}
-            className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 flex items-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer font-mono"
+            className="bg-gold hover:bg-gold-light text-black text-xs font-semibold uppercase tracking-wider px-4 py-2 flex items-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer rounded-sm"
           >
             <Calendar className="w-3.5 h-3.5" />
             <span>Book Appointment</span>
@@ -85,14 +98,14 @@ export default function Navbar({
           <button
             type="button"
             onClick={onNavigateToBooking}
-            className="sm:hidden bg-gold text-black text-[11px] font-bold uppercase px-3 py-1.5 font-mono"
+            className="sm:hidden bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase px-3 py-1.5 cursor-pointer transition-colors rounded-sm"
           >
             Book
           </button>
 
           <button 
             type="button"
-            className="text-white p-2 hover:text-gold transition-colors"
+            className="text-white p-2 hover:text-gold transition-colors cursor-pointer"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Menu"
           >
@@ -122,21 +135,55 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => {
-                  setMobileMenuOpen(false);
                   onNavigateToBooking?.();
+                  setMobileMenuOpen(false);
                 }}
-                className="w-full bg-gold text-black text-xs font-bold uppercase py-3 flex items-center justify-center gap-2 font-mono"
+                className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase py-3 flex items-center justify-center gap-2 font-mono cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
                 <span>Book an Appointment</span>
               </button>
 
-              <a
-                href="tel:16198861267"
-                className="text-center text-xs text-gray-400 hover:text-gold py-2 font-mono"
+              {onOpenCheckStatus && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenCheckStatus();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-[#151517] hover:bg-[#202026] text-gray-200 hover:text-gold border border-white/15 hover:border-gold/50 text-xs font-bold uppercase py-3 flex items-center justify-center gap-2 font-mono cursor-pointer active:scale-98 transition-all"
+                >
+                  <Search className="w-3.5 h-3.5 text-gold" />
+                  <span>Check Appointment / Chair Status</span>
+                </button>
+              )}
+
+              {/* Waitlist ONLY visible if authorized by owner */}
+              {isWaitlistOpen && onOpenWaitlist && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenWaitlist();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-[#151517] hover:bg-[#202026] text-amber-400 border border-amber-500/40 text-xs font-bold uppercase py-2.5 flex items-center justify-center gap-2 font-mono cursor-pointer"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Join Same-Day Waitlist</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenCallModal?.();
+                }}
+                className="w-full text-center text-xs text-gray-400 hover:text-gold py-2 font-mono flex items-center justify-center gap-1.5 cursor-pointer bg-transparent border-none"
               >
-                Call Shop: +1 (619) 886-1267
-              </a>
+                <Phone className="w-3.5 h-3.5 text-gold" />
+                <span>Call Shop (2 Phone Lines)</span>
+              </button>
             </li>
           </ul>
         </div>

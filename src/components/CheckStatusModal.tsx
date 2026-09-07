@@ -19,9 +19,18 @@ interface CheckStatusModalProps {
   onClose: () => void;
   onOpenWaitlist?: () => void;
   initialQuery?: string;
+  isWaitlistOpen?: boolean;
+  onNavigateToBooking?: () => void;
 }
 
-export default function CheckStatusModal({ isOpen, onClose, onOpenWaitlist, initialQuery = '' }: CheckStatusModalProps) {
+export default function CheckStatusModal({ 
+  isOpen, 
+  onClose, 
+  onOpenWaitlist, 
+  initialQuery = '',
+  isWaitlistOpen = false,
+  onNavigateToBooking
+}: CheckStatusModalProps) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [isSearching, setIsSearching] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -216,7 +225,7 @@ export default function CheckStatusModal({ isOpen, onClose, onOpenWaitlist, init
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Reservation name or ID (e.g. Marcus or FS-102)"
+                placeholder="Reservation name or ID (e.g. Mika or FS-102)"
                 className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 outline-none font-mono"
               />
               <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
@@ -239,10 +248,12 @@ export default function CheckStatusModal({ isOpen, onClose, onOpenWaitlist, init
               <span>No active status found for "{searchQuery}"</span>
             </div>
             <p className="text-[11px] text-gray-400 leading-relaxed pl-6">
-              Please verify your spelling, or if you just arrived at the shop, you can join today's walk-in waitlist right now.
+              {isWaitlistOpen 
+                ? "Please verify your spelling, or if you're heading to the shop now, you can join today's walk-in waitlist."
+                : "Please verify your phone number or name. The walk-in queue is currently closed by the owner; please schedule an appointment to reserve your chair."}
             </p>
-            {onOpenWaitlist && (
-              <div className="pl-6 pt-1">
+            <div className="pl-6 pt-1">
+              {isWaitlistOpen && onOpenWaitlist ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -253,8 +264,19 @@ export default function CheckStatusModal({ isOpen, onClose, onOpenWaitlist, init
                 >
                   Join Today's Waitlist &rarr;
                 </button>
-              </div>
-            )}
+              ) : onNavigateToBooking ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onNavigateToBooking();
+                  }}
+                  className="text-xs text-gold underline font-bold uppercase tracking-wider hover:text-white cursor-pointer"
+                >
+                  Book an Appointment &rarr;
+                </button>
+              ) : null}
+            </div>
           </div>
         )}
 

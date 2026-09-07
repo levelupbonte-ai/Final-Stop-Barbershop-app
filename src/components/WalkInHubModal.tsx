@@ -7,7 +7,10 @@ import {
   ShieldCheck,
   Send,
   Gift,
-  Users
+  Users,
+  AlertCircle,
+  Calendar,
+  Key
 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -18,9 +21,19 @@ interface WalkInHubModalProps {
   mode: ModalMode;
   onClose: () => void;
   onOpenStatusCheck?: () => void;
+  isWaitlistOpen?: boolean;
+  onOpenOwnerControls?: () => void;
+  onNavigateToBooking?: () => void;
 }
 
-export default function WalkInHubModal({ mode, onClose, onOpenStatusCheck }: WalkInHubModalProps) {
+export default function WalkInHubModal({ 
+  mode, 
+  onClose, 
+  onOpenStatusCheck,
+  isWaitlistOpen = false,
+  onOpenOwnerControls,
+  onNavigateToBooking
+}: WalkInHubModalProps) {
   // Waitlist form states
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
@@ -115,8 +128,62 @@ export default function WalkInHubModal({ mode, onClose, onOpenStatusCheck }: Wal
           <X className="w-5 h-5" />
         </button>
 
-        {/* MODE: WAITLIST (Walk-in for today) */}
-        {mode === 'waitlist' && (
+        {/* MODE: WAITLIST (Walk-in for today) - When CLOSED by Owner */}
+        {mode === 'waitlist' && !isWaitlistOpen && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+              <span className="text-[10px] uppercase font-mono tracking-widest text-red-400 font-bold">
+                Walk-In Waitlist &bull; Currently Closed
+              </span>
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-white mb-2">
+              Waitlist Closed by Owner
+            </h3>
+
+            <p className="text-xs text-gray-400 mb-6 leading-relaxed">
+              Today's walk-in waitlist is currently disabled by the shop owner. We are operating exclusively by appointment or all walk-in chairs are at full capacity.
+            </p>
+
+            <div className="bg-[#0A0A0B] border border-red-500/30 p-4 space-y-2 mb-6">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <div className="text-xs text-gray-300 leading-relaxed font-sans">
+                  <span className="text-white font-mono font-bold block mb-0.5">Need a haircut today?</span>
+                  Please schedule an appointment with Mika or Luska to guarantee your chair time.
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              {onNavigateToBooking && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onNavigateToBooking();
+                  }}
+                  className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider py-3.5 flex items-center justify-center gap-2 font-mono transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Book an Appointment</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full bg-white/5 hover:bg-white/10 text-gray-300 text-xs py-2.5 transition-colors cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* MODE: WAITLIST (Walk-in for today) - When OPEN */}
+        {mode === 'waitlist' && isWaitlistOpen && (
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
@@ -221,8 +288,8 @@ export default function WalkInHubModal({ mode, onClose, onOpenStatusCheck }: Wal
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
                     <option value="First Available Barber">First Available Barber (Fastest)</option>
-                    <option value="Marcus 'Blade' Carter">Marcus "Blade" Carter (Skin Fade Specialist)</option>
-                    <option value="David 'The Sculptor' Vance">David "The Sculptor" Vance (Beard & Hot Towel)</option>
+                    <option value="Mika">Mika (Skin Fade Specialist)</option>
+                    <option value="Luska">Luska (Beard & Hot Towel)</option>
                   </select>
                 </div>
 

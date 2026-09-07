@@ -10,12 +10,23 @@ import {
   Clock, 
   CheckCircle2, 
   AlertCircle,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
+import CallShopModal from '../components/CallShopModal';
+import { getMapboxToken } from '../lib/mapboxConfig';
 
 interface RoutePlannerPageProps {
   onBackToHome: () => void;
+}
+
+interface AddressSuggestion {
+  displayName: string;
+  mainText: string;
+  secondaryText: string;
+  lat: number;
+  lng: number;
 }
 
 const DESTINATION = {
@@ -37,6 +48,9 @@ const POPULAR_POINTS = [
 export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps) {
   const [startAddress, setStartAddress] = useState('');
   const [startCoords, setStartCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearchingSuggestions, setIsSearchingSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{
     distanceMiles: string;
@@ -45,6 +59,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
     steps: string[];
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
 
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -55,11 +70,75 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
+  // Free OpenStreetMap Autocomplete (Photon & Nominatim - 0 API Quota consumed)
+  useEffect(() => {
+    const query = startAddress.trim();
+    if (query.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingSuggestions(true);
+      try {
+        const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lat=${DESTINATION.lat}&lon=${DESTINATION.lng}`;
+        const res = await fetch(photonUrl);
+        const data = await res.json();
+
+        if (data.features && data.features.length > 0) {
+          const list: AddressSuggestion[] = data.features.map((f: any) => {
+            const p = f.properties;
+            const main = [p.housenumber, p.street || p.name].filter(Boolean).join(' ') || p.name || 'Location';
+            const secondary = [p.city, p.state, p.postcode].filter(Boolean).join(', ') || p.country || '';
+            return {
+              displayName: `${main}${secondary ? ', ' + secondary : ''}`,
+              mainText: main,
+              secondaryText: secondary,
+              lat: f.geometry.coordinates[1],
+              lng: f.geometry.coordinates[0],
+            };
+          });
+          setSuggestions(list);
+          setShowSuggestions(true);
+        } else {
+          // Fallback to Nominatim
+          const nomQuery = query.toLowerCase().includes('san diego') ? query : `${query}, San Diego, CA`;
+          const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nomQuery)}&limit=5&addressdetails=1`;
+          const nRes = await fetch(nomUrl, { headers: { 'User-Agent': 'FinalStopBarbershop/1.0' } });
+          const nData = await nRes.json();
+          if (nData && nData.length > 0) {
+            const list: AddressSuggestion[] = nData.map((item: any) => {
+              const parts = item.display_name.split(',');
+              return {
+                displayName: item.display_name,
+                mainText: parts[0]?.trim() || item.display_name,
+                secondaryText: parts.slice(1, 4).join(',').trim(),
+                lat: parseFloat(item.lat),
+                lng: parseFloat(item.lon),
+              };
+            });
+            setSuggestions(list);
+            setShowSuggestions(true);
+          } else {
+            setSuggestions([]);
+          }
+        }
+      } catch (err) {
+        console.warn('Address autocomplete fetch error:', err);
+      } finally {
+        setIsSearchingSuggestions(false);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [startAddress]);
+
   // Initialize Mapbox
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoibGV2ZWx1cC1lY28iLCJhIjoiY21lcTllbDZpMG56bjJzcTM3Y2k0aWoxdSJ9.wX6p-oIugm-R5B_X_aE1ug';
+    mapboxgl.accessToken = getMapboxToken();
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
@@ -235,10 +314,19 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
     );
   };
 
-  // Handle Text Address Search via Nominatim
+  // Handle Text Address Search via Nominatim or top suggestion
   const handleSearchAddress = async (e: FormEvent) => {
     e.preventDefault();
     if (!startAddress.trim()) return;
+
+    setShowSuggestions(false);
+
+    if (suggestions.length > 0) {
+      const top = suggestions[0];
+      setStartAddress(top.displayName);
+      calculateRoute({ lat: top.lat, lng: top.lng }, top.mainText);
+      return;
+    }
 
     setIsLoading(true);
     setErrorMessage('');
@@ -298,13 +386,16 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
             />
           </div>
 
-          <a
-            href="tel:16198861267"
-            className="text-xs font-mono text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5"
+          {/* Direct Phone Assistance (Opens 2 lines modal) */}
+          <button
+            type="button"
+            onClick={() => setIsCallModalOpen(true)}
+            className="text-xs font-mono text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
+            title="Call Shop (2 Numbers Available)"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
             <span className="hidden sm:inline">+1 (619) 886-1267</span>
-          </a>
+          </button>
         </div>
       </header>
 
@@ -340,17 +431,79 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
               </div>
 
               <form onSubmit={handleSearchAddress} className="space-y-4">
-                <div>
-                  <label className="text-[11px] uppercase font-mono text-gray-400 block mb-1.5">
-                    Address, Neighborhood, or Zip Code
-                  </label>
-                  <input
-                    type="text"
-                    value={startAddress}
-                    onChange={(e) => setStartAddress(e.target.value)}
-                    placeholder="e.g. Downtown San Diego, La Jolla, 92101..."
-                    className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition-colors"
-                  />
+                <div className="relative">
+                  <div className="mb-1.5">
+                    <label className="text-[11px] uppercase font-mono text-gray-400 block">
+                      Address, Street, or Zip Code
+                    </label>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={startAddress}
+                      onChange={(e) => setStartAddress(e.target.value)}
+                      onFocus={() => {
+                        if (suggestions.length > 0) setShowSuggestions(true);
+                      }}
+                      placeholder="e.g. 5th Ave, Downtown San Diego, 92101..."
+                      className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition-colors pr-10 font-mono"
+                    />
+                    {isSearchingSuggestions && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gold">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      </div>
+                    )}
+                    {!isSearchingSuggestions && startAddress && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStartAddress('');
+                          setSuggestions([]);
+                          setShowSuggestions(false);
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white p-1 cursor-pointer"
+                        title="Clear"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Autocomplete Suggestions Dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-1.5 bg-[#121214] border border-gold/40 shadow-2xl z-50 max-h-64 overflow-y-auto divide-y divide-white/5">
+                      <div className="px-3 py-1.5 bg-black/70 text-[10px] font-mono uppercase tracking-wider text-gold flex items-center justify-between border-b border-white/5">
+                        <span>Select Matching Address:</span>
+                        <span className="text-[9px] text-gray-400">OpenStreetMap</span>
+                      </div>
+                      {suggestions.map((item, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setStartAddress(item.displayName);
+                            setShowSuggestions(false);
+                            calculateRoute({ lat: item.lat, lng: item.lng }, item.mainText);
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 hover:bg-gold/15 transition-colors flex items-start gap-2.5 group cursor-pointer"
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-bold text-white group-hover:text-gold font-mono truncate">
+                              {item.mainText}
+                            </div>
+                            {item.secondaryText && (
+                              <div className="text-[11px] text-gray-400 truncate">
+                                {item.secondaryText}
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2.5">
@@ -536,6 +689,12 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
       <footer className="border-t border-white/10 py-6 px-6 bg-[#0A0A0B] text-center text-xs text-gray-500 w-full mt-10">
         <p>&copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115</p>
       </footer>
+
+      {/* Direct Phone Assistance Modal with 2 Lines */}
+      <CallShopModal 
+        isOpen={isCallModalOpen}
+        onClose={() => setIsCallModalOpen(false)}
+      />
 
     </div>
   );

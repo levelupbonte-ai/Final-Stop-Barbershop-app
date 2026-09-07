@@ -2,6 +2,7 @@ import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink } from 
 
 interface FooterProps {
   onNavigateToBooking?: () => void;
+  onOpenOwnerControls?: () => void;
 }
 
 export default function Footer({ onNavigateToBooking }: FooterProps) {
@@ -48,9 +49,9 @@ export default function Footer({ onNavigateToBooking }: FooterProps) {
             <ul className="space-y-3 text-[11px] text-gray-400 uppercase tracking-widest">
               <li><a href="#team-pricing" className="hover:text-gold transition-colors">Barbers & Rates</a></li>
               <li><a href="#gallery" className="hover:text-gold transition-colors">Portfolio</a></li>
+              <li><a href="#contact" className="hover:text-gold transition-colors">Location & Map</a></li>
               <li><a href="#testimonials" className="hover:text-gold transition-colors">Client Reviews</a></li>
               <li><a href="#faq" className="hover:text-gold transition-colors">FAQ</a></li>
-              <li><a href="#contact" className="hover:text-gold transition-colors">Location & Map</a></li>
             </ul>
           </div>
 
@@ -84,9 +85,14 @@ export default function Footer({ onNavigateToBooking }: FooterProps) {
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <a href="tel:16198861267" className="text-white hover:text-gold transition-colors font-mono font-bold">
-                  +1 (619) 886-1267
-                </a>
+                <div className="space-y-1">
+                  <a href="tel:16198861267" className="text-white hover:text-gold transition-colors font-mono font-bold block">
+                    +1 (619) 886-1267
+                  </a>
+                  <a href="tel:16199287084" className="text-gray-300 hover:text-gold transition-colors font-mono font-bold block text-xs">
+                    +1 (619) 928-7084
+                  </a>
+                </div>
               </li>
               <li className="flex items-start gap-3 min-w-0 pt-1">
                 <Mail className="w-4 h-4 text-gold shrink-0 mt-0.5" />
@@ -121,7 +127,7 @@ export default function Footer({ onNavigateToBooking }: FooterProps) {
             </a>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             <a href="#" className="hover:text-white transition-colors">Legal Terms</a>
             <span className="opacity-40">|</span>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>

@@ -5,14 +5,14 @@ const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9";
 export default function Testimonials() {
   const reviews = [
     {
-      name: "Marcus R.",
+      name: "Malik R.",
       date: "2 weeks ago",
       content: "Hands down one of the top barbershops in San Diego! The fade is razor sharp and the beard work is surgical precision. Great vibe, clean shop, and top hospitality.",
       rating: 5,
       avatarColor: "bg-[#1E3A8A]"
     },
     {
-      name: "David K.",
+      name: "Derrick K.",
       date: "1 month ago",
       content: "Flawless service every single visit. The barber takes the time to listen and tailor the cut to perfection. Clean shop, great music, and on-time appointments. 100% recommended.",
       rating: 5,

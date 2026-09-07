@@ -1,24 +1,30 @@
-import { Scissors, Clock, Award } from 'lucide-react';
+import { useState } from 'react';
+import { Scissors, Clock, Award, Receipt, ChevronRight } from 'lucide-react';
+import MobilePricingModal, { ALL_SERVICES } from './MobilePricingModal';
+
+interface TeamAndPricingProps {
+  onNavigateToBooking?: (serviceName?: string) => void;
+}
 
 // 2 Barbers only, with stylized avatars (no photos)
 const BARBERS = [
   {
-    id: 'marcus',
-    name: 'Marcus "Blade" Carter',
+    id: 'mika',
+    name: 'Mika',
     role: 'Lead Master Barber & Founder',
     experience: '12 Years in the Craft',
     specialty: 'Specialized in surgical skin fades, razor-sharp straight razor lineups, textured crops, and signature beard detailing.',
-    initials: 'MC',
+    initials: 'MK',
     badge: 'Master Fade & Razor',
     tags: ['Skin Fade', 'Straight Razor', 'Precision Styling']
   },
   {
-    id: 'david',
-    name: 'David "The Sculptor" Vance',
+    id: 'luska',
+    name: 'Luska',
     role: 'Artisan Barber & Traditional Grooming',
     experience: '8 Years in the Craft',
     specialty: 'Expert in bespoke beard sculpting, traditional eucalyptus hot towel steam rituals, and restorative hair treatments.',
-    initials: 'DV',
+    initials: 'LK',
     badge: 'Artisan Beard & Spa',
     tags: ['Beard Sculpting', 'Hot Towel Steam', 'Relaxation Care']
   }
@@ -63,7 +69,9 @@ const PRICING_LIST = [
   },
 ];
 
-export default function TeamAndPricing() {
+export default function TeamAndPricing({ onNavigateToBooking }: TeamAndPricingProps) {
+  const [isMobilePricingOpen, setIsMobilePricingOpen] = useState(false);
+
   return (
     <section id="team-pricing" className="py-20 bg-[#0E0E10] relative border-t border-white/5">
       <div className="max-w-6xl mx-auto px-6">
@@ -110,17 +118,17 @@ export default function TeamAndPricing() {
                     <h3 className="text-lg sm:text-xl font-serif font-bold text-white group-hover:text-gold transition-colors">
                       {barber.name}
                     </h3>
-                    <p className="text-xs text-gold font-mono font-semibold mt-0.5">
+                    <p className="text-xs text-gold font-medium mt-0.5">
                       {barber.role}
                     </p>
-                    <span className="text-[11px] text-gray-500 font-mono block mt-1">
+                    <span className="text-xs text-gray-400 block mt-1">
                       {barber.experience} &bull; {barber.badge}
                     </span>
                   </div>
                 </div>
 
                 {/* Specialty Description */}
-                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mb-5">
+                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-5">
                   {barber.specialty}
                 </p>
               </div>
@@ -130,7 +138,7 @@ export default function TeamAndPricing() {
                 {barber.tags.map((tag, i) => (
                   <span 
                     key={i} 
-                    className="text-[10px] font-mono uppercase tracking-wider bg-white/5 text-gray-300 px-2.5 py-1 border border-white/5"
+                    className="text-[11px] font-medium tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm"
                   >
                     {tag}
                   </span>
@@ -156,36 +164,85 @@ export default function TeamAndPricing() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Desktop: Full 2-column Grid */}
+          <div className="hidden md:grid md:grid-cols-2 gap-4">
             {PRICING_LIST.map((item, idx) => (
               <div 
                 key={idx}
-                className="bg-[#0A0A0B] p-4 border border-white/5 hover:border-white/20 transition-colors flex justify-between items-start"
+                className="bg-[#0A0A0B] p-5 border border-white/10 hover:border-gold/40 transition-colors flex justify-between items-start"
               >
                 <div className="pr-4">
-                  <h4 className="text-sm font-bold text-white mb-1">
+                  <h4 className="text-base font-bold text-white mb-1.5">
                     {item.name}
                   </h4>
-                  <p className="text-[11px] text-gray-400 leading-relaxed mb-2">
+                  <p className="text-xs text-gray-300 leading-relaxed mb-3">
                     {item.desc}
                   </p>
-                  <span className="text-[10px] font-mono text-gray-500 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-gold" />
-                    {item.duration}
+                  <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-gold" />
+                    <span>{item.duration}</span>
                   </span>
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="text-lg font-mono font-bold text-gold">
+                  <span className="text-xl font-bold text-gold font-sans">
                     {item.price}
                   </span>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Mobile: Top Signature Previews + "Voir plus" Dedicated Interface Button */}
+          <div className="block md:hidden space-y-3">
+            {PRICING_LIST.slice(0, 2).map((item, idx) => (
+              <div 
+                key={idx}
+                className="bg-[#0A0A0B] p-4 border border-white/10 flex justify-between items-start shadow-md"
+              >
+                <div className="flex-1 pr-3">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <h4 className="text-sm font-bold text-white leading-snug">
+                      {item.name}
+                    </h4>
+                    <span className="text-base font-bold text-gold font-sans shrink-0">
+                      {item.price}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed mb-2">
+                    {item.desc}
+                  </p>
+                  <span className="text-[11px] text-gray-400 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-gold" />
+                    <span>{item.duration}</span>
+                  </span>
+                </div>
+              </div>
+            ))}
+
+            {/* Professional English Menu Expansion Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setIsMobilePricingOpen(true)}
+                className="w-full bg-[#18181C] hover:bg-gold hover:text-black text-gold border border-gold/40 text-xs font-semibold uppercase tracking-wider py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 cursor-pointer group"
+              >
+                <Receipt className="w-4 h-4 text-gold group-hover:text-black transition-colors" />
+                <span>View Full Service & Price Menu ({ALL_SERVICES.length})</span>
+                <ChevronRight className="w-4 h-4 text-gold group-hover:text-black transition-transform group-hover:translate-x-0.5" />
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
+
+      {/* Dedicated Mobile Pricing & Services Modal */}
+      <MobilePricingModal 
+        isOpen={isMobilePricingOpen}
+        onClose={() => setIsMobilePricingOpen(false)}
+        onNavigateToBooking={onNavigateToBooking}
+      />
     </section>
   );
 }

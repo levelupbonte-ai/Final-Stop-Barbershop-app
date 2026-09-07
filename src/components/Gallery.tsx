@@ -2,33 +2,33 @@ export default function Gallery() {
   const images = [
     { 
       src: 'https://i.ibb.co/20Ns74Tz/Chat-GPT-Image-6-sept-2026-15-53-44.png', 
-      alt: 'Skin Fade & American Blend',
-      category: 'Cut & Style'
+      alt: 'Twisted Locs with High Taper Fade & Beard Lineup',
+      category: 'Locs & Taper Fade'
     },
     { 
       src: 'https://i.ibb.co/xq8zMm2t/Chat-GPT-Image-6-sept-2026-15-55-41.png', 
-      alt: 'Shear Work & Textured Crop',
-      category: 'Signature Cut'
+      alt: 'Swirl Cornrows & Geometric Spiral Braids',
+      category: 'Designer Braids'
     },
     { 
       src: 'https://i.ibb.co/cXxD5MpB/Chat-GPT-Image-6-sept-2026-15-56-42.png', 
-      alt: 'Precision Beard Sculpting & Lineup',
-      category: 'Beard Grooming'
+      alt: 'Waist-Length Knotless Box Braids',
+      category: 'Protective Styling'
     },
     { 
       src: 'https://i.ibb.co/zhXtNXB4/Chat-GPT-Image-Sep-6-2026-03-38-30-PM-1.png', 
-      alt: 'Taper Fade & Razor Edge',
-      category: 'High Precision'
+      alt: 'Burgundy Goddess Locs & Edge Styling',
+      category: 'Locs & Custom Color'
     },
     { 
       src: 'https://i.ibb.co/d4N6qCDJ/Chat-GPT-Image-Sep-6-2026-03-39-13-PM-1.png', 
-      alt: 'Hot Lather Shave & Traditional Ritual',
-      category: 'Classic Shave'
+      alt: 'Sleek High Braided Ponytail & Cornrow Crown',
+      category: 'Braided Updo'
     },
     { 
       src: 'https://i.ibb.co/HTWwwJNz/Chat-GPT-Image-Sep-6-2026-03-11-02-PM-1.png', 
-      alt: 'Shop Atmosphere & Vintage Leather Chairs',
-      category: 'The Sanctuary'
+      alt: 'Final Stop Barbershop • Storefront & Grooming Lounge',
+      category: 'Our Barber Shop'
     }
   ];
 
@@ -82,11 +82,11 @@ export default function Gallery() {
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 md:p-6">
                 <span className="text-gold font-mono text-[9px] uppercase tracking-widest mb-1">
                   {img.category}
                 </span>
-                <span className="text-white font-serif text-base font-medium">
+                <span className="text-white font-serif text-sm md:text-base font-medium leading-snug">
                   {img.alt}
                 </span>
               </div>
