@@ -45,7 +45,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
       localStorage.setItem('finalstop_notifications_enabled', 'true');
       sendBarberNotification({
         title: 'Notifications Enabled! 💈',
-        body: 'You will receive real-time queue alerts and appointment updates directly on your device.',
+        body: 'You will receive instant queue alerts and appointment updates directly on your device.',
         url: '/'
       });
     } else {

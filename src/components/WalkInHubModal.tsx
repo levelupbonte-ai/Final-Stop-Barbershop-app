@@ -211,7 +211,7 @@ export default function WalkInHubModal({
             </h3>
 
             <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-              Visiting the shop today without an appointment? Secure your spot in our real-time waitlist now to save waiting time.
+              Visiting the shop today without an appointment? Secure your spot in our live waitlist now to save waiting time.
             </p>
 
             {waitlistSuccess ? (

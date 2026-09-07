@@ -533,7 +533,7 @@ export default function MobilePwaApp({
               </div>
             </div>
 
-            {/* Barbers / Coiffeurs */}
+            {/* Barbers */}
             <div className="space-y-2.5">
               <h3 className="text-xs font-mono uppercase tracking-wider text-gold font-bold flex items-center gap-1.5">
                 <Scissors className="w-3.5 h-3.5" />

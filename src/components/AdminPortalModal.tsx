@@ -779,7 +779,7 @@ export default function AdminPortalModal({
                         Latest Received Reservations
                       </h5>
                       <p className="text-xs text-gray-400">
-                        Real-time sync with Firestore database.
+                        Synchronized with Firestore database.
                       </p>
                     </div>
 

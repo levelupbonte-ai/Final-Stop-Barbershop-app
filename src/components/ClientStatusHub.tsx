@@ -40,7 +40,7 @@ export default function ClientStatusHub({
               Client Service Center & Live Desk
             </h2>
             <p className="text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
-              Track your real-time chair status or reserve your guaranteed appointment slot with Mika & Luska.
+              Track your chair status or reserve your guaranteed appointment slot with Mika & Luska.
             </p>
           </div>
         </div>
@@ -58,7 +58,7 @@ export default function ClientStatusHub({
                   <Search className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 font-bold">
-                  Real-Time
+                  Status Tracker
                 </span>
               </div>
 

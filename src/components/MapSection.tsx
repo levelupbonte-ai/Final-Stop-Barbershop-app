@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapPin, Navigation, Phone, ExternalLink, Clock } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import { setupMapboxGl, getMapboxStyle, CARTO_DARK_MAP_STYLE } from '../lib/mapboxConfig';
+import { getSmartMapsUrl, getAppleMapsUrl, getGoogleMapsUrl } from '../lib/mapLinks';
 
 const SHOP_LOCATION = {
   lat: 32.7572493,
@@ -11,9 +12,6 @@ const SHOP_LOCATION = {
   phone: "+1 (619) 886-1267"
 };
 
-const GOOGLE_MAPS_LINK = "https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9";
-const DIRECTIONS_URL = "https://www.google.com/maps/dir/?api=1&destination=5277+El+Cajon+Blvd,+San+Diego,+CA+92115";
-
 interface MapSectionProps {
   onNavigateToRoutePlanner?: () => void;
 }
@@ -21,6 +19,11 @@ interface MapSectionProps {
 export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const [smartMap, setSmartMap] = useState({ url: getGoogleMapsUrl(), appName: 'Google Maps' as 'Apple Maps' | 'Google Maps', isApple: false });
+
+  useEffect(() => {
+    setSmartMap(getSmartMapsUrl());
+  }, []);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -76,7 +79,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
           </span>
           <div style="margin-top: 6px;">
             <span style="display: inline-block; background: #C5A059; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; text-transform: uppercase;">
-              Ouvert 10h - 18h
+              Open 10:00 AM - 6:00 PM
             </span>
           </div>
         </div>
@@ -178,13 +181,14 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
               </button>
 
               <a
-                href={GOOGLE_MAPS_LINK}
+                href={smartMap.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:inline-flex items-center gap-1.5 text-xs font-mono text-gray-400 hover:text-gold transition-colors py-2 px-3 border border-white/10"
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-mono text-gray-300 hover:text-gold transition-colors py-2 px-3 border border-white/15 bg-black/40"
+                title={`Open in ${smartMap.appName}`}
               >
-                <span>Google Maps</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <span>{smartMap.appName}</span>
+                <ExternalLink className="w-3.5 h-3.5 text-gold" />
               </a>
             </div>
           </div>

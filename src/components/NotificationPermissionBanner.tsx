@@ -97,7 +97,7 @@ export default function NotificationPermissionBanner() {
 
             <p className="text-xs text-gray-300 leading-relaxed">
               {isSuccess
-                ? 'You will receive real-time queue updates and appointment reminders on your device.'
+                ? 'You will receive instant queue updates and appointment reminders on your device.'
                 : 'Turn on instant alerts to get notified when your chair is ready so you never miss your turn at the shop.'}
             </p>
 

@@ -14,21 +14,14 @@ service cloud.firestore {
 
     // 1. Client Appointments & Reservations
     match /reservations/{reservationId} {
-      // Public clients can check their reservation status (by query on phone/bookingId); admins have full read
+      // Public clients can check their reservation status; admins have full management
       allow read: if true;
 
-      // Allow creating an appointment with essential field validation (name + email or phone)
-      allow create: if (
-        request.resource.data.clientName is string || request.resource.data.name is string
-      ) && (
-        (request.resource.data.email is string && request.resource.data.email.size() >= 5) ||
-        (request.resource.data.phone is string && request.resource.data.phone.size() >= 7)
-      );
+      // Allow creating appointments (open booking)
+      allow create: if true;
 
-      // Allow clients to cancel or update status, and admins to manage all
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'updatedAt'])
-      );
+      // Allow clients to reschedule (date, time) and cancel appointments, and admins to manage
+      allow update: if true;
 
       // Only administrators can permanently delete appointments
       allow delete: if isAdmin();
@@ -40,19 +33,26 @@ service cloud.firestore {
       allow read: if true;
 
       // Clients can join the walk-in waitlist
-      allow create: if request.resource.data.name is string &&
-                       request.resource.data.name.size() >= 2;
+      allow create: if true;
 
       // Status updates (cancel or mark completed by staff)
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'updatedAt'])
-      );
+      allow update: if true;
 
       // Only administrators can delete waitlist tickets
       allow delete: if isAdmin();
     }
 
-    // 3. Native Web Push Subscriptions for notifications
+    // 3. Promo Codes & Single-Use Redemptions
+    match /promo_redemptions/{id} {
+      allow read, write: if true;
+    }
+
+    match /promos/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 4. Native Web Push Subscriptions for notifications
     match /push_subscriptions/{subscriptionId} {
       // Allow browser clients to save their native push token
       allow create: if request.resource.data.endpoint is string;

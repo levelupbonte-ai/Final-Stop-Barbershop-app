@@ -25,10 +25,12 @@ import {
 } from 'lucide-react';
 import { format, addDays, startOfToday } from 'date-fns';
 import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, setDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import CallShopModal from '../components/CallShopModal';
 import { sendBookingConfirmationEmail } from '../lib/emailService';
 import { sendBarberNotification } from '../lib/notifications';
+import { validatePromo, recordPromoRedeemed } from '../lib/promoService';
+import { getSmartMapsUrl } from '../lib/mapLinks';
 
 interface BookingPageProps {
   onBackToHome: () => void;
@@ -168,23 +170,25 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
     WELCOME: { percent: 10, label: '10% Off Welcome Pass' }
   };
 
-  const handleApplyPromo = (codeToApply?: string) => {
+  const handleApplyPromo = async (codeToApply?: string) => {
     const raw = (codeToApply || promoInput).trim().toUpperCase();
     if (!raw) {
       setPromoMessage({ text: 'Please enter a promo code', isError: true });
       return;
     }
-    const match = VALID_PROMOS[raw];
-    if (match) {
+    
+    // Check dynamic validity, single-use policy, and expiration
+    const validation = await validatePromo(raw, guestEmail);
+    if (validation.valid) {
       setAppliedPromo({
         code: raw,
-        percent: match.percent,
-        amount: match.amount,
-        label: match.label
+        percent: validation.percent,
+        amount: validation.amount,
+        label: validation.label || raw
       });
-      setPromoMessage({ text: `Code ${raw} applied (${match.label})!`, isError: false });
+      setPromoMessage({ text: `Code ${raw} applied (${validation.label})!`, isError: false });
     } else {
-      setPromoMessage({ text: 'Invalid or expired promo code.', isError: true });
+      setPromoMessage({ text: validation.errorMessage || 'Invalid or expired promo code.', isError: true });
     }
   };
 
@@ -245,7 +249,7 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
     return { base, discount: 0, total: base };
   };
 
-  // Real-Time Booking without Google Account Requirement
+  // Instant Booking Confirmation without Google Account Requirement
   const handleConfirmReservation = async () => {
     setIsSubmitting(true);
     try {
@@ -255,6 +259,7 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
 
       const reservationData = {
         ticketId: generatedTicketId,
+        id: generatedTicketId,
         name: guestName.trim(),
         fullName: guestName.trim(),
         clientName: guestName.trim(),
@@ -276,17 +281,25 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
         createdAt: serverTimestamp()
       };
 
-      let docId = generatedTicketId;
+      // 1. Direct Firestore setDoc by ticket ID
       try {
-        const docRef = await addDoc(collection(db, 'reservations'), reservationData);
-        docId = docRef.id;
+        await setDoc(doc(db, 'reservations', generatedTicketId), reservationData);
       } catch (dbErr) {
-        console.warn('Real-time database record created locally:', dbErr);
+        console.warn('Firestore primary write notice:', dbErr);
+        // Secondary collection addDoc attempt
+        try {
+          await addDoc(collection(db, 'reservations'), reservationData);
+        } catch (_) {}
+      }
+
+      // 2. Consume promo code if applied
+      if (appliedPromo?.code) {
+        await recordPromoRedeemed(appliedPromo.code, guestEmail, generatedTicketId);
       }
 
       const payload = {
         ...reservationData,
-        id: docId,
+        id: generatedTicketId,
         ticketId: generatedTicketId
       };
 
@@ -609,6 +622,16 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
 
             {/* Bottom Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+              <a
+                href={getSmartMapsUrl().url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto bg-[#1E1E24] hover:bg-white/10 text-white border border-white/20 text-xs font-semibold uppercase tracking-wider px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer no-underline"
+              >
+                <MapPin className="w-4 h-4 text-gold" />
+                <span>Open in {getSmartMapsUrl().appName}</span>
+              </a>
+
               <button
                 type="button"
                 onClick={handlePrintTicket}
