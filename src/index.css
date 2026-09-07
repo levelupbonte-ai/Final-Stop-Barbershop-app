@@ -43,6 +43,20 @@ html, body {
   -ms-overflow-style: none !important;
   -webkit-text-size-adjust: 100%;
   touch-action: manipulation;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Safe area padding utilities for mobile notch and navigation bar */
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
+}
+
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}
+
+.top-safe {
+  top: max(env(safe-area-inset-top, 0px), 12px);
 }
 
 /* Eliminate unwanted iOS / Android viewport zoom on input focus */

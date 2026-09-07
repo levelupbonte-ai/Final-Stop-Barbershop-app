@@ -23,7 +23,8 @@ import CallShopModal from './components/CallShopModal';
 import NotificationAndPwaModal from './components/NotificationAndPwaModal';
 import NotificationPermissionBanner from './components/NotificationPermissionBanner';
 import MobilePwaApp from './components/MobilePwaApp';
-import Style360Viewer from './components/Style360Viewer';
+import AdminPortalModal from './components/AdminPortalModal';
+import AnnouncementBanner from './components/AnnouncementBanner';
 import { getIsWaitlistOpen } from './lib/waitlistService';
 import { registerServiceWorker } from './lib/pwa';
 import { Smartphone } from 'lucide-react';
@@ -58,7 +59,7 @@ export default function App() {
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
-  const [is360ModalOpen, setIs360ModalOpen] = useState(false);
+  const [isAdminPortalOpen, setIsAdminPortalOpen] = useState(false);
 
   // Shop Owner-controlled waitlist state (Default: closed until owner opens it)
   const [isWaitlistOpen, setIsWaitlistOpen] = useState<boolean>(getIsWaitlistOpen);
@@ -74,15 +75,15 @@ export default function App() {
     const handleCheckPwa = () => {
       setIsPwaInstalled(checkIsPwaInstalled());
     };
-    const handleOpen360 = () => setIs360ModalOpen(true);
+    const handleOpenAdminPortal = () => setIsAdminPortalOpen(true);
 
     window.addEventListener('resize', handleCheckPwa);
     window.addEventListener('hashchange', handleCheckPwa);
-    window.addEventListener('open-360-modal', handleOpen360);
+    window.addEventListener('open-admin-portal', handleOpenAdminPortal);
     return () => {
       window.removeEventListener('resize', handleCheckPwa);
       window.removeEventListener('hashchange', handleCheckPwa);
-      window.removeEventListener('open-360-modal', handleOpen360);
+      window.removeEventListener('open-admin-portal', handleOpenAdminPortal);
     };
   }, []);
 
@@ -186,6 +187,7 @@ export default function App() {
           onOpenWaitlist={() => setHubMode('waitlist')}
           isWaitlistOpen={isWaitlistOpen}
           onSwitchToWebView={() => setForceWebView(true)}
+          onOpenAdminPortal={() => setIsAdminPortalOpen(true)}
         />
 
         {/* 1. Dedicated 'Check My Status' Modal */}
@@ -227,6 +229,14 @@ export default function App() {
 
         {/* 5. 6-Second Notification Permission Pop-up Banner */}
         <NotificationPermissionBanner />
+
+        {/* 6. Admin Portal Modal */}
+        <AdminPortalModal
+          isOpen={isAdminPortalOpen}
+          onClose={() => setIsAdminPortalOpen(false)}
+          isWaitlistOpen={isWaitlistOpen}
+          onWaitlistChange={(newState) => setIsWaitlistOpen(newState)}
+        />
       </>
     );
   }
@@ -244,6 +254,9 @@ export default function App() {
           <span>Mode App Mobile PWA</span>
         </button>
       )}
+
+      {/* Live Announcement Banner on Web */}
+      <AnnouncementBanner />
 
       {/* Top Navbar with Client Services (Status check, Waitlist, VIP Club) */}
       <Navbar 
@@ -273,7 +286,7 @@ export default function App() {
         />
 
         {/* Realizations portfolio */}
-        <Gallery onOpen360={() => setIs360ModalOpen(true)} />
+        <Gallery />
         
         {/* Location & Map Section with interactive map & route planner */}
         <MapSection onNavigateToRoutePlanner={navigateToRoutePlanner} />
@@ -288,6 +301,7 @@ export default function App() {
       <Footer 
         onNavigateToBooking={navigateToBooking} 
         onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
+        onOpenAdminPortal={() => setIsAdminPortalOpen(true)}
       />
 
       {/* 1. Dedicated 'Check My Status' Modal */}
@@ -343,20 +357,13 @@ export default function App() {
       {/* 7. 6-Second Notification Permission Pop-up Banner */}
       <NotificationPermissionBanner />
 
-      {/* 8. 360 Studio & Haircare Products Inspection Modal */}
-      {is360ModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-3 sm:p-6 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
-          <div className="w-full max-w-4xl relative">
-            <Style360Viewer
-              onClose={() => setIs360ModalOpen(false)}
-              onSelectServiceForBooking={(srv) => {
-                setIs360ModalOpen(false);
-                navigateToBooking(srv);
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {/* 8. Secret Admin Portal (PIN + Google Login) */}
+      <AdminPortalModal
+        isOpen={isAdminPortalOpen}
+        onClose={() => setIsAdminPortalOpen(false)}
+        isWaitlistOpen={isWaitlistOpen}
+        onWaitlistChange={(newState) => setIsWaitlistOpen(newState)}
+      />
     </div>
   );
 }

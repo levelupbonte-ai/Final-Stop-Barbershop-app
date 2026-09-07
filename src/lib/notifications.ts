@@ -98,12 +98,12 @@ export async function sendBarberNotification(options: BarberNotificationOptions)
 }
 
 /**
- * Send a quick test notification so the user can verify
+ * Send a quick test or preview notification so the user can verify
  */
-export async function sendTestNotification(): Promise<void> {
+export async function sendTestNotification(title?: string, body?: string): Promise<void> {
   await sendBarberNotification({
-    title: 'Final Stop Barber Shop 💈',
-    body: 'Test réussi ! Votre système de notifications PWA fonctionne parfaitement.',
+    title: title || 'Final Stop Barber Shop 💈',
+    body: body || 'Test réussi ! Votre système de notifications PWA fonctionne parfaitement.',
     url: '/'
   });
 }

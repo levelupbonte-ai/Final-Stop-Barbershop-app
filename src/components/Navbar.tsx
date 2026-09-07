@@ -40,9 +40,12 @@ export default function Navbar({
   ];
 
   return (
-    <nav className={`fixed w-full z-40 transition-all duration-300 ${
-      isScrolled ? 'bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 py-3' : 'bg-gradient-to-b from-[#0A0A0B]/90 to-transparent py-4'
-    }`}>
+    <nav 
+      className={`fixed w-full z-40 transition-all duration-300 ${
+        isScrolled ? 'bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 py-3' : 'bg-gradient-to-b from-[#0A0A0B]/90 to-transparent py-4'
+      }`}
+      style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 12px)' }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
         
         {/* Brand Logo */}

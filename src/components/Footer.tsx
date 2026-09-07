@@ -1,11 +1,12 @@
-import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink } from 'lucide-react';
+import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink, Lock } from 'lucide-react';
 
 interface FooterProps {
   onNavigateToBooking?: () => void;
   onOpenOwnerControls?: () => void;
+  onOpenAdminPortal?: () => void;
 }
 
-export default function Footer({ onNavigateToBooking }: FooterProps) {
+export default function Footer({ onNavigateToBooking, onOpenOwnerControls, onOpenAdminPortal }: FooterProps) {
   return (
     <footer className="bg-[#0F0F10] pt-20 pb-10 border-t border-white/10 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
@@ -131,6 +132,17 @@ export default function Footer({ onNavigateToBooking }: FooterProps) {
             <a href="#" className="hover:text-white transition-colors">Legal Terms</a>
             <span className="opacity-40">|</span>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <span className="opacity-40">|</span>
+            {/* Discreet admin lock trigger (unnoticeable to clients) */}
+            <button
+              type="button"
+              onClick={onOpenAdminPortal || onOpenOwnerControls}
+              className="opacity-20 hover:opacity-90 text-gray-500 hover:text-gold transition-opacity cursor-pointer p-1"
+              title=""
+              aria-label="Staff"
+            >
+              <Lock className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>

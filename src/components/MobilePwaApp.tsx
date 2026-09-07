@@ -18,11 +18,11 @@ import {
   ChevronRight,
   X,
   Share2,
-  Rotate3d
+  Lock
 } from 'lucide-react';
 import { ALL_SERVICES } from './MobilePricingModal';
 import MapSection from './MapSection';
-import Style360Viewer from './Style360Viewer';
+import AnnouncementBanner from './AnnouncementBanner';
 
 interface MobilePwaAppProps {
   onNavigateToBooking: (serviceName?: string) => void;
@@ -32,6 +32,7 @@ interface MobilePwaAppProps {
   onOpenWaitlist: () => void;
   isWaitlistOpen: boolean;
   onSwitchToWebView: () => void;
+  onOpenAdminPortal?: () => void;
 }
 
 export type MobileTab = 'prices' | 'maps' | 'infos' | 'book' | 'gallery';
@@ -111,13 +112,13 @@ export default function MobilePwaApp({
   onOpenCallModal,
   onOpenWaitlist,
   isWaitlistOpen,
-  onSwitchToWebView
+  onSwitchToWebView,
+  onOpenAdminPortal
 }: MobilePwaAppProps) {
   const [activeTab, setActiveTab] = useState<MobileTab>('prices');
   const [showSplashScreen, setShowSplashScreen] = useState(true);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
   const [galleryFilter, setGalleryFilter] = useState<string>('Tous');
-  const [show360Viewer, setShow360Viewer] = useState<boolean>(false);
 
   // Splash Screen timer (1.8s) with animated logo, 3 dots and "powered by Levelup"
   useEffect(() => {
@@ -135,7 +136,13 @@ export default function MobilePwaApp({
     <div className="min-h-screen bg-[#0E0E10] text-gray-100 flex flex-col justify-between font-sans pb-24 relative select-none antialiased">
       {/* 1. SPLASH SCREEN ANIMATION (Logo + 3 animated dots + Powered by Levelup) */}
       {showSplashScreen && (
-        <div className="fixed inset-0 z-[99999] bg-[#0A0A0C] flex flex-col items-center justify-between p-8 animate-out fade-out duration-700 pointer-events-none">
+        <div 
+          className="fixed inset-0 z-[99999] bg-[#0A0A0C] flex flex-col items-center justify-between p-8 animate-out fade-out duration-700 pointer-events-none"
+          style={{
+            paddingTop: 'max(env(safe-area-inset-top, 0px), 24px)',
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 24px)'
+          }}
+        >
           <div className="w-full flex justify-end">
             <span className="text-[10px] font-mono tracking-widest text-gold/60 uppercase">PWA Mobile</span>
           </div>
@@ -177,10 +184,16 @@ export default function MobilePwaApp({
         </div>
       )}
 
+      {/* Live Announcement Banner */}
+      <AnnouncementBanner />
+
       {/* 2. TOP HEADER: Salon Image + Welcome Description + Quick Action Pills */}
       <header className="relative w-full bg-[#141416] border-b border-white/10 shadow-lg overflow-hidden">
-        {/* Salon Cover Photo */}
-        <div className="relative h-44 w-full overflow-hidden">
+        {/* Salon Cover Photo with Safe Area height limit */}
+        <div 
+          className="relative w-full overflow-hidden"
+          style={{ height: 'calc(11.5rem + env(safe-area-inset-top, 0px))' }}
+        >
           <img
             src="https://i.ibb.co/HTWwwJNz/Chat-GPT-Image-Sep-6-2026-03-11-02-PM-1.png"
             alt="Final Stop Barber Shop Lounge"
@@ -190,9 +203,12 @@ export default function MobilePwaApp({
           {/* Deep Dark Gradients for contrast */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#141416] via-[#141416]/60 to-black/40" />
 
-          {/* Top Floating Controls */}
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
-            <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-gold/30 text-gold text-[10px] font-mono font-bold tracking-wider">
+          {/* Top Floating Controls - Safely spaced below the mobile notch / status bar */}
+          <div 
+            className="absolute left-3 right-3 flex items-center justify-between z-10"
+            style={{ top: 'max(env(safe-area-inset-top, 0px), 12px)' }}
+          >
+            <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-gold/40 text-gold text-[10px] font-mono font-bold tracking-wider shadow-md">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               OUVERT 9H - 19H
             </div>
@@ -200,7 +216,7 @@ export default function MobilePwaApp({
             <button
               type="button"
               onClick={onSwitchToWebView}
-              className="text-[10px] font-mono uppercase tracking-wider text-gray-300 hover:text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 transition-colors"
+              className="text-[10px] font-mono uppercase tracking-wider text-gray-200 hover:text-white bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 transition-colors shadow-md active:scale-95 cursor-pointer"
               title="Passer au site complet"
             >
               Mode Web PC
@@ -557,6 +573,21 @@ export default function MobilePwaApp({
                 </div>
               </div>
             </div>
+
+            {/* Discreet staff link - invisible to regular clients */}
+            <div className="pt-6 pb-2 text-center text-[10px] text-gray-500 font-mono flex items-center justify-center gap-2">
+              <span>© {new Date().getFullYear()} Final Stop Barber Shop</span>
+              <span className="opacity-40">•</span>
+              <button
+                type="button"
+                onClick={onOpenAdminPortal}
+                className="opacity-20 hover:opacity-90 text-gray-500 hover:text-gold transition-opacity p-1 cursor-pointer"
+                title=""
+                aria-label="Staff"
+              >
+                <Lock className="w-2.5 h-2.5" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -669,32 +700,6 @@ export default function MobilePwaApp({
                 </h2>
                 <p className="text-[11px] text-gray-400 font-mono">Portfolio officiel Final Stop</p>
               </div>
-            </div>
-
-            {/* 360 Studio IA Feature Card */}
-            <div className="bg-gradient-to-r from-[#17171C] via-[#1E1A14] to-[#17171C] border border-gold/40 rounded-xl p-4 shadow-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Rotate3d className="w-5 h-5 text-gold animate-spin-slow" />
-                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wide">
-                    Studio 360° IA & Produits
-                  </span>
-                </div>
-                <span className="bg-gold text-black font-mono font-bold text-[9px] px-1.5 py-0.5 rounded">
-                  IA & 360°
-                </span>
-              </div>
-              <p className="text-xs text-gray-300 leading-relaxed mb-3">
-                Faites tourner nos coupes signatures à 360° et inspectez en détail les produits de coiffage utilisés par nos barbiers.
-              </p>
-              <button
-                type="button"
-                onClick={() => setShow360Viewer(true)}
-                className="w-full bg-gold hover:bg-gold-light text-black font-bold text-xs font-mono py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
-              >
-                <Rotate3d className="w-4 h-4" />
-                <span>Ouvrir l'Inspecteur 360° & Soins IA</span>
-              </button>
             </div>
 
             {/* Filter Chips */}
@@ -882,21 +887,6 @@ export default function MobilePwaApp({
           </button>
         </div>
       </nav>
-
-      {/* 360 Studio Modal Overlay */}
-      {show360Viewer && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-3 sm:p-6 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
-          <div className="w-full max-w-4xl relative">
-            <Style360Viewer
-              onClose={() => setShow360Viewer(false)}
-              onSelectServiceForBooking={(srv) => {
-                setShow360Viewer(false);
-                onNavigateToBooking(srv);
-              }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
