@@ -22,6 +22,7 @@ import { format, addDays, startOfToday } from 'date-fns';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import CallShopModal from '../components/CallShopModal';
+import { sendBookingConfirmationEmail } from '../lib/emailService';
 
 interface BookingPageProps {
   onBackToHome: () => void;
@@ -215,6 +216,21 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
         id: docId,
         ticketId: generatedTicketId
       };
+
+      // Automatically send confirmation email with ticket details via EmailJS
+      sendBookingConfirmationEmail({
+        toName: guestName.trim(),
+        toEmail: guestEmail.trim(),
+        ticketId: generatedTicketId,
+        serviceName: selectedService.name,
+        duration: selectedService.duration,
+        price: selectedService.price,
+        date: selectedDate,
+        time: selectedTime,
+        barberName: BARBERS.find(b => b.id === selectedBarber)?.name || 'First Available Master Barber',
+        phone: guestPhone.trim(),
+        notes: specialNotes.trim()
+      }).catch((err) => console.warn('EmailJS background warning:', err));
 
       setConfirmedData(payload);
       localStorage.setItem('finalstop_active_booking', JSON.stringify(payload));
