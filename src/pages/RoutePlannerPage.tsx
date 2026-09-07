@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import CallShopModal from '../components/CallShopModal';
-import { getMapboxToken } from '../lib/mapboxConfig';
+import { getMapboxToken, getMapboxStyle } from '../lib/mapboxConfig';
 
 interface RoutePlannerPageProps {
   onBackToHome: () => void;
@@ -142,7 +142,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: getMapboxStyle(),
       center: [DESTINATION.lng, DESTINATION.lat],
       zoom: 13,
       pitch: 30,

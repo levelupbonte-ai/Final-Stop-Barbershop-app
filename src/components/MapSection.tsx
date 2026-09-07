@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { MapPin, Navigation, Phone, ExternalLink, Clock } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
-import { getMapboxToken } from '../lib/mapboxConfig';
+import { getMapboxToken, getMapboxStyle } from '../lib/mapboxConfig';
 
 const SHOP_LOCATION = {
   lat: 32.7572493,
@@ -30,8 +30,9 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
     mapboxgl.accessToken = token;
 
     // Modern Dark Mapbox Style with fallback if token is not configured
+    const customStyle = getMapboxStyle();
     const darkStyle: any = token
-      ? 'mapbox://styles/mapbox/dark-v11'
+      ? customStyle
       : {
           version: 8,
           sources: {

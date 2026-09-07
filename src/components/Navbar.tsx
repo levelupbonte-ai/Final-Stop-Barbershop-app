@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Calendar, Phone, Search, Users } from 'lucide-react';
+import { Menu, X, Calendar, Phone, Search, Users, Bell, Smartphone } from 'lucide-react';
 
 interface NavbarProps {
   onNavigateToBooking?: () => void;
@@ -7,6 +7,7 @@ interface NavbarProps {
   onOpenWaitlist?: () => void;
   onOpenPromo?: () => void;
   onOpenCallModal?: () => void;
+  onOpenNotifications?: () => void;
   isWaitlistOpen?: boolean;
 }
 
@@ -16,6 +17,7 @@ export default function Navbar({
   onOpenWaitlist,
   onOpenPromo,
   onOpenCallModal,
+  onOpenNotifications,
   isWaitlistOpen = false,
 }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -72,6 +74,18 @@ export default function Navbar({
 
         {/* Clean Top Action: Call & Book Appointment CTA */}
         <div className="hidden sm:flex items-center gap-3">
+          {onOpenNotifications && (
+            <button
+              type="button"
+              onClick={onOpenNotifications}
+              className="text-xs font-medium text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 px-2.5 py-2 cursor-pointer bg-white/5 hover:bg-white/10 rounded-lg border border-white/10"
+              title="Notifications & Application Mobile (PWA)"
+            >
+              <Bell className="w-3.5 h-3.5 text-gold" />
+              <span className="hidden md:inline">App & Alertes</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onOpenCallModal}
@@ -170,6 +184,20 @@ export default function Navbar({
                 >
                   <Users className="w-3.5 h-3.5" />
                   <span>Join Same-Day Waitlist</span>
+                </button>
+              )}
+
+              {onOpenNotifications && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenNotifications();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-[#151517] hover:bg-[#202026] text-gold border border-gold/40 text-xs font-bold uppercase py-2.5 flex items-center justify-center gap-2 font-mono cursor-pointer"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  <span>Notifications & Installer l'App Mobile</span>
                 </button>
               )}
 

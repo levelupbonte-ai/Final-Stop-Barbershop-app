@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="100" fill="#0A0A0B"/>
+  <rect x="24" y="24" width="464" height="464" rx="80" fill="none" stroke="#C5A059" stroke-width="8" stroke-opacity="0.8"/>
+  <circle cx="256" cy="256" r="170" fill="#151517" stroke="#C5A059" stroke-width="4"/>
+  
+  <!-- Scissors & Barber Pole Gold Motif -->
+  <g transform="translate(256, 256)">
+    <!-- Scissor Blades -->
+    <path d="M-80 -80 L60 60" stroke="#C5A059" stroke-width="12" stroke-linecap="round"/>
+    <path d="M80 -80 L-60 60" stroke="#C5A059" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="14" fill="#C5A059"/>
+    
+    <!-- Scissor Handles -->
+    <circle cx="-95" cy="-95" r="32" fill="none" stroke="#C5A059" stroke-width="10"/>
+    <circle cx="95" cy="-95" r="32" fill="none" stroke="#C5A059" stroke-width="10"/>
+    
+    <!-- Straight Razor Accent -->
+    <path d="M -50 90 L 50 90 L 40 120 L -40 120 Z" fill="#C5A059"/>
+  </g>
+  
+  <text x="256" y="420" font-family="'Cinzel', Georgia, serif" font-size="34" font-weight="900" fill="#C5A059" text-anchor="middle" letter-spacing="4">FINAL STOP</text>
+  <text x="256" y="450" font-family="sans-serif" font-size="16" font-weight="600" fill="#E0E0E0" text-anchor="middle" letter-spacing="6">SAN DIEGO</text>
+</svg>

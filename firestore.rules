@@ -3,29 +3,74 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Function to check if user is an admin
+    // Check if the authenticated user is an administrator
     function isAdmin() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return request.auth != null && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+        request.auth.token.email in ['alsherafael@gmail.com', 'finalstopbarbershop@gmail.com']
+      );
     }
 
+    // 1. Client Appointments & Reservations
     match /reservations/{reservationId} {
-      // Users can read their own reservations, admins can read all
-      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
-      // Any authenticated user can create a reservation for themselves
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      // Users can update their own reservations (e.g. status to cancelled), admins can update any
-      allow update: if request.auth != null && (
-        isAdmin() || 
-        (request.auth.uid == resource.data.userId && request.resource.data.userId == resource.data.userId)
+      // Public clients can check their reservation status (by query on phone/bookingId); admins have full read
+      allow read: if true;
+
+      // Allow creating an appointment with essential field validation
+      allow create: if request.resource.data.clientName is string &&
+                       request.resource.data.clientName.size() >= 2 &&
+                       request.resource.data.clientPhone is string &&
+                       request.resource.data.clientPhone.size() >= 7;
+
+      // Allow clients to cancel or update status, and admins to manage all
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'updatedAt'])
       );
-      // Only admins can delete reservations
+
+      // Only administrators can permanently delete appointments
       allow delete: if isAdmin();
     }
-    
+
+    // 2. Walk-in Waitlist Queue
+    match /waitlist/{ticketId} {
+      // Public read is required for the live queue board & status check
+      allow read: if true;
+
+      // Clients can join the walk-in waitlist
+      allow create: if request.resource.data.name is string &&
+                       request.resource.data.name.size() >= 2 &&
+                       request.resource.data.phone is string &&
+                       request.resource.data.phone.size() >= 7;
+
+      // Status updates (cancel or mark completed by staff)
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'updatedAt'])
+      );
+
+      // Only administrators can delete waitlist tickets
+      allow delete: if isAdmin();
+    }
+
+    // 3. VIP Club Signups
+    match /vip_club/{memberId} {
+      // Clients can sign up for the VIP club
+      allow create: if request.resource.data.phone is string || request.resource.data.email is string;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 4. Welcome Promos & Discount Claims
+    match /promos/{promoId} {
+      // Clients can claim the promo code
+      allow create: if request.resource.data.email is string;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 5. User Profiles & Staff Roles
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow write: if isAdmin();
     }
   }
 }
+

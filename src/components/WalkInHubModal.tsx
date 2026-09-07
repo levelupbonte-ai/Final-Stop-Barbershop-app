@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { sendBarberNotification } from '../lib/notifications';
 
 export type ModalMode = 'waitlist' | 'promo' | null;
 
@@ -81,6 +82,14 @@ export default function WalkInHubModal({
       }
 
       localStorage.setItem('finalstop_active_ticket', JSON.stringify(ticketData));
+      
+      // Dispatch notification
+      sendBarberNotification({
+        title: `Ticket #${ticketId} Confirmé ! 💈`,
+        body: `Vous êtes en position #${position} dans la file d'attente (estimation: ~${estMinutes} min). Nous vous avertirons dès que votre tour approche.`,
+        url: '/'
+      });
+
       setWaitlistSuccess(ticketData);
     } catch (err) {
       console.error(err);
@@ -105,6 +114,11 @@ export default function WalkInHubModal({
       } catch (err) {
         console.warn('Firestore fallback for promo:', err);
       }
+      sendBarberNotification({
+        title: 'Code VIP 15% Débloqué ! 🎟️',
+        body: 'Code FINALSTOP15 prêt à être utilisé lors de votre passage au salon.',
+        url: '/'
+      });
       setPromoSuccess(true);
     } finally {
       setIsSubmitting(false);

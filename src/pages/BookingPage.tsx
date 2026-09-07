@@ -23,6 +23,7 @@ import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import CallShopModal from '../components/CallShopModal';
 import { sendBookingConfirmationEmail } from '../lib/emailService';
+import { sendBarberNotification } from '../lib/notifications';
 
 interface BookingPageProps {
   onBackToHome: () => void;
@@ -234,6 +235,14 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
 
       setConfirmedData(payload);
       localStorage.setItem('finalstop_active_booking', JSON.stringify(payload));
+
+      // Trigger Web Push and In-App notification
+      sendBarberNotification({
+        title: 'Rendez-vous Confirmé ! 💈',
+        body: `${selectedService.name} réservé le ${selectedDate} à ${selectedTime} (${BARBERS.find(b => b.id === selectedBarber)?.name || 'Premier disponible'}). Ticket #${generatedTicketId}`,
+        url: '/'
+      });
+
       setIsSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {

@@ -20,7 +20,10 @@ import ClientStatusHub from './components/ClientStatusHub';
 import OwnerWaitlistModal from './components/OwnerWaitlistModal';
 import WelcomePromoModal from './components/WelcomePromoModal';
 import CallShopModal from './components/CallShopModal';
+import NotificationAndPwaModal from './components/NotificationAndPwaModal';
+import InAppToast from './components/InAppToast';
 import { getIsWaitlistOpen } from './lib/waitlistService';
+import { registerServiceWorker } from './lib/pwa';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'booking' | 'route'>(() => {
@@ -35,16 +38,27 @@ export default function App() {
   const [hubMode, setHubMode] = useState<ModalMode>(null);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   // Shop Owner-controlled waitlist state (Default: closed until owner opens it)
   const [isWaitlistOpen, setIsWaitlistOpen] = useState<boolean>(getIsWaitlistOpen);
   const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
 
-  // Global call modal listener
+  // Register PWA Service Worker on initial startup
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
+  // Global call modal and notification modal listeners
   useEffect(() => {
     const handleOpenCall = () => setIsCallModalOpen(true);
+    const handleOpenNotifications = () => setIsNotificationModalOpen(true);
     window.addEventListener('open-call-modal', handleOpenCall);
-    return () => window.removeEventListener('open-call-modal', handleOpenCall);
+    window.addEventListener('open-notification-modal', handleOpenNotifications);
+    return () => {
+      window.removeEventListener('open-call-modal', handleOpenCall);
+      window.removeEventListener('open-notification-modal', handleOpenNotifications);
+    };
   }, []);
 
   // Timed VIP Welcome Promo Pop-up (strictly 5 seconds after arrival)
@@ -113,13 +127,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-dark-bg text-gray-200">
-      {/* Top Navbar with Client Services (Status check, Waitlist, VIP Club) */}
+      {/* Top Navbar with Client Services (Status check, Waitlist, VIP Club, PWA Notifications) */}
       <Navbar 
         onNavigateToBooking={navigateToBooking}
         onOpenCheckStatus={() => handleOpenCheckStatus()}
         onOpenWaitlist={() => setHubMode('waitlist')}
         onOpenPromo={() => setIsPromoModalOpen(true)}
         onOpenCallModal={() => setIsCallModalOpen(true)}
+        onOpenNotifications={() => setIsNotificationModalOpen(true)}
         isWaitlistOpen={isWaitlistOpen}
       />
 
@@ -201,6 +216,15 @@ export default function App() {
         isOpen={isCallModalOpen}
         onClose={() => setIsCallModalOpen(false)}
       />
+
+      {/* 6. PWA Installation & Notifications Center */}
+      <NotificationAndPwaModal 
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+      />
+
+      {/* 7. Real-Time In-App Notification Toasts */}
+      <InAppToast />
     </div>
   );
 }
