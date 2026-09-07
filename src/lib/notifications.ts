@@ -59,28 +59,14 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 /**
- * Dispatch a notification (using ServiceWorker if available, falling back to window.Notification,
- * plus triggering an in-app visual toast banner)
+ * Dispatch a native OS / mobile notification (using ServiceWorker if available,
+ * falling back to window.Notification)
  */
 export async function sendBarberNotification(options: BarberNotificationOptions): Promise<void> {
   const icon = options.icon || DEFAULT_ICON;
   const badge = options.badge || DEFAULT_ICON;
 
-  // 1. Always dispatch in-app event so the app displays a stylish toast
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(
-      new CustomEvent('finalstop-inapp-notification', {
-        detail: {
-          title: options.title,
-          body: options.body,
-          icon,
-          url: options.url || '/'
-        }
-      })
-    );
-  }
-
-  // 2. If browser notifications are granted, show native OS / mobile notification
+  // Native OS / Browser notifications only (as requested: "uniquement des notifications natives pas in app")
   if (isNotificationSupported() && Notification.permission === 'granted') {
     try {
       if ('serviceWorker' in navigator) {

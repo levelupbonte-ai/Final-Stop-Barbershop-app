@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import CallShopModal from '../components/CallShopModal';
-import { getMapboxToken, getMapboxStyle } from '../lib/mapboxConfig';
+import { setupMapboxGl, getMapboxStyle, CARTO_DARK_MAP_STYLE } from '../lib/mapboxConfig';
 
 interface RoutePlannerPageProps {
   onBackToHome: () => void;
@@ -138,7 +138,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = getMapboxToken();
+    setupMapboxGl(mapboxgl);
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
@@ -146,6 +146,17 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
       center: [DESTINATION.lng, DESTINATION.lat],
       zoom: 13,
       pitch: 30,
+    });
+
+    // Gracefully handle token or style load errors
+    map.on('error', (e: any) => {
+      const msg = String(e?.error?.message || '').toLowerCase();
+      if (e?.error?.status === 401 || msg.includes('access token') || msg.includes('not authorized')) {
+        console.warn('Mapbox style unauthorized, falling back cleanly to dark basemap.');
+        try {
+          map.setStyle(CARTO_DARK_MAP_STYLE);
+        } catch (_) {}
+      }
     });
 
     mapRef.current = map;

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { MapPin, Navigation, Phone, ExternalLink, Clock } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
-import { getMapboxToken, getMapboxStyle } from '../lib/mapboxConfig';
+import { setupMapboxGl, getMapboxStyle, CARTO_DARK_MAP_STYLE } from '../lib/mapboxConfig';
 
 const SHOP_LOCATION = {
   lat: 32.7572493,
@@ -26,45 +26,26 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
     if (!mapContainer.current) return;
     if (mapRef.current) return;
 
-    const token = getMapboxToken();
-    mapboxgl.accessToken = token;
-
-    // Modern Dark Mapbox Style with fallback if token is not configured
-    const customStyle = getMapboxStyle();
-    const darkStyle: any = token
-      ? customStyle
-      : {
-          version: 8,
-          sources: {
-            'carto-dark': {
-              type: 'raster',
-              tiles: [
-                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
-              ],
-              tileSize: 256,
-              attribution: '© Mapbox © OpenStreetMap'
-            }
-          },
-          layers: [
-            {
-              id: 'carto-dark-layer',
-              type: 'raster',
-              source: 'carto-dark',
-              minzoom: 0,
-              maxzoom: 22
-            }
-          ]
-        };
+    // Safely configure access token and requirements
+    setupMapboxGl(mapboxgl);
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: darkStyle,
+      style: getMapboxStyle(),
       center: [SHOP_LOCATION.lng, SHOP_LOCATION.lat],
       zoom: 15.2,
       attributionControl: true
+    });
+
+    // Gracefully handle any token unauthorized / style load issues
+    map.on('error', (e: any) => {
+      const msg = String(e?.error?.message || '').toLowerCase();
+      if (e?.error?.status === 401 || msg.includes('access token') || msg.includes('not authorized')) {
+        console.warn('Mapbox style unauthorized, falling back cleanly to dark basemap.');
+        try {
+          map.setStyle(CARTO_DARK_MAP_STYLE);
+        } catch (_) {}
+      }
     });
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'bottom-right');

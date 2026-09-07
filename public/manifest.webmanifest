@@ -3,7 +3,7 @@
   "name": "Final Stop Barber Shop San Diego",
   "short_name": "Final Stop",
   "description": "Premier San Diego barber shop offering precision skin fades, beard sculpting, traditional hot lather shaves, and live waitlist tracking.",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

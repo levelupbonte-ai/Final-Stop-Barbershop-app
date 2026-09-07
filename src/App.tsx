@@ -21,9 +21,12 @@ import OwnerWaitlistModal from './components/OwnerWaitlistModal';
 import WelcomePromoModal from './components/WelcomePromoModal';
 import CallShopModal from './components/CallShopModal';
 import NotificationAndPwaModal from './components/NotificationAndPwaModal';
-import InAppToast from './components/InAppToast';
+import NotificationPermissionBanner from './components/NotificationPermissionBanner';
+import MobilePwaApp from './components/MobilePwaApp';
+import Style360Viewer from './components/Style360Viewer';
 import { getIsWaitlistOpen } from './lib/waitlistService';
 import { registerServiceWorker } from './lib/pwa';
+import { Smartphone } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'booking' | 'route'>(() => {
@@ -32,6 +35,22 @@ export default function App() {
     return 'home';
   });
 
+  // Standalone PWA detection:
+  // Strictly for installed PWAs (display-mode: standalone, iOS standalone, ?source=pwa, or #pwa)
+  // Standard mobile web browser visitors keep the responsive website ("ancien version web") as requested.
+  const checkIsPwaInstalled = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true ||
+      window.location.search.includes('source=pwa') ||
+      window.location.hash.includes('pwa')
+    );
+  };
+
+  const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(checkIsPwaInstalled);
+  const [forceWebView, setForceWebView] = useState<boolean>(false);
+
   // Modals state for menu action items
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [statusQuery, setStatusQuery] = useState('');
@@ -39,6 +58,7 @@ export default function App() {
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [is360ModalOpen, setIs360ModalOpen] = useState(false);
 
   // Shop Owner-controlled waitlist state (Default: closed until owner opens it)
   const [isWaitlistOpen, setIsWaitlistOpen] = useState<boolean>(getIsWaitlistOpen);
@@ -47,6 +67,23 @@ export default function App() {
   // Register PWA Service Worker on initial startup
   useEffect(() => {
     registerServiceWorker();
+  }, []);
+
+  // Update PWA detection on resize and URL hash changes
+  useEffect(() => {
+    const handleCheckPwa = () => {
+      setIsPwaInstalled(checkIsPwaInstalled());
+    };
+    const handleOpen360 = () => setIs360ModalOpen(true);
+
+    window.addEventListener('resize', handleCheckPwa);
+    window.addEventListener('hashchange', handleCheckPwa);
+    window.addEventListener('open-360-modal', handleOpen360);
+    return () => {
+      window.removeEventListener('resize', handleCheckPwa);
+      window.removeEventListener('hashchange', handleCheckPwa);
+      window.removeEventListener('open-360-modal', handleOpen360);
+    };
   }, []);
 
   // Global call modal and notification modal listeners
@@ -99,8 +136,12 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const navigateToBooking = () => {
-    window.location.hash = '#booking';
+  const navigateToBooking = (serviceName?: string) => {
+    if (serviceName) {
+      window.location.hash = `#booking?service=${encodeURIComponent(serviceName)}`;
+    } else {
+      window.location.hash = '#booking';
+    }
     setCurrentView('booking');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -125,16 +166,92 @@ export default function App() {
     return <RoutePlannerPage onBackToHome={navigateToHome} />;
   }
 
+  // Dedicated Mobile PWA Experience (Strictly for installed PWA mode, normal mobile browsers stay on web)
+  if (isPwaInstalled && !forceWebView && currentView === 'home') {
+    return (
+      <>
+        <MobilePwaApp
+          onNavigateToBooking={(serviceName) => {
+            if (serviceName) {
+              window.location.hash = `#booking?service=${encodeURIComponent(serviceName)}`;
+            } else {
+              window.location.hash = '#booking';
+            }
+            setCurrentView('booking');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onNavigateToRoutePlanner={navigateToRoutePlanner}
+          onOpenCheckStatus={() => handleOpenCheckStatus()}
+          onOpenCallModal={() => setIsCallModalOpen(true)}
+          onOpenWaitlist={() => setHubMode('waitlist')}
+          isWaitlistOpen={isWaitlistOpen}
+          onSwitchToWebView={() => setForceWebView(true)}
+        />
+
+        {/* 1. Dedicated 'Check My Status' Modal */}
+        <CheckStatusModal 
+          isOpen={isStatusModalOpen}
+          onClose={() => {
+            setIsStatusModalOpen(false);
+            setStatusQuery('');
+          }}
+          onOpenWaitlist={() => setHubMode('waitlist')}
+          initialQuery={statusQuery}
+          isWaitlistOpen={isWaitlistOpen}
+          onNavigateToBooking={navigateToBooking}
+        />
+
+        {/* 2. Walk-in Waitlist Modal */}
+        <WalkInHubModal 
+          mode={hubMode}
+          onClose={() => setHubMode(null)}
+          onOpenStatusCheck={() => handleOpenCheckStatus()}
+          isWaitlistOpen={isWaitlistOpen}
+          onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
+          onNavigateToBooking={navigateToBooking}
+        />
+
+        {/* 3. Shop Owner Waitlist Control Modal */}
+        <OwnerWaitlistModal 
+          isOpen={isOwnerModalOpen}
+          onClose={() => setIsOwnerModalOpen(false)}
+          isWaitlistOpen={isWaitlistOpen}
+          onStatusChange={(newState) => setIsWaitlistOpen(newState)}
+        />
+
+        {/* 4. Direct Phone Lines Modal (2 shop numbers) */}
+        <CallShopModal 
+          isOpen={isCallModalOpen}
+          onClose={() => setIsCallModalOpen(false)}
+        />
+
+        {/* 5. 6-Second Notification Permission Pop-up Banner */}
+        <NotificationPermissionBanner />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-dark-bg text-gray-200">
-      {/* Top Navbar with Client Services (Status check, Waitlist, VIP Club, PWA Notifications) */}
+      {/* Switch back to mobile PWA mode pill if in PWA standalone */}
+      {isPwaInstalled && forceWebView && (
+        <button
+          type="button"
+          onClick={() => setForceWebView(false)}
+          className="fixed bottom-4 left-4 z-40 bg-gold hover:bg-gold-light text-black font-mono font-bold text-xs py-2 px-3.5 rounded-full shadow-2xl flex items-center gap-1.5 border border-black/20 cursor-pointer active:scale-95 transition-all"
+        >
+          <Smartphone className="w-4 h-4" />
+          <span>Mode App Mobile PWA</span>
+        </button>
+      )}
+
+      {/* Top Navbar with Client Services (Status check, Waitlist, VIP Club) */}
       <Navbar 
         onNavigateToBooking={navigateToBooking}
         onOpenCheckStatus={() => handleOpenCheckStatus()}
         onOpenWaitlist={() => setHubMode('waitlist')}
         onOpenPromo={() => setIsPromoModalOpen(true)}
         onOpenCallModal={() => setIsCallModalOpen(true)}
-        onOpenNotifications={() => setIsNotificationModalOpen(true)}
         isWaitlistOpen={isWaitlistOpen}
       />
 
@@ -156,7 +273,7 @@ export default function App() {
         />
 
         {/* Realizations portfolio */}
-        <Gallery />
+        <Gallery onOpen360={() => setIs360ModalOpen(true)} />
         
         {/* Location & Map Section with interactive map & route planner */}
         <MapSection onNavigateToRoutePlanner={navigateToRoutePlanner} />
@@ -223,8 +340,23 @@ export default function App() {
         onClose={() => setIsNotificationModalOpen(false)}
       />
 
-      {/* 7. Real-Time In-App Notification Toasts */}
-      <InAppToast />
+      {/* 7. 6-Second Notification Permission Pop-up Banner */}
+      <NotificationPermissionBanner />
+
+      {/* 8. 360 Studio & Haircare Products Inspection Modal */}
+      {is360ModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-3 sm:p-6 overflow-y-auto flex items-center justify-center animate-in fade-in duration-200">
+          <div className="w-full max-w-4xl relative">
+            <Style360Viewer
+              onClose={() => setIs360ModalOpen(false)}
+              onSelectServiceForBooking={(srv) => {
+                setIs360ModalOpen(false);
+                navigateToBooking(srv);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

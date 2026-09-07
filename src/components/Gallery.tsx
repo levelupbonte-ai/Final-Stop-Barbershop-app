@@ -1,4 +1,10 @@
-export default function Gallery() {
+import { Rotate3d, Sparkles } from 'lucide-react';
+
+interface GalleryProps {
+  onOpen360?: () => void;
+}
+
+export default function Gallery({ onOpen360 }: GalleryProps) {
   const images = [
     { 
       src: 'https://i.ibb.co/20Ns74Tz/Chat-GPT-Image-6-sept-2026-15-53-44.png', 
@@ -47,6 +53,37 @@ export default function Gallery() {
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
             Every fade, scissor cut, and hot lather shave is delivered with uncompromising attention to detail.
           </p>
+        </div>
+
+        {/* Interactive 360° Studio CTA Banner */}
+        <div className="mb-12 bg-gradient-to-r from-[#17171C] via-[#221D16] to-[#17171C] border border-gold/40 p-6 md:p-8 rounded-xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gold/15 border border-gold/40 flex items-center justify-center text-gold shrink-0">
+              <Rotate3d className="w-7 h-7 animate-spin-slow" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="bg-gold text-black text-[10px] font-mono font-bold px-2 py-0.5 rounded">
+                  INNOVATION IA
+                </span>
+                <h3 className="text-lg md:text-xl font-serif font-bold text-white">
+                  Studio 360° & Détail des Produits Utilisés
+                </h3>
+              </div>
+              <p className="text-xs md:text-sm text-gray-300 max-w-xl leading-relaxed">
+                Faites pivoter la coupe à 360 degrés, analysez les dégradés sous chaque angle et découvrez les produits de coiffage professionnels appliqués par nos barbiers.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpen360}
+            className="w-full md:w-auto bg-gold hover:bg-gold-light text-black text-xs font-mono font-bold uppercase tracking-wider px-6 py-3.5 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 cursor-pointer shrink-0"
+          >
+            <Rotate3d className="w-4 h-4" />
+            <span>Lancer la Rotation 360°</span>
+          </button>
         </div>
 
         {/* Featured 6-in-1 Showcase Banner */}

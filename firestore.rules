@@ -17,11 +17,13 @@ service cloud.firestore {
       // Public clients can check their reservation status (by query on phone/bookingId); admins have full read
       allow read: if true;
 
-      // Allow creating an appointment with essential field validation
-      allow create: if request.resource.data.clientName is string &&
-                       request.resource.data.clientName.size() >= 2 &&
-                       request.resource.data.clientPhone is string &&
-                       request.resource.data.clientPhone.size() >= 7;
+      // Allow creating an appointment with essential field validation (name + email or phone)
+      allow create: if (
+        request.resource.data.clientName is string || request.resource.data.name is string
+      ) && (
+        (request.resource.data.email is string && request.resource.data.email.size() >= 5) ||
+        (request.resource.data.phone is string && request.resource.data.phone.size() >= 7)
+      );
 
       // Allow clients to cancel or update status, and admins to manage all
       allow update: if isAdmin() || (
@@ -39,9 +41,7 @@ service cloud.firestore {
 
       // Clients can join the walk-in waitlist
       allow create: if request.resource.data.name is string &&
-                       request.resource.data.name.size() >= 2 &&
-                       request.resource.data.phone is string &&
-                       request.resource.data.phone.size() >= 7;
+                       request.resource.data.name.size() >= 2;
 
       // Status updates (cancel or mark completed by staff)
       allow update: if isAdmin() || (
@@ -52,21 +52,34 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // 3. VIP Club Signups
+    // 3. Native Web Push Subscriptions for notifications
+    match /push_subscriptions/{subscriptionId} {
+      // Allow browser clients to save their native push token
+      allow create: if request.resource.data.endpoint is string;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 4. Shop Settings (Live waitlist toggle, owner configurations)
+    match /shop_settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 5. VIP Club Signups
     match /vip_club/{memberId} {
       // Clients can sign up for the VIP club
       allow create: if request.resource.data.phone is string || request.resource.data.email is string;
       allow read, update, delete: if isAdmin();
     }
 
-    // 4. Welcome Promos & Discount Claims
+    // 6. Welcome Promos & Discount Claims
     match /promos/{promoId} {
       // Clients can claim the promo code
       allow create: if request.resource.data.email is string;
       allow read, update, delete: if isAdmin();
     }
 
-    // 5. User Profiles & Staff Roles
+    // 7. User Profiles & Staff Roles
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow write: if isAdmin();

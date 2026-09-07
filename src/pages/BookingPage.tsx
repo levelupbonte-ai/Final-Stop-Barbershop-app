@@ -16,7 +16,8 @@ import {
   Scissors,
   Printer,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Tag
 } from 'lucide-react';
 import { format, addDays, startOfToday } from 'date-fns';
 import { db } from '../lib/firebase';
@@ -145,6 +146,50 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
   const [specialNotes, setSpecialNotes] = useState('');
   const [formErrors, setFormErrors] = useState<{ name?: string; email?: string }>({});
 
+  // Promo Code State & Validation
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    percent?: number;
+    amount?: number;
+    label: string;
+  } | null>(null);
+  const [promoMessage, setPromoMessage] = useState<{ text: string; isError: boolean } | null>(null);
+
+  const VALID_PROMOS: Record<string, { percent?: number; amount?: number; label: string }> = {
+    FINALSTOP15: { percent: 15, label: '15% de Réduction VIP' },
+    VIP10: { amount: 10, label: '$10 de Réduction Club' },
+    BARBER15: { percent: 15, label: '15% Off Grooming' },
+    LEVELUP20: { percent: 20, label: '20% Off Spécial Levelup' },
+    WELCOME: { percent: 10, label: '10% Off Bienvenue' }
+  };
+
+  const handleApplyPromo = (codeToApply?: string) => {
+    const raw = (codeToApply || promoInput).trim().toUpperCase();
+    if (!raw) {
+      setPromoMessage({ text: 'Veuillez saisir un code promo', isError: true });
+      return;
+    }
+    const match = VALID_PROMOS[raw];
+    if (match) {
+      setAppliedPromo({
+        code: raw,
+        percent: match.percent,
+        amount: match.amount,
+        label: match.label
+      });
+      setPromoMessage({ text: `Code ${raw} appliqué (${match.label}) !`, isError: false });
+    } else {
+      setPromoMessage({ text: 'Code promo invalide ou expiré.', isError: true });
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput('');
+    setPromoMessage(null);
+  };
+
   // Submission & Result State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -177,12 +222,29 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
     return Object.keys(errors).length === 0;
   };
 
+  const calculatePricing = () => {
+    const base = selectedService.numericPrice;
+    if (!appliedPromo) {
+      return { base, discount: 0, total: base };
+    }
+    if (appliedPromo.percent) {
+      const discount = Math.round((base * appliedPromo.percent) / 100);
+      return { base, discount, total: Math.max(0, base - discount) };
+    }
+    if (appliedPromo.amount) {
+      const discount = Math.min(base, appliedPromo.amount);
+      return { base, discount, total: Math.max(0, base - discount) };
+    }
+    return { base, discount: 0, total: base };
+  };
+
   // Real-Time Booking without Google Account Requirement
   const handleConfirmReservation = async () => {
     setIsSubmitting(true);
     try {
       const randomTicketNum = Math.floor(10000 + Math.random() * 90000);
       const generatedTicketId = `FS-${randomTicketNum}`;
+      const pricing = calculatePricing();
 
       const reservationData = {
         ticketId: generatedTicketId,
@@ -194,7 +256,10 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
         phone: guestPhone.trim() || 'Not specified',
         service: selectedService.name,
         serviceId: selectedService.id,
-        price: selectedService.price,
+        price: `$${pricing.total}`,
+        originalPrice: selectedService.price,
+        discount: pricing.discount > 0 ? `-$${pricing.discount}` : null,
+        promoCode: appliedPromo?.code || null,
         duration: selectedService.duration,
         date: selectedDate,
         time: selectedTime,
@@ -351,7 +416,14 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
                 </div>
                 <div>
                   <span className="text-gray-400 block text-[10px] uppercase">Rate (Pay in shop)</span>
-                  <span className="text-gold font-bold text-sm">{confirmedData?.price}</span>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-gold font-bold text-sm">{confirmedData?.price}</span>
+                    {confirmedData?.promoCode && (
+                      <span className="text-emerald-400 text-[10px]">
+                        ({confirmedData.promoCode} {confirmedData.discount})
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -826,6 +898,54 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
                       className="w-full bg-[#0A0A0B] border border-white/20 focus:border-gold p-3 text-sm text-white placeholder-gray-500 outline-none font-mono resize-none"
                     />
                   </div>
+
+                  {/* Promo Code Input (Code Promo) */}
+                  <div className="pt-2 border-t border-white/10">
+                    <label className="block text-xs font-mono uppercase tracking-wider text-gold mb-1.5 font-bold flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5" />
+                      Code Promo / VIP (Optionnel)
+                    </label>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoInput}
+                        onChange={(e) => {
+                          setPromoInput(e.target.value.toUpperCase());
+                          if (promoMessage) setPromoMessage(null);
+                        }}
+                        placeholder="Ex: FINALSTOP15, LEVELUP20..."
+                        className="flex-1 bg-[#0A0A0B] border border-white/20 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none font-mono uppercase"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleApplyPromo()}
+                        className="bg-gold hover:bg-gold-light text-black text-xs font-mono font-bold uppercase px-4 py-2.5 transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
+                      >
+                        Appliquer
+                      </button>
+                    </div>
+
+                    {promoMessage && (
+                      <p className={`text-xs mt-1.5 font-mono ${promoMessage.isError ? 'text-red-400' : 'text-emerald-400 font-bold flex items-center gap-1'}`}>
+                        {!promoMessage.isError && <Check className="w-3.5 h-3.5" />}
+                        {promoMessage.text}
+                      </p>
+                    )}
+
+                    {appliedPromo && (
+                      <div className="mt-2 p-2 bg-emerald-500/10 border border-emerald-500/30 rounded flex items-center justify-between text-xs font-mono text-emerald-300">
+                        <span>✓ {appliedPromo.label} activé sur ce rendez-vous</span>
+                        <button
+                          type="button"
+                          onClick={handleRemovePromo}
+                          className="text-[10px] text-gray-400 hover:text-white underline cursor-pointer"
+                        >
+                          Retirer
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Navigation Buttons */}
@@ -896,7 +1016,17 @@ export default function BookingPage({ onBackToHome }: BookingPageProps) {
 
                     <div>
                       <span className="text-gray-400 text-[10px] uppercase block">Price Due at Shop</span>
-                      <span className="text-gold font-bold text-xl block">{selectedService.price}</span>
+                      {appliedPromo && calculatePricing().discount > 0 ? (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-gray-500 line-through text-sm">{selectedService.price}</span>
+                          <span className="text-gold font-bold text-xl">${calculatePricing().total}</span>
+                          <span className="text-emerald-400 text-[10px] font-bold">
+                            (-${calculatePricing().discount} avec {appliedPromo.code})
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-gold font-bold text-xl block">{selectedService.price}</span>
+                      )}
                       <span className="text-gray-400 text-[10px]">Pay by Cash or Card after haircut</span>
                     </div>
                   </div>
