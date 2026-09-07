@@ -1,22 +1,34 @@
 import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink } from 'lucide-react';
 
-export default function Footer() {
+interface FooterProps {
+  onNavigateToBooking?: () => void;
+}
+
+export default function Footer({ onNavigateToBooking }: FooterProps) {
   return (
     <footer className="bg-[#0F0F10] pt-20 pb-10 border-t border-white/10 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           
           <div className="col-span-1 md:col-span-1">
-            <div className="mb-6">
+            <div className="mb-5 flex items-center gap-3">
               <img 
                 src="https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png" 
-                alt="Logo" 
-                className="h-16 w-auto object-contain hover:scale-105 transition-all"
+                alt="Final Stop Barber Shop Logo" 
+                className="h-12 w-auto object-contain hover:scale-105 transition-all"
                 referrerPolicy="no-referrer"
               />
+              <div className="flex flex-col">
+                <span className="text-white font-serif font-black tracking-widest text-sm uppercase">
+                  FINAL STOP
+                </span>
+                <span className="text-gold font-mono text-[9px] uppercase tracking-widest font-bold">
+                  BARBER SHOP
+                </span>
+              </div>
             </div>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6">
-              L'art du grooming masculin élevé au rang de rituel. Prenez le temps pour vous dans notre espace dédié à l'excellence.
+            <p className="text-[11px] text-gray-400 leading-relaxed mb-6">
+              The standard in men's precision grooming in San Diego. Elevated haircuts, hot lather shaves, and artisanal care in a vintage-modern lounge.
             </p>
             <div className="flex gap-4">
               <a href="#" className="w-10 h-10 border border-white/5 bg-[#151517] flex items-center justify-center text-gray-400 hover:text-gold transition-all">
@@ -32,32 +44,33 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Liens Rapides</h4>
-            <ul className="space-y-3 text-[11px] text-gray-500 uppercase tracking-widest">
-              <li><a href="#services" className="hover:text-gold transition-colors">Prestations</a></li>
-              <li><a href="#reservation" className="hover:text-gold transition-colors">Réservation</a></li>
-              <li><a href="#gallery" className="hover:text-gold transition-colors">Réalisations</a></li>
+            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Navigation</h4>
+            <ul className="space-y-3 text-[11px] text-gray-400 uppercase tracking-widest">
+              <li><a href="#team-pricing" className="hover:text-gold transition-colors">Barbers & Rates</a></li>
+              <li><a href="#gallery" className="hover:text-gold transition-colors">Portfolio</a></li>
+              <li><a href="#testimonials" className="hover:text-gold transition-colors">Client Reviews</a></li>
               <li><a href="#faq" className="hover:text-gold transition-colors">FAQ</a></li>
+              <li><a href="#contact" className="hover:text-gold transition-colors">Location & Map</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Horaires</h4>
-            <ul className="space-y-3 text-[11px] text-gray-500 uppercase tracking-widest">
+            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Hours</h4>
+            <ul className="space-y-3 text-[11px] text-gray-400 uppercase tracking-widest">
               <li className="flex justify-between border-b border-white/10 pb-2">
-                <span>Lun - Sam</span>
-                <span className="text-white">10:00 - 18:00</span>
+                <span>Monday - Saturday</span>
+                <span className="text-white font-mono">10:00 AM - 6:00 PM</span>
               </li>
               <li className="flex justify-between pb-2">
-                <span>Dimanche</span>
-                <span className="text-gold">Fermé</span>
+                <span>Sunday</span>
+                <span className="text-gold font-bold">Closed</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Contact</h4>
-            <ul className="space-y-4 text-[11px] text-gray-500 tracking-widest">
+            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Contact & Location</h4>
+            <ul className="space-y-3 text-[11px] text-gray-400 tracking-wider">
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-gold shrink-0 mt-0.5" />
                 <a 
@@ -69,13 +82,13 @@ export default function Footer() {
                   5277 El Cajon Blvd<br />San Diego, CA 92115
                 </a>
               </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-gold shrink-0" />
-                <a href="tel:+16198861267" className="hover:text-gold transition-colors">
+              <li className="flex items-start gap-3">
+                <Phone className="w-4 h-4 text-gold shrink-0 mt-0.5" />
+                <a href="tel:16198861267" className="text-white hover:text-gold transition-colors font-mono font-bold">
                   +1 (619) 886-1267
                 </a>
               </li>
-              <li className="flex items-start gap-3 min-w-0">
+              <li className="flex items-start gap-3 min-w-0 pt-1">
                 <Mail className="w-4 h-4 text-gold shrink-0 mt-0.5" />
                 <a 
                   href="mailto:contact@finalstopbarbershop.com" 
@@ -91,7 +104,7 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} Final Stop Barber Shop. Tous droits réservés.
+            &copy; {new Date().getFullYear()} Final Stop Barber Shop. All rights reserved.
           </p>
 
           {/* Professional Powered by LevelUp badge */}
@@ -109,9 +122,9 @@ export default function Footer() {
           </div>
 
           <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Mentions légales</a>
+            <a href="#" className="hover:text-white transition-colors">Legal Terms</a>
             <span className="opacity-40">|</span>
-            <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
           </div>
         </div>
       </div>

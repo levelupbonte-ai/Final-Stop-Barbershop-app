@@ -6,22 +6,22 @@ export default function Testimonials() {
   const reviews = [
     {
       name: "Marcus R.",
-      date: "Il y a 2 semaines",
-      content: "Un des meilleurs barbershops de la région ! Le fade est ultra net, le travail sur la barbe est d'une précision chirurgicale. Accueil chaleureux, ambiance au top.",
+      date: "2 weeks ago",
+      content: "Hands down one of the top barbershops in San Diego! The fade is razor sharp and the beard work is surgical precision. Great vibe, clean shop, and top hospitality.",
       rating: 5,
       avatarColor: "bg-[#1E3A8A]"
     },
     {
       name: "David K.",
-      date: "Il y a 1 mois",
-      content: "Prestation irréprochable. Le barbier prend le temps de comprendre exactement ce que vous voulez. Salon propre, musique agréable et service ponctuel. Je recommande à 100%.",
+      date: "1 month ago",
+      content: "Flawless service every single visit. The barber takes the time to listen and tailor the cut to perfection. Clean shop, great music, and on-time appointments. 100% recommended.",
       rating: 5,
       avatarColor: "bg-[#B45309]"
     },
     {
       name: "Anthony M.",
-      date: "Il y a 1 mois",
-      content: "Ambiance conviviale et savoir-faire traditionnel au rendez-vous. La serviette chaude et la coupe au rasoir sont parfaites pour se détendre. Mon nouveau spot attitré.",
+      date: "1 month ago",
+      content: "Old-school barbershop hospitality with modern high-precision craft. The hot eucalyptus towel and straight razor neck shave are unbeatable. My regular go-to spot.",
       rating: 5,
       avatarColor: "bg-[#065F46]"
     }
@@ -44,7 +44,7 @@ export default function Testimonials() {
               <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.23 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
-            <span className="text-white text-xs font-bold tracking-wider uppercase">Avis Google Maps</span>
+            <span className="text-white text-xs font-bold tracking-wider uppercase">Google Maps Reviews</span>
             <span className="text-white/20">|</span>
             <div className="flex items-center gap-1">
               <span className="text-gold font-bold text-xs">5.0</span>
@@ -57,11 +57,11 @@ export default function Testimonials() {
           </div>
 
           <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">
-            La Confiance de nos Clients
+            Client Testimonials
           </h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 max-w-xl mx-auto text-sm">
-            Retrouvez les retours d'expérience authentiques laissés directement par nos clients sur notre fiche officielle Google.
+            Authentic feedback from our community, published directly on our official Google Business profile.
           </p>
         </div>
 
@@ -100,7 +100,7 @@ export default function Testimonials() {
                     <h4 className="font-bold text-white text-sm">{review.name}</h4>
                     <span className="text-[10px] text-gray-500 flex items-center gap-1">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      Avis vérifié Google
+                      Verified Google Review
                     </span>
                   </div>
                 </div>
@@ -124,7 +124,7 @@ export default function Testimonials() {
             rel="noopener noreferrer"
             className="w-full sm:w-auto bg-[#151517] hover:bg-white/10 text-white border border-white/20 hover:border-gold px-6 py-3.5 text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-95"
           >
-            <span>Voir notre fiche & tous les avis Google</span>
+            <span>View All Google Reviews</span>
             <ExternalLink className="w-3.5 h-3.5 text-gold" />
           </a>
           <a
@@ -134,7 +134,7 @@ export default function Testimonials() {
             className="w-full sm:w-auto bg-gold hover:bg-gold-light text-black px-6 py-3.5 text-xs uppercase tracking-widest font-extrabold flex items-center justify-center gap-2.5 transition-all shadow-[0_4px_20px_rgba(197,160,89,0.3)] active:scale-95"
           >
             <MessageSquarePlus className="w-4 h-4 text-black" />
-            <span>Laisser un avis sur Google</span>
+            <span>Write a Google Review</span>
           </a>
         </div>
 

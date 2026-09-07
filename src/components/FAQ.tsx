@@ -1,24 +1,24 @@
-import { MapPin, Phone, Mail, Instagram, Facebook, Clock, ChevronDown, ChevronUp, CheckCircle, Calendar, ArrowRight } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 
 export default function FAQ() {
   const faqs = [
     {
-      question: "Combien de temps à l'avance dois-je réserver ?",
-      answer: "Nous vous recommandons de réserver au moins 48 heures à l'avance pour vous garantir l'horaire de votre choix, particulièrement le week-end."
+      question: "How far in advance should I book an appointment?",
+      answer: "We recommend booking at least 24 to 48 hours in advance to secure your preferred time and barber, especially for Friday and Saturday slots."
     },
     {
-      question: "Acceptez-vous les clients sans rendez-vous ?",
-      answer: "Oui, selon nos disponibilités du jour. Cependant, pour éviter une longue attente, la prise de rendez-vous reste privilégiée."
+      question: "Do you accept walk-in clients?",
+      answer: "Yes! Walk-ins are always welcome based on daily chair availability. You can also join our live same-day waitlist directly from the website to track your turn in real time."
     },
     {
-      question: "Quels produits utilisez-vous ?",
-      answer: "Nous utilisons exclusivement des produits professionnels haut de gamme, adaptés à chaque type de cheveux et de barbe, sélectionnés pour leur qualité et leur respect de la peau."
+      question: "What grooming products do you use?",
+      answer: "We exclusively formulate and use premium artisan grooming goods, natural eucalyptus steam balms, alcohol-free witch hazel toners, and certified organic beard oils gentle on all skin types."
     },
     {
-      question: "Puis-je annuler ou modifier mon rendez-vous ?",
-      answer: "Bien sûr. Vous pouvez modifier ou annuler votre réservation directement depuis votre espace client jusqu'à 24h avant le rendez-vous."
+      question: "Can I cancel or reschedule my appointment?",
+      answer: "Yes, you can reschedule or cancel your reservation free of charge up to 2 hours before your scheduled appointment time."
     }
   ];
 
@@ -28,7 +28,10 @@ export default function FAQ() {
     <section id="faq" className="py-24 bg-dark-bg">
       <div className="max-w-4xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">Questions Fréquentes</h2>
+          <span className="text-gold text-[11px] uppercase tracking-[0.25em] font-mono font-bold block mb-3">
+            Common Questions
+          </span>
+          <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">Frequently Asked Questions</h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full"></div>
         </div>
 
@@ -39,10 +42,10 @@ export default function FAQ() {
               className="border border-white/5 overflow-hidden bg-[#151517] transition-all duration-300"
             >
               <button
-                className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none hover:bg-white/5"
+                className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none hover:bg-white/5 cursor-pointer"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
               >
-                <span className="font-medium text-lg text-gray-100">{faq.question}</span>
+                <span className="font-medium text-base sm:text-lg text-gray-100">{faq.question}</span>
                 {openIndex === index ? (
                   <ChevronUp className="w-5 h-5 text-gold flex-shrink-0" />
                 ) : (
@@ -58,7 +61,7 @@ export default function FAQ() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="px-6 pb-5 text-gray-400">
+                    <div className="px-6 pb-5 text-gray-400 text-sm leading-relaxed">
                       {faq.answer}
                     </div>
                   </motion.div>
