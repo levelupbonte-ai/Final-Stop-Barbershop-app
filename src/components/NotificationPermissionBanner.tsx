@@ -19,10 +19,10 @@ export default function NotificationPermissionBanner() {
       return;
     }
 
-    // Strictly 6 seconds after opening the site as requested by user
+    // 3.5 seconds after opening the site as requested by user (3-4 seconds delay)
     const timer = setTimeout(() => {
       setIsVisible(true);
-    }, 6000);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -58,7 +58,7 @@ export default function NotificationPermissionBanner() {
 
   return (
     <aside
-      aria-label="Autorisation des notifications"
+      aria-label="Notification Permission Request"
       className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-[9999] animate-in fade-in slide-in-from-bottom-6 duration-500"
     >
       <div className="relative bg-[#141416]/95 backdrop-blur-xl border border-gold/40 rounded-xl p-4 sm:p-5 shadow-[0_12px_40px_rgba(0,0,0,0.85)] text-white ring-1 ring-gold/20">
@@ -70,7 +70,7 @@ export default function NotificationPermissionBanner() {
           type="button"
           onClick={handleDismiss}
           className="absolute top-3 right-3 text-gray-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
-          aria-label="Fermer"
+          aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
@@ -87,18 +87,18 @@ export default function NotificationPermissionBanner() {
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/25 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                Alertes en direct
+                Live Alerts
               </span>
             </div>
 
             <h4 className="text-sm font-bold text-white tracking-wide mb-1 font-serif">
-              {isSuccess ? 'Notifications Activées !' : 'Restez informé de votre passage'}
+              {isSuccess ? 'Notifications Activated!' : 'Stay Updated On Your Turn'}
             </h4>
 
             <p className="text-xs text-gray-300 leading-relaxed">
               {isSuccess
-                ? 'Vous recevrez les alertes natives de la file d’attente et vos rappels sur votre appareil.'
-                : 'Activez les alertes natives pour être prévenu immédiatement quand votre tour approche au salon et ne jamais perdre votre place.'}
+                ? 'You will receive real-time queue updates and appointment reminders on your device.'
+                : 'Turn on instant alerts to get notified when your chair is ready so you never miss your turn at the shop.'}
             </p>
 
             {/* Action Buttons */}
@@ -106,7 +106,7 @@ export default function NotificationPermissionBanner() {
               {isSuccess ? (
                 <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium py-1">
                   <CheckCircle className="w-4 h-4 text-emerald-400" />
-                  <span>Autorisation confirmée</span>
+                  <span>Permission Granted</span>
                 </div>
               ) : (
                 <>
@@ -117,7 +117,7 @@ export default function NotificationPermissionBanner() {
                     className="flex-1 bg-gradient-to-r from-gold via-gold-light to-gold hover:opacity-95 text-black font-bold text-xs uppercase tracking-wider py-2.5 px-4 rounded shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     <Bell className="w-3.5 h-3.5" />
-                    <span>{isSubmitting ? 'Activation...' : 'Activer les alertes'}</span>
+                    <span>{isSubmitting ? 'Enabling...' : 'Enable Alerts'}</span>
                   </button>
 
                   <button
@@ -125,7 +125,7 @@ export default function NotificationPermissionBanner() {
                     onClick={handleDismiss}
                     className="text-xs text-gray-400 hover:text-gray-200 px-3 py-2.5 transition-colors cursor-pointer"
                   >
-                    Plus tard
+                    Not Now
                   </button>
                 </>
               )}

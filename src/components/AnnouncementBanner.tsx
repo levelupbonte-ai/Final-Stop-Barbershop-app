@@ -15,8 +15,8 @@ export interface AnnouncementData {
 
 export const DEFAULT_ANNOUNCEMENT: AnnouncementData = {
   active: true,
-  title: 'Information Salon',
-  message: 'Ouvert du Lundi au Samedi 10h-18h • Walk-in sans RDV & Réservations disponibles.',
+  title: 'Shop Notice',
+  message: 'Open Monday - Saturday 10:00 AM - 6:00 PM • Walk-ins & Instant Online Booking available.',
   type: 'info'
 };
 

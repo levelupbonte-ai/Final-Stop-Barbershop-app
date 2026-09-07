@@ -44,8 +44,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
     if (granted) {
       localStorage.setItem('finalstop_notifications_enabled', 'true');
       sendBarberNotification({
-        title: 'Notifications Activées ! 💈',
-        body: 'Vous recevrez les alertes de votre file d’attente et rappels de rendez-vous en direct.',
+        title: 'Notifications Enabled! 💈',
+        body: 'You will receive real-time queue alerts and appointment updates directly on your device.',
         url: '/'
       });
     } else {
@@ -66,7 +66,7 @@ export async function sendBarberNotification(options: BarberNotificationOptions)
   const icon = options.icon || DEFAULT_ICON;
   const badge = options.badge || DEFAULT_ICON;
 
-  // Native OS / Browser notifications only (as requested: "uniquement des notifications natives pas in app")
+  // Native OS / Browser notifications only
   if (isNotificationSupported() && Notification.permission === 'granted') {
     try {
       if ('serviceWorker' in navigator) {
@@ -103,7 +103,7 @@ export async function sendBarberNotification(options: BarberNotificationOptions)
 export async function sendTestNotification(title?: string, body?: string): Promise<void> {
   await sendBarberNotification({
     title: title || 'Final Stop Barber Shop 💈',
-    body: body || 'Test réussi ! Votre système de notifications PWA fonctionne parfaitement.',
+    body: body || 'Test successful! Your PWA notifications are configured properly.',
     url: '/'
   });
 }

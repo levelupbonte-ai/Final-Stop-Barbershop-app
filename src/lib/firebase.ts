@@ -32,9 +32,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Add calendar scopes to provider
-googleProvider.addScope('https://www.googleapis.com/auth/calendar');
-googleProvider.addScope('https://www.googleapis.com/auth/presentations');
+// Standard Google Sign-In without intrusive calendar or slides permissions
 
 export const loginWithGoogle = async () => {
   try {

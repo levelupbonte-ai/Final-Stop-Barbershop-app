@@ -96,7 +96,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
     playChime();
     await sendTestNotification(
       '✂️ Final Stop Barber Shop',
-      'Votre place approche dans la file d\'attente ! Préparez-vous à entrer au salon.'
+      'Your chair is almost ready in the queue! Head over to the lounge now.'
     );
     setTimeout(() => setTestSent(false), 3500);
   };
@@ -126,14 +126,14 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-mono tracking-widest text-gold uppercase font-bold">
-                  Centre d'Alertes
+                  Alert Center
                 </span>
                 <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-mono px-1.5 py-0.2 rounded border border-emerald-500/30">
-                  Temps Réel
+                  Live Updates
                 </span>
               </div>
               <h3 className="font-serif text-lg font-bold text-white tracking-wide">
-                Notifications & Application
+                Notifications & App Setup
               </h3>
             </div>
           </div>
@@ -141,6 +141,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
             type="button"
             onClick={onClose}
             className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
@@ -158,7 +159,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
             }`}
           >
             <Bell className="w-3.5 h-3.5" />
-            <span>Alertes & Rappels</span>
+            <span>Alerts & Reminders</span>
           </button>
           <button
             type="button"
@@ -170,7 +171,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span>Installer l'App</span>
+            <span>Install App</span>
           </button>
         </div>
 
@@ -183,9 +184,9 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                 <div className="flex items-center justify-between mb-3 text-[10px] text-gray-400 font-mono">
                   <span className="flex items-center gap-1 text-gold">
                     <Sparkles className="w-3 h-3" />
-                    Aperçu sur votre écran
+                    Lock Screen Preview
                   </span>
-                  <span>Notification Push Instantanée</span>
+                  <span>Instant Push Notification</span>
                 </div>
 
                 <div className="bg-[#2C2C2E]/90 border border-white/10 rounded-xl p-3 flex items-start gap-3 shadow-md">
@@ -202,10 +203,10 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                       <h5 className="text-xs font-bold text-white tracking-wide truncate">
                         Final Stop Barber Shop
                       </h5>
-                      <span className="text-[10px] text-gray-400 font-mono">À l'instant</span>
+                      <span className="text-[10px] text-gray-400 font-mono">Just now</span>
                     </div>
                     <p className="text-xs text-gray-300 mt-1 leading-relaxed">
-                      💈 Votre tour approche dans 10 minutes ! Mika vous attend au fauteuil #1.
+                      💈 Your turn is in 10 minutes! Mika is ready for you at Chair #1.
                     </p>
                   </div>
                 </div>
@@ -217,12 +218,12 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                   <Volume2 className="w-4 h-4 text-gold" />
                   <div>
                     <span className="text-xs font-bold text-white block">
-                      Statut des autorisations
+                      Permission Status
                     </span>
                     <span className="text-[11px] text-gray-400 font-mono">
                       {permission === 'granted'
-                        ? 'Notifications autorisées dans ce navigateur'
-                        : 'Autorisation requise pour recevoir les alertes'}
+                        ? 'Notifications enabled in this browser'
+                        : 'Permission needed to receive chair alerts'}
                     </span>
                   </div>
                 </div>
@@ -232,43 +233,43 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                     ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                     : 'bg-white/10 text-gray-400'
                 }`}>
-                  {permission === 'granted' ? 'ACTIVÉES' : 'EN ATTENTE'}
+                  {permission === 'granted' ? 'ENABLED' : 'PENDING'}
                 </span>
               </div>
 
               {/* Granular Preference Checklist */}
               <div className="bg-black/30 border border-white/5 rounded-xl p-4 space-y-3">
                 <span className="text-xs font-mono font-bold text-gold uppercase tracking-wider block">
-                  Alertes incluses :
+                  Included alerts:
                 </span>
 
                 <label className="flex items-center justify-between text-xs text-gray-300 cursor-pointer">
-                  <span>File d'attente Walk-in en direct (alerte de passage)</span>
+                  <span>Live Walk-in waitlist queue turn alert</span>
                   <input
                     type="checkbox"
                     checked={prefWaitlist}
                     onChange={(e) => setPrefWaitlist(e.target.checked)}
-                    className="accent-gold w-4 h-4"
+                    className="accent-gold w-4 h-4 cursor-pointer"
                   />
                 </label>
 
                 <label className="flex items-center justify-between text-xs text-gray-300 cursor-pointer">
-                  <span>Rappels de rendez-vous (24h et 2h avant la coupe)</span>
+                  <span>Appointment reminders (24h & 2h before chair time)</span>
                   <input
                     type="checkbox"
                     checked={prefReminders}
                     onChange={(e) => setPrefReminders(e.target.checked)}
-                    className="accent-gold w-4 h-4"
+                    className="accent-gold w-4 h-4 cursor-pointer"
                   />
                 </label>
 
                 <label className="flex items-center justify-between text-xs text-gray-300 cursor-pointer">
-                  <span>Annonces du salon & ouvertures exceptionnelles</span>
+                  <span>Shop announcements & holiday openings</span>
                   <input
                     type="checkbox"
                     checked={prefOffers}
                     onChange={(e) => setPrefOffers(e.target.checked)}
-                    className="accent-gold w-4 h-4"
+                    className="accent-gold w-4 h-4 cursor-pointer"
                   />
                 </label>
               </div>
@@ -283,7 +284,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                     className="w-full bg-gold hover:bg-gold-light text-black font-bold text-xs uppercase tracking-wider py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-gold/20 active:scale-95"
                   >
                     <Bell className="w-4 h-4" />
-                    <span>{loadingAction ? 'Demande en cours...' : 'Activer les notifications instantanées'}</span>
+                    <span>{loadingAction ? 'Requesting...' : 'Enable Instant Notifications'}</span>
                   </button>
                 ) : (
                   <button
@@ -295,12 +296,12 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                     {testSent ? (
                       <>
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        <span className="text-emerald-300">Alerte de test envoyée avec succès !</span>
+                        <span className="text-emerald-300">Test alert sent successfully!</span>
                       </>
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4 text-gold" />
-                        <span>Tester l'alerte sonore & vibration</span>
+                        <span>Test Sound & Vibration Alert</span>
                       </>
                     )}
                   </button>
@@ -308,7 +309,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
 
                 <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 font-mono pt-1">
                   <Lock className="w-3 h-3 text-gold/60" />
-                  <span>Confidentialité garantie • Zéro spam • Désactivation facile</span>
+                  <span>Privacy guaranteed • Zero spam • Easily disabled</span>
                 </div>
               </div>
             </>
@@ -320,10 +321,10 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                   <Smartphone className="w-5 h-5 text-gold" />
                   <div>
                     <h5 className="text-xs font-bold text-white">
-                      Application Web Progressive (PWA)
+                      Progressive Web App (PWA)
                     </h5>
                     <p className="text-[11px] text-gray-400 font-mono">
-                      Fonctionne hors-ligne & accès direct plein écran
+                      Works offline & provides full-screen access
                     </p>
                   </div>
                 </div>
@@ -333,7 +334,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                     ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                     : 'bg-gold/20 text-gold border border-gold/40'
                 }`}>
-                  {isInstalled ? 'INSTALLÉE' : 'DISPONIBLE'}
+                  {isInstalled ? 'INSTALLED' : 'AVAILABLE'}
                 </span>
               </div>
 
@@ -341,23 +342,23 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                 <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 flex items-center gap-3 text-xs text-emerald-300 font-mono">
                   <Check className="w-5 h-5 text-emerald-400 shrink-0" />
                   <span>
-                    L'application Final Stop Barber Shop est déjà installée sur votre écran d'accueil !
+                    Final Stop Barber Shop app is already installed on your home screen!
                   </span>
                 </div>
               ) : isIOS ? (
                 <div className="p-4 rounded-xl bg-black/60 border border-gold/40 space-y-3">
                   <span className="text-xs font-mono font-bold text-gold uppercase block">
-                    Installation sur iPhone & iPad (Safari) :
+                    Install on iPhone & iPad (Safari):
                   </span>
                   <ol className="text-xs text-gray-300 space-y-2 list-decimal list-inside leading-relaxed">
                     <li>
-                      Appuyez sur le bouton de partage <Share2 className="inline w-3.5 h-3.5 text-gold mx-1" /> en bas de Safari.
+                      Tap the Share button <Share2 className="inline w-3.5 h-3.5 text-gold mx-1" /> at the bottom of Safari.
                     </li>
                     <li>
-                      Faites défiler vers le bas et sélectionnez <strong className="text-white">"Sur l'écran d'accueil"</strong> <PlusSquare className="inline w-3.5 h-3.5 text-gold mx-1" />.
+                      Scroll down and tap <strong className="text-white">"Add to Home Screen"</strong> <PlusSquare className="inline w-3.5 h-3.5 text-gold mx-1" />.
                     </li>
                     <li>
-                      Appuyez sur <strong className="text-white">"Ajouter"</strong> en haut à droite.
+                      Tap <strong className="text-white">"Add"</strong> in the top right corner.
                     </li>
                   </ol>
                 </div>
@@ -368,18 +369,18 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
                   className="w-full bg-gold hover:bg-gold-light text-black font-bold text-xs uppercase tracking-wider py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-gold/20 active:scale-95"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Installer l'application sur cet appareil</span>
+                  <span>Install App on this Device</span>
                 </button>
               )}
 
               <div className="grid grid-cols-2 gap-2 text-xs text-gray-400 pt-2">
                 <div className="flex items-center gap-2 bg-white/5 p-2.5 rounded-lg border border-white/5">
                   <ShieldCheck className="w-4 h-4 text-gold shrink-0" />
-                  <span>Zéro stockage lourd</span>
+                  <span>Zero heavy storage</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/5 p-2.5 rounded-lg border border-white/5">
                   <Sparkles className="w-4 h-4 text-gold shrink-0" />
-                  <span>Accès VIP direct</span>
+                  <span>Instant VIP access</span>
                 </div>
               </div>
             </div>
@@ -393,7 +394,7 @@ export default function NotificationAndPwaModal({ isOpen, onClose }: Notificatio
             onClick={onClose}
             className="text-xs text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
-            Fermer la fenêtre
+            Close Window
           </button>
         </div>
       </div>

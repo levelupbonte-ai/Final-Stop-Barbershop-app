@@ -85,8 +85,8 @@ export default function WalkInHubModal({
       
       // Dispatch notification
       sendBarberNotification({
-        title: `Ticket #${ticketId} Confirmé ! 💈`,
-        body: `Vous êtes en position #${position} dans la file d'attente (estimation: ~${estMinutes} min). Nous vous avertirons dès que votre tour approche.`,
+        title: `Ticket #${ticketId} Confirmed! 💈`,
+        body: `You are in position #${position} in the live queue (~${estMinutes} mins wait). We'll notify you as your turn approaches.`,
         url: '/'
       });
 
@@ -115,8 +115,8 @@ export default function WalkInHubModal({
         console.warn('Firestore fallback for promo:', err);
       }
       sendBarberNotification({
-        title: 'Code VIP 15% Débloqué ! 🎟️',
-        body: 'Code FINALSTOP15 prêt à être utilisé lors de votre passage au salon.',
+        title: 'VIP 15% Code Unlocked! 🎟️',
+        body: 'Code FINALSTOP15 is ready to use for your next haircut or beard trim.',
         url: '/'
       });
       setPromoSuccess(true);

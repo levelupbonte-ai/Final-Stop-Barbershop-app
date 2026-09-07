@@ -41,22 +41,22 @@ const BARBERS = [
   {
     id: 'mika',
     name: 'Mika',
-    role: 'Lead Master Barber & Fondateur',
-    experience: '12 ans de métier',
-    specialty: 'Skin fades chirurgicaux, contours rasoir droit, textured crops et barbes taillées au millimètre.',
+    role: 'Lead Master Barber & Founder',
+    experience: '12 years experience',
+    specialty: 'Surgical skin fades, straight razor lineups, textured crops, and millimeter beard sculpting.',
     initials: 'MK',
     badge: 'Master Fade & Razor',
-    tags: ['Skin Fade', 'Rasoir Droit', 'Styling Texturé']
+    tags: ['Skin Fade', 'Straight Razor', 'Textured Styling']
   },
   {
     id: 'luska',
     name: 'Luska',
-    role: 'Artisan Barbier & Grooming Traditionnel',
-    experience: '8 ans de métier',
-    specialty: 'Sculpture de barbe sur-mesure, rituel vapeur serviette chaude eucalyptus et soins réparateurs.',
+    role: 'Master Craftsman & Traditional Grooming',
+    experience: '8 years experience',
+    specialty: 'Custom beard sculpting, hot eucalyptus towel steam rituals, and revitalizing grooming treatments.',
     initials: 'LK',
-    badge: 'Artisan Barbe & Spa',
-    tags: ['Sculpture Barbe', 'Serviette Chaude', 'Soin Relaxant']
+    badge: 'Beard Craftsman & Spa',
+    tags: ['Beard Sculpting', 'Hot Towel', 'Relaxation Care']
   }
 ];
 
@@ -71,13 +71,13 @@ const GALLERY_IMAGES = [
     src: 'https://i.ibb.co/xq8zMm2t/Chat-GPT-Image-6-sept-2026-15-55-41.png',
     alt: 'Swirl Cornrows & Geometric Spiral Braids',
     title: 'Designer Braids',
-    tag: 'Tresses'
+    tag: 'Braids'
   },
   {
     src: 'https://i.ibb.co/cXxD5MpB/Chat-GPT-Image-6-sept-2026-15-56-42.png',
     alt: 'Waist-Length Knotless Box Braids',
     title: 'Protective Styling',
-    tag: 'Tresses'
+    tag: 'Braids'
   },
   {
     src: 'https://i.ibb.co/zhXtNXB4/Chat-GPT-Image-Sep-6-2026-03-38-30-PM-1.png',
@@ -89,13 +89,13 @@ const GALLERY_IMAGES = [
     src: 'https://i.ibb.co/d4N6qCDJ/Chat-GPT-Image-Sep-6-2026-03-39-13-PM-1.png',
     alt: 'Sleek High Braided Ponytail & Cornrow Crown',
     title: 'Braided Updo',
-    tag: 'Tresses'
+    tag: 'Braids'
   },
   {
     src: 'https://i.ibb.co/HTWwwJNz/Chat-GPT-Image-Sep-6-2026-03-11-02-PM-1.png',
     alt: 'Final Stop Barbershop • Storefront & Grooming Lounge',
-    title: 'Le Salon & Lounge',
-    tag: 'Salon'
+    title: 'Lounge & Barbershop',
+    tag: 'Shop'
   },
   {
     src: 'https://i.ibb.co/Y4yKyxRB/Chat-GPT-Image-Sep-6-2026-03-26-27-PM.png',
@@ -118,7 +118,7 @@ export default function MobilePwaApp({
   const [activeTab, setActiveTab] = useState<MobileTab>('prices');
   const [showSplashScreen, setShowSplashScreen] = useState(true);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState<string | null>(null);
-  const [galleryFilter, setGalleryFilter] = useState<string>('Tous');
+  const [galleryFilter, setGalleryFilter] = useState<string>('All');
 
   // Splash Screen timer (1.8s) with animated logo, 3 dots and "powered by Levelup"
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function MobilePwaApp({
     return () => clearTimeout(timer);
   }, []);
 
-  const filteredGallery = galleryFilter === 'Tous'
+  const filteredGallery = galleryFilter === 'All'
     ? GALLERY_IMAGES
     : GALLERY_IMAGES.filter(img => img.tag === galleryFilter);
 
@@ -187,47 +187,84 @@ export default function MobilePwaApp({
       {/* Live Announcement Banner */}
       <AnnouncementBanner />
 
-      {/* 2. TOP HEADER: Salon Image + Welcome Description + Quick Action Pills */}
-      <header className="relative w-full bg-[#141416] border-b border-white/10 shadow-lg overflow-hidden">
-        {/* Salon Cover Photo with Safe Area height limit */}
+      {/* 2. SECURE TOP HEADER BAR */}
+      <header className="sticky top-0 z-40 bg-[#0A0A0C]/95 backdrop-blur-xl border-b border-white/10 shadow-md">
         <div 
-          className="relative w-full overflow-hidden"
-          style={{ height: 'calc(11.5rem + env(safe-area-inset-top, 0px))' }}
+          className="px-3.5 py-2.5 flex items-center justify-between"
+          style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 8px)' }}
         >
+          {/* Left: Brand + Verified Security Shield */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full border border-gold/50 p-0.5 bg-black shrink-0 shadow-sm">
+              <img
+                src="https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png"
+                alt="Final Stop Logo"
+                className="w-full h-full object-cover rounded-full"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-serif font-bold text-white tracking-wider text-xs uppercase">
+                  Final Stop
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-mono text-emerald-400 bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-500/30">
+                  <ShieldCheck className="w-2.5 h-2.5" />
+                  Verified
+                </span>
+              </div>
+              <span className="text-[10px] text-gray-400 font-mono block">
+                San Diego, CA
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Live Status Pill & Quick Controls */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-black/60 px-2 py-1 rounded-full border border-gold/30 text-gold text-[10px] font-mono font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Open 9am-7pm</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={onOpenCallModal}
+              className="w-7 h-7 rounded-full bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 flex items-center justify-center transition-all cursor-pointer active:scale-95"
+              aria-label="Call Shop"
+              title="Call Shop"
+            >
+              <Phone className="w-3.5 h-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={onSwitchToWebView}
+              className="text-[10px] font-mono uppercase tracking-wider text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-full border border-white/15 transition-colors cursor-pointer"
+              title="Desktop Site"
+            >
+              Desktop
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Salon Cover Card */}
+      <div className="relative w-full bg-[#141416] border-b border-white/10 shadow-lg overflow-hidden">
+        {/* Salon Cover Photo */}
+        <div className="relative w-full h-36 overflow-hidden">
           <img
             src="https://i.ibb.co/HTWwwJNz/Chat-GPT-Image-Sep-6-2026-03-11-02-PM-1.png"
             alt="Final Stop Barber Shop Lounge"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          {/* Deep Dark Gradients for contrast */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#141416] via-[#141416]/60 to-black/40" />
-
-          {/* Top Floating Controls - Safely spaced below the mobile notch / status bar */}
-          <div 
-            className="absolute left-3 right-3 flex items-center justify-between z-10"
-            style={{ top: 'max(env(safe-area-inset-top, 0px), 12px)' }}
-          >
-            <div className="flex items-center gap-1.5 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-gold/40 text-gold text-[10px] font-mono font-bold tracking-wider shadow-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              OUVERT 9H - 19H
-            </div>
-
-            <button
-              type="button"
-              onClick={onSwitchToWebView}
-              className="text-[10px] font-mono uppercase tracking-wider text-gray-200 hover:text-white bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 transition-colors shadow-md active:scale-95 cursor-pointer"
-              title="Passer au site complet"
-            >
-              Mode Web PC
-            </button>
-          </div>
         </div>
 
         {/* Salon Info & Welcome Description */}
         <div className="px-4 pb-4 -mt-10 relative z-10">
           <div className="flex items-end gap-3 mb-2">
-            <div className="w-16 h-16 rounded-xl border-2 border-gold/60 overflow-hidden bg-black shadow-xl flex-shrink-0">
+            <div className="w-16 h-16 rounded-xl border-2 border-gold/60 overflow-hidden bg-black shadow-xl shrink-0">
               <img
                 src="https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png"
                 alt="Logo Final Stop"
@@ -251,27 +288,27 @@ export default function MobilePwaApp({
           </div>
 
           <p className="text-xs text-gray-300 leading-relaxed line-clamp-2 mb-3">
-            L'artisanat du barbier haut de gamme à San Diego. Fades millimétrés, rasoir droit traditionnel, tresses & rituels serviette chaude.
+            San Diego's premier luxury barbershop. Precision skin fades, traditional straight-razor grooming, custom braids & hot eucalyptus towel rituals.
           </p>
 
-          {/* Quick Action Pills: Check Statut + Call + Waitlist */}
+          {/* Quick Action Pills: Check Status + Call + Waitlist */}
           <div className="grid grid-cols-2 gap-2 pt-1">
             <button
               type="button"
               onClick={onOpenCheckStatus}
-              className="bg-white/5 hover:bg-white/10 active:scale-95 border border-gold/40 text-gold text-xs font-mono font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm"
+              className="bg-white/5 hover:bg-white/10 active:scale-95 border border-gold/40 text-gold text-xs font-mono font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
             >
               <Search className="w-3.5 h-3.5 text-gold" />
-              <span>Check Statut RDV</span>
+              <span>Check Status</span>
             </button>
 
             <button
               type="button"
               onClick={onOpenCallModal}
-              className="bg-gold hover:bg-gold-light active:scale-95 text-black text-xs font-mono font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-md"
+              className="bg-gold hover:bg-gold-light active:scale-95 text-black text-xs font-mono font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5" />
-              <span>Appeler le Salon</span>
+              <span>Call Shop</span>
             </button>
           </div>
 
@@ -279,30 +316,30 @@ export default function MobilePwaApp({
             <button
               type="button"
               onClick={onOpenWaitlist}
-              className="w-full mt-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all"
+              className="w-full mt-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>File Walk-in Ouverte • Rejoindre en direct</span>
+              <span>Live Walk-in Queue • Join Online</span>
             </button>
           )}
         </div>
-      </header>
+      </div>
 
       {/* 3. MAIN TAB CONTENT AREA */}
       <main className="flex-1 px-4 py-4 max-w-lg mx-auto w-full">
-        {/* TAB 1: PRIX & SERVICES */}
+        {/* TAB 1: PRICES & SERVICES */}
         {activeTab === 'prices' && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between pb-1 border-b border-white/10">
               <div>
                 <h2 className="text-base font-serif font-bold text-white flex items-center gap-2">
                   <Scissors className="w-4 h-4 text-gold" />
-                  Tarifs & Prestations
+                  Rates & Services
                 </h2>
-                <p className="text-[11px] text-gray-400 font-mono">Soins et coupes d'élite à la carte</p>
+                <p className="text-[11px] text-gray-400 font-mono">Master grooming & signature cuts à la carte</p>
               </div>
               <span className="text-[10px] font-mono text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/30">
-                {ALL_SERVICES.length} Prestations
+                {ALL_SERVICES.length} Services
               </span>
             </div>
 
@@ -336,7 +373,7 @@ export default function MobilePwaApp({
                     onClick={() => onNavigateToBooking(srv.name)}
                     className="w-full bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 text-xs font-mono font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                   >
-                    <span>Réserver ce soin ({srv.price})</span>
+                    <span>Book This Service ({srv.price})</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -345,16 +382,16 @@ export default function MobilePwaApp({
           </div>
         )}
 
-        {/* TAB 2: MAPS & TRAJET */}
+        {/* TAB 2: MAPS & DIRECTIONS */}
         {activeTab === 'maps' && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between pb-1 border-b border-white/10">
               <div>
                 <h2 className="text-base font-serif font-bold text-white flex items-center gap-2">
                   <Navigation className="w-4 h-4 text-gold" />
-                  Localisation & Trajet
+                  Location & Directions
                 </h2>
-                <p className="text-[11px] text-gray-400 font-mono">Au cœur de North Park, San Diego</p>
+                <p className="text-[11px] text-gray-400 font-mono">In the heart of North Park, San Diego</p>
               </div>
             </div>
 
@@ -368,7 +405,7 @@ export default function MobilePwaApp({
                   <h3 className="text-sm font-bold text-white font-serif">Final Stop Barber Shop</h3>
                   <p className="text-xs text-gray-300 mt-0.5">4679 30th St, San Diego, CA 92116</p>
                   <p className="text-[11px] text-gray-400 mt-1">
-                    Face au quartier commerçant de North Park, parking disponible.
+                    Facing North Park shopping district, customer parking available.
                   </p>
                 </div>
               </div>
@@ -419,21 +456,21 @@ export default function MobilePwaApp({
               className="w-full bg-gradient-to-r from-gold via-gold-light to-gold text-black font-bold text-xs uppercase tracking-wider py-3 px-4 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Navigation className="w-4 h-4" />
-              <span>Calculer mon itinéraire personnalisé</span>
+              <span>Calculate Custom Route</span>
             </button>
           </div>
         )}
 
-        {/* TAB 3: INFOS & ÉQUIPE */}
+        {/* TAB 3: INFOS & TEAM */}
         {activeTab === 'infos' && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between pb-1 border-b border-white/10">
               <div>
                 <h2 className="text-base font-serif font-bold text-white flex items-center gap-2">
                   <Info className="w-4 h-4 text-gold" />
-                  Contact, Équipe & Salon
+                  Contact, Team & Lounge
                 </h2>
-                <p className="text-[11px] text-gray-400 font-mono">Tout savoir sur votre barbier</p>
+                <p className="text-[11px] text-gray-400 font-mono">Everything about your master barbers</p>
               </div>
             </div>
 
@@ -441,7 +478,7 @@ export default function MobilePwaApp({
             <div className="bg-[#141417] border border-gold/30 rounded-xl p-3.5 shadow-sm">
               <h3 className="text-xs font-mono uppercase tracking-wider text-gold font-bold mb-2 flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5" />
-                Lignes Téléphoniques Directes
+                Direct Phone Lines
               </h3>
 
               <div className="space-y-2">
@@ -451,10 +488,10 @@ export default function MobilePwaApp({
                 >
                   <div>
                     <div className="text-xs font-bold font-mono text-gold">+1 (619) 886-1267</div>
-                    <div className="text-[10px] text-gray-400">Ligne Principale • Prise directe</div>
+                    <div className="text-[10px] text-gray-400">Main Line • Direct Reception</div>
                   </div>
                   <span className="bg-gold text-black text-[10px] font-bold uppercase px-2 py-1 rounded">
-                    Appeler
+                    Call
                   </span>
                 </a>
 
@@ -464,10 +501,10 @@ export default function MobilePwaApp({
                 >
                   <div>
                     <div className="text-xs font-bold font-mono text-gold">+1 (619) 284-9356</div>
-                    <div className="text-[10px] text-gray-400">Ligne Secondaire • Salon Lounge</div>
+                    <div className="text-[10px] text-gray-400">Secondary Line • Lounge Desk</div>
                   </div>
                   <span className="bg-gold text-black text-[10px] font-bold uppercase px-2 py-1 rounded">
-                    Appeler
+                    Call
                   </span>
                 </a>
               </div>
@@ -477,21 +514,21 @@ export default function MobilePwaApp({
             <div className="bg-[#141417] border border-white/10 rounded-xl p-3.5 shadow-sm">
               <h3 className="text-xs font-mono uppercase tracking-wider text-gold font-bold mb-2.5 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
-                Horaires d'Ouverture
+                Hours of Operation
               </h3>
 
               <div className="space-y-1.5 text-xs font-mono">
                 <div className="flex justify-between py-1 border-b border-white/5">
-                  <span className="text-gray-400">Lundi - Vendredi</span>
-                  <span className="text-white font-bold">9:00 - 19:00</span>
+                  <span className="text-gray-400">Monday - Friday</span>
+                  <span className="text-white font-bold">9:00 AM - 7:00 PM</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-white/5">
-                  <span className="text-gray-400">Samedi</span>
-                  <span className="text-white font-bold">9:00 - 18:00</span>
+                  <span className="text-gray-400">Saturday</span>
+                  <span className="text-white font-bold">9:00 AM - 6:00 PM</span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-gray-400">Dimanche</span>
-                  <span className="text-amber-400 font-bold">10:00 - 17:00</span>
+                  <span className="text-gray-400">Sunday</span>
+                  <span className="text-amber-400 font-bold">10:00 AM - 5:00 PM</span>
                 </div>
               </div>
             </div>
@@ -500,7 +537,7 @@ export default function MobilePwaApp({
             <div className="space-y-2.5">
               <h3 className="text-xs font-mono uppercase tracking-wider text-gold font-bold flex items-center gap-1.5">
                 <Scissors className="w-3.5 h-3.5" />
-                L'Équipe des Barbiers
+                Master Barbers Team
               </h3>
 
               {BARBERS.map((barber) => (
@@ -543,7 +580,7 @@ export default function MobilePwaApp({
                     onClick={() => onNavigateToBooking(barber.name)}
                     className="w-full bg-white/5 hover:bg-gold hover:text-black border border-white/15 text-xs font-mono font-bold py-2 rounded-lg text-center transition-all cursor-pointer"
                   >
-                    Réserver avec {barber.name}
+                    Book with {barber.name}
                   </button>
                 </div>
               ))}
@@ -552,24 +589,24 @@ export default function MobilePwaApp({
             {/* Salon Amenities */}
             <div className="bg-[#141417] border border-white/10 rounded-xl p-3.5 shadow-sm">
               <h3 className="text-xs font-mono uppercase tracking-wider text-gold font-bold mb-2.5">
-                Inclus & Confort Salon
+                Included Amenities & Lounge Comfort
               </h3>
               <div className="grid grid-cols-2 gap-2 text-xs text-gray-300 font-mono">
                 <div className="flex items-center gap-2 p-2 rounded bg-black/30 border border-white/5">
                   <Coffee className="w-3.5 h-3.5 text-gold" />
-                  <span>Espresso Offert</span>
+                  <span>Complimentary Espresso</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-black/30 border border-white/5">
                   <Wifi className="w-3.5 h-3.5 text-gold" />
-                  <span>Wi-Fi Fibre</span>
+                  <span>High-Speed Wi-Fi</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-black/30 border border-white/5">
                   <Car className="w-3.5 h-3.5 text-gold" />
-                  <span>Parking Facile</span>
+                  <span>Customer Parking</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded bg-black/30 border border-white/5">
                   <ShieldCheck className="w-3.5 h-3.5 text-gold" />
-                  <span>Hygiène Stérile</span>
+                  <span>Sterilized Hygiene</span>
                 </div>
               </div>
             </div>
@@ -591,16 +628,16 @@ export default function MobilePwaApp({
           </div>
         )}
 
-        {/* TAB 4: BOOK (RÉSERVATION & FILE WALK-IN) */}
+        {/* TAB 4: BOOK (RESERVATIONS & LIVE WAITLIST) */}
         {activeTab === 'book' && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between pb-1 border-b border-white/10">
               <div>
                 <h2 className="text-base font-serif font-bold text-white flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-gold" />
-                  Prendre Rendez-vous
+                  Book an Appointment
                 </h2>
-                <p className="text-[11px] text-gray-400 font-mono">Choisissez votre formule préférée</p>
+                <p className="text-[11px] text-gray-400 font-mono">Choose your preferred grooming experience</p>
               </div>
             </div>
 
@@ -610,15 +647,15 @@ export default function MobilePwaApp({
 
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-gold bg-gold/15 px-2 py-0.5 rounded border border-gold/30 inline-flex items-center gap-1 mb-2">
                 <Sparkles className="w-3 h-3" />
-                Service Premium Garanti
+                Guaranteed Premium Experience
               </span>
 
               <h3 className="text-base font-serif font-bold text-white mb-1.5">
-                Réservation Immédiate en Ligne
+                Instant Online Reservation
               </h3>
 
               <p className="text-xs text-gray-300 leading-relaxed mb-4">
-                Bloquez votre créneau horaire avec votre coiffeur préféré (Mika ou Luska), sans attente à votre arrivée au salon.
+                Lock in your dedicated time slot with Mika or Luska — guaranteed zero wait time upon arrival at the lounge.
               </p>
 
               <button
@@ -627,14 +664,14 @@ export default function MobilePwaApp({
                 className="w-full bg-gradient-to-r from-gold via-gold-light to-gold text-black font-bold text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
-                <span>Ouvrir l'agenda des réservations</span>
+                <span>Open Reservation Calendar</span>
               </button>
             </div>
 
             {/* Walk-in Waitlist Card */}
             <div className="bg-[#141417] border border-white/10 rounded-xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-bold text-white font-serif">File d'attente Walk-in</h3>
+                <h3 className="text-sm font-bold text-white font-serif">Walk-in Waitlist Queue</h3>
                 <span
                   className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
                     isWaitlistOpen
@@ -642,14 +679,14 @@ export default function MobilePwaApp({
                       : 'bg-red-500/20 text-red-400 border border-red-500/30'
                   }`}
                 >
-                  {isWaitlistOpen ? 'Ouverte Actuellement' : 'Fermée pour le moment'}
+                  {isWaitlistOpen ? 'Open Currently' : 'Closed for Now'}
                 </span>
               </div>
 
               <p className="text-xs text-gray-300 leading-relaxed mb-3">
                 {isWaitlistOpen
-                  ? 'Rejoignez la file sans rendez-vous depuis votre smartphone et suivez votre rang en temps réel.'
-                  : 'La file sans rendez-vous est momentanément saturée ou fermée par le gérant. Privilégiez la réservation avec créneau horaire.'}
+                  ? 'Join the live queue directly from your phone and track your position in real time.'
+                  : 'The live walk-in queue is temporarily full or paused. Please book a dedicated appointment slot.'}
               </p>
 
               {isWaitlistOpen ? (
@@ -658,7 +695,7 @@ export default function MobilePwaApp({
                   onClick={onOpenWaitlist}
                   className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase tracking-wider py-3 px-4 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>Rejoindre la file d'attente en direct</span>
+                  <span>Join Live Walk-in Queue</span>
                 </button>
               ) : (
                 <button
@@ -667,7 +704,7 @@ export default function MobilePwaApp({
                   className="w-full bg-white/5 hover:bg-white/10 text-gray-200 border border-white/15 text-xs font-mono font-bold py-2.5 px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Phone className="w-3.5 h-3.5 text-gold" />
-                  <span>Appeler pour vérifier les créneaux disponibles</span>
+                  <span>Call to Inquire About Openings</span>
                 </button>
               )}
             </div>
@@ -675,36 +712,36 @@ export default function MobilePwaApp({
             {/* Check Status Direct Card */}
             <div className="bg-[#141417] border border-white/10 rounded-xl p-3.5 shadow-sm flex items-center justify-between">
               <div>
-                <h4 className="text-xs font-bold text-white font-serif">Déjà client ?</h4>
-                <p className="text-[11px] text-gray-400">Consultez votre ticket ou modifiez votre RDV</p>
+                <h4 className="text-xs font-bold text-white font-serif">Already a client?</h4>
+                <p className="text-[11px] text-gray-400">Check your grooming pass or view details</p>
               </div>
               <button
                 type="button"
                 onClick={onOpenCheckStatus}
-                className="bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 text-xs font-mono font-bold py-2 px-3 rounded-lg transition-all"
+                className="bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 text-xs font-mono font-bold py-2 px-3 rounded-lg transition-all cursor-pointer"
               >
-                Vérifier
+                Check Status
               </button>
             </div>
           </div>
         )}
 
-        {/* TAB 5: GALERIE PORTFOLIO */}
+        {/* TAB 5: GALLERY PORTFOLIO */}
         {activeTab === 'gallery' && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between pb-1 border-b border-white/10">
               <div>
                 <h2 className="text-base font-serif font-bold text-white flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-gold" />
-                  Galerie & Réalisations
+                  Gallery & Cuts Portfolio
                 </h2>
-                <p className="text-[11px] text-gray-400 font-mono">Portfolio officiel Final Stop</p>
+                <p className="text-[11px] text-gray-400 font-mono">Official Final Stop Barber Shop collection</p>
               </div>
             </div>
 
             {/* Filter Chips */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {['Tous', 'Fades', 'Tresses', 'Locs', 'Salon'].map((cat) => (
+              {['All', 'Fades', 'Braids', 'Locs', 'Shop'].map((cat) => (
                 <button
                   key={cat}
                   type="button"
@@ -748,7 +785,7 @@ export default function MobilePwaApp({
 
             <div className="text-center pt-2">
               <p className="text-[11px] font-mono text-gray-400">
-                Touchez une photo pour l'agrandir en plein écran
+                Tap any photo to expand full screen
               </p>
             </div>
           </div>
@@ -764,8 +801,8 @@ export default function MobilePwaApp({
           <button
             type="button"
             onClick={() => setSelectedGalleryImage(null)}
-            className="absolute top-4 right-4 text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            aria-label="Fermer"
+            className="absolute top-4 right-4 text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-6 h-6" />
           </button>
@@ -773,25 +810,25 @@ export default function MobilePwaApp({
           <div className="max-w-md w-full max-h-[80vh] rounded-2xl overflow-hidden border border-gold/40 shadow-2xl">
             <img
               src={selectedGalleryImage}
-              alt="Agrandissement"
+              alt="Expanded view"
               className="w-full h-full object-contain bg-black"
               referrerPolicy="no-referrer"
             />
           </div>
 
           <p className="text-xs font-mono text-gray-400 mt-4 text-center">
-            Touchez n'importe où pour fermer
+            Tap anywhere to close
           </p>
         </div>
       )}
 
       {/* 5. BOTTOM NAVIGATION BAR (FIXED TAB BAR WITH 5 REQUIRED TABS) */}
       <nav
-        aria-label="Navigation mobile principale"
+        aria-label="Mobile main navigation"
         className="fixed bottom-0 left-0 right-0 z-50 bg-[#121215]/95 backdrop-blur-xl border-t border-gold/25 shadow-[0_-10px_25px_rgba(0,0,0,0.8)] pb-safe"
       >
         <div className="max-w-lg mx-auto grid grid-cols-5 h-16 items-center px-1">
-          {/* Tab 1: PRIX */}
+          {/* Tab 1: PRICES */}
           <button
             type="button"
             onClick={() => setActiveTab('prices')}
@@ -807,7 +844,7 @@ export default function MobilePwaApp({
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-gold rounded-full" />
               )}
             </div>
-            <span className="text-[10px] font-mono uppercase tracking-wider mt-1">Prix</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider mt-1">Prices</span>
           </button>
 
           {/* Tab 2: MAPS */}
@@ -829,7 +866,7 @@ export default function MobilePwaApp({
             <span className="text-[10px] font-mono uppercase tracking-wider mt-1">Maps</span>
           </button>
 
-          {/* Tab 3: INFOS */}
+          {/* Tab 3: ABOUT / TEAM */}
           <button
             type="button"
             onClick={() => setActiveTab('infos')}
@@ -845,7 +882,7 @@ export default function MobilePwaApp({
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-gold rounded-full" />
               )}
             </div>
-            <span className="text-[10px] font-mono uppercase tracking-wider mt-1">Infos</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider mt-1">About</span>
           </button>
 
           {/* Tab 4: BOOK */}
@@ -867,7 +904,7 @@ export default function MobilePwaApp({
             <span className="text-[10px] font-mono uppercase tracking-wider mt-1">Book</span>
           </button>
 
-          {/* Tab 5: GALERIE */}
+          {/* Tab 5: GALLERY */}
           <button
             type="button"
             onClick={() => setActiveTab('gallery')}
@@ -883,7 +920,7 @@ export default function MobilePwaApp({
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-gold rounded-full" />
               )}
             </div>
-            <span className="text-[10px] font-mono uppercase tracking-wider mt-1">Galerie</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider mt-1">Gallery</span>
           </button>
         </div>
       </nav>

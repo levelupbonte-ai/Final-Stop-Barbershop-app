@@ -59,7 +59,7 @@ export default function AdminPortalModal({
 
   // Notification broadcast state
   const [broadcastTitle, setBroadcastTitle] = useState('Final Stop Barber Shop');
-  const [broadcastBody, setBroadcastBody] = useState('✂️ Votre barbier est prêt ! Des créneaux sans attente sont disponibles.');
+  const [broadcastBody, setBroadcastBody] = useState('✂️ Your barber is ready! Walk-in slots are currently open with no wait.');
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [broadcastSuccess, setBroadcastSuccess] = useState('');
 
@@ -127,7 +127,7 @@ export default function AdminPortalModal({
       setPinUnlocked(true);
       setPinError('');
     } else {
-      setPinError('Code PIN incorrect. (Code PIN par défaut: 2026)');
+      setPinError('Incorrect PIN code. (Default Staff PIN: 2026)');
     }
   };
 
@@ -140,7 +140,7 @@ export default function AdminPortalModal({
       setCurrentUser(user);
     } catch (err: any) {
       console.error('Google Sign-In Error:', err);
-      setPinError(err?.message || 'Erreur de connexion Google.');
+      setPinError(err?.message || 'Google Sign-In authentication error.');
     } finally {
       setIsSigningIn(false);
     }
@@ -178,7 +178,7 @@ export default function AdminPortalModal({
 
       localStorage.setItem('final_stop_announcement', JSON.stringify(payload));
       window.dispatchEvent(new CustomEvent('announcement-updated', { detail: payload }));
-      setAnnouncementSuccess('Bandeau d\'annonce mis à jour et diffusé sur le site !');
+      setAnnouncementSuccess('Announcement banner updated and published live!');
       setTimeout(() => setAnnouncementSuccess(''), 4000);
     } catch (err: any) {
       console.error('Failed to save announcement:', err);
@@ -213,7 +213,7 @@ export default function AdminPortalModal({
         })
       );
 
-      setBroadcastSuccess('Notification diffusée avec succès aux clients connectés !');
+      setBroadcastSuccess('Push notification successfully broadcasted to connected clients!');
       setTimeout(() => setBroadcastSuccess(''), 4000);
     } catch (err) {
       console.error('Broadcast error:', err);
@@ -250,7 +250,7 @@ export default function AdminPortalModal({
                 </span>
               </div>
               <h3 className="font-serif text-lg font-bold text-white tracking-wide">
-                Espace Gestion • Final Stop
+                Shop Management • Final Stop
               </h3>
             </div>
           </div>
@@ -273,10 +273,10 @@ export default function AdminPortalModal({
                 <Lock className="w-8 h-8" />
               </div>
               <h4 className="text-xl font-serif font-bold text-white mb-1">
-                Accès Restreint
+                Restricted Staff Access
               </h4>
               <p className="text-xs text-gray-400 mb-6">
-                Veuillez saisir votre code PIN de sécurité pour déverrouiller l'accès administrateur.
+                Please enter your security PIN code to unlock administrator access.
               </p>
 
               <form onSubmit={handleVerifyPin} className="space-y-4">
@@ -307,11 +307,11 @@ export default function AdminPortalModal({
                   className="w-full max-w-xs bg-gold hover:bg-gold-light text-black font-mono font-bold text-xs uppercase tracking-wider py-3 px-6 rounded-xl transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2 mx-auto"
                 >
                   <Key className="w-4 h-4" />
-                  <span>Débloquer l'accès</span>
+                  <span>Unlock Access</span>
                 </button>
 
                 <p className="text-[11px] text-gray-500 font-mono pt-2">
-                  Code PIN staff initial : <strong className="text-gold">2026</strong> ou <strong className="text-gold">1234</strong>
+                  Staff default PIN code: <strong className="text-gold">2026</strong> or <strong className="text-gold">1234</strong>
                 </p>
               </form>
             </div>
@@ -320,7 +320,7 @@ export default function AdminPortalModal({
             <div className="max-w-md mx-auto py-6 text-center">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/50 border border-emerald-500/40 text-emerald-400 text-xs font-mono mb-4">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Code PIN vérifié avec succès</span>
+                <span>PIN Code verified successfully</span>
               </div>
 
               <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
@@ -345,10 +345,10 @@ export default function AdminPortalModal({
               </div>
 
               <h4 className="text-xl font-serif font-bold text-white mb-2">
-                Connexion Google Requise
+                Google Staff Sign-In Required
               </h4>
               <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-                Connectez-vous avec votre compte Google autorisé pour gérer les annonces, notifications, réservations et paramètres du salon.
+                Sign in with your authorized Google account to manage site announcements, push notifications, walk-in queue, and reservations.
               </p>
 
               {pinError && (
@@ -381,7 +381,7 @@ export default function AdminPortalModal({
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                   />
                 </svg>
-                <span>{isSigningIn ? 'Ouverture popup Google...' : 'Continuer avec Google'}</span>
+                <span>{isSigningIn ? 'Opening Google popup...' : 'Continue with Google'}</span>
               </button>
             </div>
           ) : (
@@ -405,10 +405,10 @@ export default function AdminPortalModal({
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="text-sm font-bold text-white">
-                        {currentUser.displayName || 'Administrateur'}
+                        {currentUser.displayName || 'Shop Administrator'}
                       </h4>
                       <span className="text-[9px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded">
-                        Connecté
+                        Online
                       </span>
                     </div>
                     <p className="text-xs text-gray-400 font-mono">
@@ -423,7 +423,7 @@ export default function AdminPortalModal({
                   className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 text-gray-300 border border-white/10 hover:border-rose-500/30 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>Déconnexion</span>
+                  <span>Sign Out</span>
                 </button>
               </div>
 
@@ -439,7 +439,7 @@ export default function AdminPortalModal({
                   }`}
                 >
                   <Megaphone className="w-3.5 h-3.5" />
-                  <span>Annonces du Site</span>
+                  <span>Site Announcements</span>
                 </button>
 
                 <button
@@ -452,7 +452,7 @@ export default function AdminPortalModal({
                   }`}
                 >
                   <Bell className="w-3.5 h-3.5" />
-                  <span>Diffuser Notification</span>
+                  <span>Broadcast Notification</span>
                 </button>
 
                 <button
@@ -465,7 +465,7 @@ export default function AdminPortalModal({
                   }`}
                 >
                   <Users className="w-3.5 h-3.5" />
-                  <span>File Walk-in</span>
+                  <span>Walk-in Queue</span>
                 </button>
 
                 <button
@@ -478,7 +478,7 @@ export default function AdminPortalModal({
                   }`}
                 >
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>Rendez-vous</span>
+                  <span>Reservations</span>
                 </button>
               </div>
 
@@ -488,16 +488,16 @@ export default function AdminPortalModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <h5 className="text-sm font-bold text-white">
-                        Bandeau d'Alerte / Annonce en Tête de Site
+                        Header Alert / Announcement Banner
                       </h5>
                       <p className="text-xs text-gray-400">
-                        S'affiche tout en haut sur Desktop et Mobile PWA.
+                        Displays prominently at the top of Desktop and Mobile PWA.
                       </p>
                     </div>
 
                     <label className="flex items-center gap-2 cursor-pointer">
                       <span className="text-xs font-mono text-gray-300">
-                        {announcement.active ? 'Actif' : 'Masqué'}
+                        {announcement.active ? 'Active' : 'Hidden'}
                       </span>
                       <input
                         type="checkbox"
@@ -522,42 +522,42 @@ export default function AdminPortalModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-mono text-gray-300 mb-1">
-                          Titre de l'annonce
+                          Announcement Title
                         </label>
                         <input
                           type="text"
                           value={announcement.title}
                           onChange={(e) => setAnnouncement({ ...announcement, title: e.target.value })}
-                          placeholder="Ex: Horaires d'ouverture, Promo Flash"
+                          placeholder="e.g. Special Holiday Hours, Flash Promo"
                           className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-gold"
                         />
                       </div>
 
                       <div>
                         <label className="block text-xs font-mono text-gray-300 mb-1">
-                          Style visuel
+                          Visual Style
                         </label>
                         <select
                           value={announcement.type}
                           onChange={(e) => setAnnouncement({ ...announcement, type: e.target.value as any })}
                           className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-xs text-white outline-none focus:border-gold"
                         >
-                          <option value="info">Info Or (Standard)</option>
-                          <option value="promo">Promo Flash (Émeraude)</option>
-                          <option value="alert">Alerte / Urgent (Rouge)</option>
+                          <option value="info">Gold / Neutral (Standard)</option>
+                          <option value="promo">Flash Promo (Emerald)</option>
+                          <option value="alert">Alert / Urgent (Ruby)</option>
                         </select>
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-mono text-gray-300 mb-1">
-                        Message complet
+                        Full Message Content
                       </label>
                       <textarea
                         rows={2}
                         value={announcement.message}
                         onChange={(e) => setAnnouncement({ ...announcement, message: e.target.value })}
-                        placeholder="Texte diffusé à tous les visiteurs..."
+                        placeholder="Broadcast message displayed to all visitors..."
                         className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-gold resize-none"
                       />
                     </div>
@@ -565,25 +565,25 @@ export default function AdminPortalModal({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-mono text-gray-300 mb-1">
-                          Texte du lien (Optionnel)
+                          Button Text (Optional)
                         </label>
                         <input
                           type="text"
                           value={announcement.linkText || ''}
                           onChange={(e) => setAnnouncement({ ...announcement, linkText: e.target.value })}
-                          placeholder="Ex: Réserver en ligne"
+                          placeholder="e.g. Book Appointment"
                           className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-gold"
                         />
                       </div>
                       <div>
                         <label className="block text-xs font-mono text-gray-300 mb-1">
-                          Lien d'action (Optionnel)
+                          Action Link URL (Optional)
                         </label>
                         <input
                           type="text"
                           value={announcement.linkUrl || ''}
                           onChange={(e) => setAnnouncement({ ...announcement, linkUrl: e.target.value })}
-                          placeholder="Ex: #booking ou https://..."
+                          placeholder="e.g. #booking or https://..."
                           className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-gold"
                         />
                       </div>
@@ -592,7 +592,7 @@ export default function AdminPortalModal({
                     {/* Preview box */}
                     <div>
                       <label className="block text-[11px] font-mono text-gray-400 mb-1">
-                        Aperçu en direct du bandeau :
+                        Live Banner Preview:
                       </label>
                       <div className={`p-3 rounded-lg border text-xs flex items-center gap-2 ${
                         announcement.type === 'promo'
@@ -605,7 +605,7 @@ export default function AdminPortalModal({
                           {announcement.type.toUpperCase()}
                         </span>
                         <strong>{announcement.title}:</strong>
-                        <span className="truncate">{announcement.message || 'Votre message...'}</span>
+                        <span className="truncate">{announcement.message || 'Your broadcast message...'}</span>
                       </div>
                     </div>
 
@@ -615,7 +615,7 @@ export default function AdminPortalModal({
                       className="w-full bg-gold hover:bg-gold-light text-black font-mono font-bold text-xs uppercase py-3 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                     >
                       <Sparkles className="w-4 h-4" />
-                      <span>{savingAnnouncement ? 'Enregistrement...' : 'Mettre à jour l\'annonce sur le site'}</span>
+                      <span>{savingAnnouncement ? 'Saving...' : 'Update Announcement on Site'}</span>
                     </button>
                   </form>
                 </div>
@@ -626,10 +626,10 @@ export default function AdminPortalModal({
                 <div className="space-y-4">
                   <div>
                     <h5 className="text-sm font-bold text-white">
-                      Diffuser une Notification Push Immédiate
+                      Broadcast Instant Push Notification
                     </h5>
                     <p className="text-xs text-gray-400">
-                      Envoyez une alerte push sonore et vibration aux téléphones et ordinateurs connectés.
+                      Trigger an instant push alert with sound and vibration to connected client smartphones and browsers.
                     </p>
                   </div>
 
@@ -643,26 +643,26 @@ export default function AdminPortalModal({
                   <form onSubmit={handleSendBroadcast} className="space-y-4">
                     <div>
                       <label className="block text-xs font-mono text-gray-300 mb-1">
-                        Titre de la notification
+                        Notification Title
                       </label>
                       <input
                         type="text"
                         value={broadcastTitle}
                         onChange={(e) => setBroadcastTitle(e.target.value)}
-                        placeholder="Ex: Final Stop Barber Shop"
+                        placeholder="e.g. Final Stop Barber Shop"
                         className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-gold"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-mono text-gray-300 mb-1">
-                        Contenu du message push
+                        Push Message Content
                       </label>
                       <textarea
                         rows={3}
                         value={broadcastBody}
                         onChange={(e) => setBroadcastBody(e.target.value)}
-                        placeholder="Ex: Places disponibles immédiatement en walk-in sans attente..."
+                        placeholder="e.g. Master barber Mika has open slots right now with zero wait..."
                         className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-xs text-white placeholder-gray-500 outline-none focus:border-gold resize-none"
                       />
                     </div>
@@ -670,7 +670,7 @@ export default function AdminPortalModal({
                     {/* Notification Preview Mockup */}
                     <div>
                       <label className="block text-[11px] font-mono text-gray-400 mb-1">
-                        Aperçu sur smartphone :
+                        Smartphone Lockscreen Preview:
                       </label>
                       <div className="bg-[#1C1C1E] border border-white/15 rounded-xl p-3 flex items-start gap-3 shadow-lg">
                         <div className="w-9 h-9 rounded-xl bg-black border border-gold/50 overflow-hidden shrink-0">
@@ -684,7 +684,7 @@ export default function AdminPortalModal({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between text-[11px] text-gray-400">
                             <span className="font-semibold text-white truncate">{broadcastTitle}</span>
-                            <span className="font-mono text-[10px]">Maintenant</span>
+                            <span className="font-mono text-[10px]">Now</span>
                           </div>
                           <p className="text-xs text-gray-300 mt-0.5 line-clamp-2 leading-relaxed">
                             {broadcastBody}
@@ -699,7 +699,7 @@ export default function AdminPortalModal({
                       className="w-full bg-gold hover:bg-gold-light text-black font-mono font-bold text-xs uppercase py-3 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                     >
                       <Send className="w-4 h-4" />
-                      <span>{sendingBroadcast ? 'Envoi en cours...' : 'Envoyer la notification maintenant'}</span>
+                      <span>{sendingBroadcast ? 'Broadcasting...' : 'Send Notification Now'}</span>
                     </button>
                   </form>
                 </div>
@@ -710,10 +710,10 @@ export default function AdminPortalModal({
                 <div className="space-y-4">
                   <div>
                     <h5 className="text-sm font-bold text-white">
-                      Contrôle de la File d'Attente Walk-in
+                      Walk-in Queue Management
                     </h5>
                     <p className="text-xs text-gray-400">
-                      Ouvrez ou fermez la file sans rendez-vous accessible en ligne.
+                      Open or close the live digital walk-in queue accessible online.
                     </p>
                   </div>
 
@@ -721,13 +721,13 @@ export default function AdminPortalModal({
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-xs font-mono text-gray-400 uppercase tracking-wider block">
-                          Statut Actuel du Salon
+                          Current Shop Status
                         </span>
                         <h4 className="text-lg font-serif font-bold text-white">
-                          File Walk-in : {isWaitlistOpen ? (
-                            <span className="text-emerald-400">OUVERTE</span>
+                          Walk-in Queue: {isWaitlistOpen ? (
+                            <span className="text-emerald-400">OPEN</span>
                           ) : (
-                            <span className="text-rose-400">FERMÉE</span>
+                            <span className="text-rose-400">CLOSED</span>
                           )}
                         </h4>
                       </div>
@@ -743,7 +743,7 @@ export default function AdminPortalModal({
                           }`}
                         >
                           <Power className="w-3.5 h-3.5" />
-                          <span>OUVRIR</span>
+                          <span>OPEN QUEUE</span>
                         </button>
 
                         <button
@@ -756,15 +756,15 @@ export default function AdminPortalModal({
                           }`}
                         >
                           <Power className="w-3.5 h-3.5" />
-                          <span>FERMER</span>
+                          <span>CLOSE QUEUE</span>
                         </button>
                       </div>
                     </div>
 
                     <p className="text-xs text-gray-300 leading-relaxed border-t border-white/5 pt-3">
                       {isWaitlistOpen
-                        ? 'Les clients peuvent rejoindre la file d\'attente numérique depuis leur mobile et suivre leur position en direct.'
-                        : 'La file est actuellement close. Les clients sont invités à réserver un rendez-vous planifié.'}
+                        ? 'Clients can join the digital waitlist from their phones and track their live queue position.'
+                        : 'The waitlist is currently closed. Clients will be prompted to book a scheduled appointment instead.'}
                     </p>
                   </div>
                 </div>
@@ -776,10 +776,10 @@ export default function AdminPortalModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <h5 className="text-sm font-bold text-white">
-                        Dernières Réservations Reçues
+                        Latest Received Reservations
                       </h5>
                       <p className="text-xs text-gray-400">
-                        Synchronisé avec Firestore.
+                        Real-time sync with Firestore database.
                       </p>
                     </div>
 
@@ -790,17 +790,17 @@ export default function AdminPortalModal({
                       className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 ${loadingReservations ? 'animate-spin' : ''}`} />
-                      <span>Actualiser</span>
+                      <span>Refresh</span>
                     </button>
                   </div>
 
                   {loadingReservations ? (
                     <div className="text-center py-8 text-xs text-gray-400 font-mono">
-                      Chargement des réservations...
+                      Loading reservations...
                     </div>
                   ) : reservations.length === 0 ? (
                     <div className="text-center py-8 bg-black/30 rounded-xl border border-white/5 text-xs text-gray-400 font-mono">
-                      Aucune réservation enregistrée pour le moment.
+                      No reservations recorded yet.
                     </div>
                   ) : (
                     <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -811,15 +811,15 @@ export default function AdminPortalModal({
                         >
                           <div>
                             <div className="font-bold text-white flex items-center gap-2">
-                              <span>{res.clientName || res.name || 'Client'}</span>
+                              <span>{res.clientName || res.name || 'Guest'}</span>
                               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-gold/15 text-gold border border-gold/30">
-                                {res.service || 'Coupe'}
+                                {res.service || 'Haircut'}
                               </span>
                             </div>
                             <div className="text-gray-400 font-mono text-[11px] flex items-center gap-2 mt-0.5">
-                              <span>{res.date || res.time || 'Aujourd\'hui'}</span>
+                              <span>{res.date || res.time || 'Today'}</span>
                               <span>•</span>
-                              <span>{res.phone || res.email || 'Sans contact'}</span>
+                              <span>{res.phone || res.email || 'No contact info'}</span>
                             </div>
                           </div>
 
@@ -828,7 +828,7 @@ export default function AdminPortalModal({
                               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                               : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                           }`}>
-                            {res.status || 'En attente'}
+                            {res.status || 'Pending'}
                           </span>
                         </div>
                       ))}
@@ -847,7 +847,7 @@ export default function AdminPortalModal({
             onClick={onClose}
             className="text-xs text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
-            Fermer le panneau d'administration
+            Close Staff Administration Panel
           </button>
         </div>
       </div>
