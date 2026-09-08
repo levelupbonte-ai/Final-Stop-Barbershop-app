@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { MapPin, Navigation, Phone, ExternalLink, Clock } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
-import { setupMapboxGl, getMapboxStyle, CARTO_DARK_MAP_STYLE } from '../lib/mapboxConfig';
-import { getSmartMapsUrl, getAppleMapsUrl, getGoogleMapsUrl } from '../lib/mapLinks';
+import { getMapboxToken } from '../lib/mapboxConfig';
 
 const SHOP_LOCATION = {
   lat: 32.7572493,
@@ -12,6 +11,9 @@ const SHOP_LOCATION = {
   phone: "+1 (619) 886-1267"
 };
 
+const GOOGLE_MAPS_LINK = "https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9";
+const DIRECTIONS_URL = "https://www.google.com/maps/dir/?api=1&destination=5277+El+Cajon+Blvd,+San+Diego,+CA+92115";
+
 interface MapSectionProps {
   onNavigateToRoutePlanner?: () => void;
 }
@@ -19,36 +21,49 @@ interface MapSectionProps {
 export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
-  const [smartMap, setSmartMap] = useState({ url: getGoogleMapsUrl(), appName: 'Google Maps' as 'Apple Maps' | 'Google Maps', isApple: false });
-
-  useEffect(() => {
-    setSmartMap(getSmartMapsUrl());
-  }, []);
 
   useEffect(() => {
     if (!mapContainer.current) return;
     if (mapRef.current) return;
 
-    // Safely configure access token and requirements
-    setupMapboxGl(mapboxgl);
+    const token = getMapboxToken();
+    mapboxgl.accessToken = token;
+
+    // Modern Dark Mapbox Style with fallback if token is not configured
+    const darkStyle: any = token
+      ? 'mapbox://styles/mapbox/dark-v11'
+      : {
+          version: 8,
+          sources: {
+            'carto-dark': {
+              type: 'raster',
+              tiles: [
+                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+                'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+              ],
+              tileSize: 256,
+              attribution: '© Mapbox © OpenStreetMap'
+            }
+          },
+          layers: [
+            {
+              id: 'carto-dark-layer',
+              type: 'raster',
+              source: 'carto-dark',
+              minzoom: 0,
+              maxzoom: 22
+            }
+          ]
+        };
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: getMapboxStyle(),
+      style: darkStyle,
       center: [SHOP_LOCATION.lng, SHOP_LOCATION.lat],
       zoom: 15.2,
       attributionControl: true
-    });
-
-    // Gracefully handle any token unauthorized / style load issues
-    map.on('error', (e: any) => {
-      const msg = String(e?.error?.message || '').toLowerCase();
-      if (e?.error?.status === 401 || msg.includes('access token') || msg.includes('not authorized')) {
-        console.warn('Mapbox style unauthorized, falling back cleanly to dark basemap.');
-        try {
-          map.setStyle(CARTO_DARK_MAP_STYLE);
-        } catch (_) {}
-      }
     });
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'bottom-right');
@@ -79,7 +94,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
           </span>
           <div style="margin-top: 6px;">
             <span style="display: inline-block; background: #C5A059; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; text-transform: uppercase;">
-              Open 10:00 AM - 6:00 PM
+              Ouvert 10h - 18h
             </span>
           </div>
         </div>
@@ -181,14 +196,13 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
               </button>
 
               <a
-                href={smartMap.url}
+                href={GOOGLE_MAPS_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:inline-flex items-center gap-1.5 text-xs font-mono text-gray-300 hover:text-gold transition-colors py-2 px-3 border border-white/15 bg-black/40"
-                title={`Open in ${smartMap.appName}`}
+                className="hidden md:inline-flex items-center gap-1.5 text-xs font-mono text-gray-400 hover:text-gold transition-colors py-2 px-3 border border-white/10"
               >
-                <span>{smartMap.appName}</span>
-                <ExternalLink className="w-3.5 h-3.5 text-gold" />
+                <span>Google Maps</span>
+                <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>

@@ -1,10 +1,4 @@
-import { Sparkles } from 'lucide-react';
-
-interface GalleryProps {
-  onNavigateToBooking?: (serviceName?: string) => void;
-}
-
-export default function Gallery({ onNavigateToBooking }: GalleryProps) {
+export default function Gallery() {
   const images = [
     { 
       src: 'https://i.ibb.co/20Ns74Tz/Chat-GPT-Image-6-sept-2026-15-53-44.png', 

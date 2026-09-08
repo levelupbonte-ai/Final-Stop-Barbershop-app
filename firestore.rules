@@ -3,86 +3,49 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Check if the authenticated user is an administrator
+    // Helper function to check admin
     function isAdmin() {
-      return request.auth != null && (
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-        request.auth.token.email in ['alsherafael@gmail.com', 'finalstopbarbershop@gmail.com', 'bazebiberthollet@gmail.com']
-      );
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // 1. Client Appointments & Reservations
+    // Client Reservations: Allow public creation for appointment bookings, public lookup for ticket status, and full management
     match /reservations/{reservationId} {
-      // Public clients can check their reservation status; admins have full management
       allow read: if true;
-
-      // Allow creating appointments (open booking)
-      allow create: if true;
-
-      // Allow clients to reschedule (date, time) and cancel appointments, and admins to manage
-      allow update: if true;
-
-      // Only administrators can permanently delete appointments
-      allow delete: if isAdmin();
+      allow create: if request.resource.data.name != null || request.resource.data.clientName != null;
+      allow update, delete: if true;
     }
 
-    // 2. Walk-in Waitlist Queue
+    // Live Walk-In Waitlist: Allow clients to view queue and register, and staff/owner to manage
     match /waitlist/{ticketId} {
-      // Public read is required for the live queue board & status check
-      allow read: if true;
-
-      // Clients can join the walk-in waitlist
-      allow create: if true;
-
-      // Status updates (cancel or mark completed by staff)
-      allow update: if true;
-
-      // Only administrators can delete waitlist tickets
-      allow delete: if isAdmin();
+      allow read, create, update, delete: if true;
     }
 
-    // 3. Promo Codes & Single-Use Redemptions
-    match /promo_redemptions/{id} {
+    // Shop Configuration & Waitlist status (open/closed, hours, announcements)
+    match /shop_config/{configId} {
       allow read, write: if true;
     }
 
-    match /promos/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
+    // VIP Promo Club Signups (15% discount)
+    match /vip_club/{docId} {
+      allow read, write: if true;
     }
 
-    // 4. Native Web Push Subscriptions for notifications
-    match /push_subscriptions/{subscriptionId} {
-      // Allow browser clients to save their native push token
-      allow create: if request.resource.data.endpoint is string;
-      allow read, update, delete: if isAdmin();
+    // Barbers profiles and ratings
+    match /barbers/{barberId} {
+      allow read, write: if true;
     }
 
-    // 4. Shop Settings (Live waitlist toggle, owner configurations)
-    match /shop_settings/{settingId} {
-      allow read: if true;
-      allow write: if isAdmin();
+    // Client Reviews & Ratings
+    match /reviews/{reviewId} {
+      allow read, write: if true;
     }
-
-    // 5. VIP Club Signups
-    match /vip_club/{memberId} {
-      // Clients can sign up for the VIP club
-      allow create: if request.resource.data.phone is string || request.resource.data.email is string;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // 6. Welcome Promos & Discount Claims
-    match /promos/{promoId} {
-      // Clients can claim the promo code
-      allow create: if request.resource.data.email is string;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // 7. User Profiles & Staff Roles
+    
+    // User accounts
     match /users/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow write: if isAdmin();
+      allow read: if true;
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
   }
 }

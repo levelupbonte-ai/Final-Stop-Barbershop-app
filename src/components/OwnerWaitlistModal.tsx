@@ -7,6 +7,7 @@ interface OwnerWaitlistModalProps {
   onClose: () => void;
   isWaitlistOpen: boolean;
   onStatusChange: (isOpen: boolean) => void;
+  onOpenFullAdmin?: () => void;
 }
 
 export default function OwnerWaitlistModal({
@@ -14,6 +15,7 @@ export default function OwnerWaitlistModal({
   onClose,
   isWaitlistOpen,
   onStatusChange,
+  onOpenFullAdmin,
 }: OwnerWaitlistModalProps) {
   const [pin, setPin] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -189,6 +191,19 @@ export default function OwnerWaitlistModal({
                 <span className="text-[9px] font-normal normal-case opacity-80">(Appointments only)</span>
               </button>
             </div>
+
+            {onOpenFullAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleResetAndClose();
+                  onOpenFullAdmin();
+                }}
+                className="w-full mb-3 bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 py-2.5 px-4 text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Accéder à la Console Firestore & Réservations &rarr;</span>
+              </button>
+            )}
 
             <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-gray-500 font-mono">
               <span>Owner Mode Active</span>

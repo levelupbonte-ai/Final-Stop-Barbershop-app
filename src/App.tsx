@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
+import Navbar, { NavView } from './components/Navbar';
 import Hero from './components/Hero';
 import TeamAndPricing from './components/TeamAndPricing';
 import Gallery from './components/Gallery';
@@ -12,91 +12,115 @@ import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import MapSection from './components/MapSection';
 import Footer from './components/Footer';
+
+// Full dedicated pages
+import BarberProfilePage from './pages/BarberProfilePage';
+import BarbersPage from './pages/BarbersPage';
+import ServicesPage from './pages/ServicesPage';
+import WaitlistPage from './pages/WaitlistPage';
+import AdminPage from './pages/AdminPage';
+import GalleryPage from './pages/GalleryPage';
+import ReviewsPage from './pages/ReviewsPage';
 import BookingPage from './pages/BookingPage';
 import RoutePlannerPage from './pages/RoutePlannerPage';
+
+// Modals
 import CheckStatusModal from './components/CheckStatusModal';
 import WalkInHubModal, { ModalMode } from './components/WalkInHubModal';
 import ClientStatusHub from './components/ClientStatusHub';
 import OwnerWaitlistModal from './components/OwnerWaitlistModal';
 import WelcomePromoModal from './components/WelcomePromoModal';
 import CallShopModal from './components/CallShopModal';
-import NotificationAndPwaModal from './components/NotificationAndPwaModal';
-import NotificationPermissionBanner from './components/NotificationPermissionBanner';
-import MobilePwaApp from './components/MobilePwaApp';
-import AdminPortalModal from './components/AdminPortalModal';
-import AnnouncementBanner from './components/AnnouncementBanner';
 import { getIsWaitlistOpen } from './lib/waitlistService';
-import { registerServiceWorker } from './lib/pwa';
-import { Smartphone } from 'lucide-react';
+
+export type ActiveView = 
+  | 'home' 
+  | 'barbers' 
+  | 'barber-profile' 
+  | 'services' 
+  | 'waitlist' 
+  | 'booking' 
+  | 'route' 
+  | 'gallery' 
+  | 'reviews' 
+  | 'admin';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'booking' | 'route'>(() => {
-    if (window.location.hash === '#booking') return 'booking';
-    if (window.location.hash === '#route') return 'route';
+  // Parse initial view from hash if present
+  const [currentView, setCurrentView] = useState<ActiveView>(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash.startsWith('barber-profile')) return 'barber-profile';
+    if (hash === 'barbers') return 'barbers';
+    if (hash === 'services') return 'services';
+    if (hash === 'waitlist') return 'waitlist';
+    if (hash === 'booking') return 'booking';
+    if (hash === 'route') return 'route';
+    if (hash === 'gallery') return 'gallery';
+    if (hash === 'reviews') return 'reviews';
+    if (hash === 'admin') return 'admin';
     return 'home';
   });
 
-  // Standalone PWA detection:
-  // Strictly for installed PWAs (display-mode: standalone, iOS standalone, ?source=pwa, or #pwa)
-  // Standard mobile web browser visitors keep the responsive website ("ancien version web") as requested.
-  const checkIsPwaInstalled = (): boolean => {
-    if (typeof window === 'undefined') return false;
-    return (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true ||
-      window.location.search.includes('source=pwa') ||
-      window.location.hash.includes('pwa')
-    );
-  };
+  // Selected barber for profile or booking
+  const [selectedBarberId, setSelectedBarberId] = useState<'mika' | 'lusca'>(() => {
+    const hash = window.location.hash;
+    if (hash.includes('id=lusca')) return 'lusca';
+    return 'mika';
+  });
 
-  const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(checkIsPwaInstalled);
-  const [forceWebView, setForceWebView] = useState<boolean>(false);
+  // Selected service for booking pre-selection
+  const [bookingService, setBookingService] = useState<string | undefined>(undefined);
 
-  // Modals state for menu action items
+  // Modals state
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [statusQuery, setStatusQuery] = useState('');
   const [hubMode, setHubMode] = useState<ModalMode>(null);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
-  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
-  const [isAdminPortalOpen, setIsAdminPortalOpen] = useState(false);
 
-  // Shop Owner-controlled waitlist state (Default: closed until owner opens it)
+  // Shop Owner-controlled waitlist state
   const [isWaitlistOpen, setIsWaitlistOpen] = useState<boolean>(getIsWaitlistOpen);
   const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
 
-  // Register PWA Service Worker on initial startup
+  // Hash change listener for true browser navigation (Back / Forward buttons)
   useEffect(() => {
-    registerServiceWorker();
+    const handleHashChange = () => {
+      const rawHash = window.location.hash.replace('#', '');
+      const [viewName, queryStr] = rawHash.split('?');
+
+      if (viewName === 'barber-profile') {
+        setCurrentView('barber-profile');
+        if (queryStr && queryStr.includes('id=lusca')) {
+          setSelectedBarberId('lusca');
+        } else if (queryStr && queryStr.includes('id=mika')) {
+          setSelectedBarberId('mika');
+        }
+      } else if (
+        viewName === 'barbers' ||
+        viewName === 'services' ||
+        viewName === 'waitlist' ||
+        viewName === 'booking' ||
+        viewName === 'route' ||
+        viewName === 'gallery' ||
+        viewName === 'reviews' ||
+        viewName === 'admin'
+      ) {
+        setCurrentView(viewName as ActiveView);
+      } else {
+        setCurrentView('home');
+      }
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Update PWA detection on resize and URL hash changes
-  useEffect(() => {
-    const handleCheckPwa = () => {
-      setIsPwaInstalled(checkIsPwaInstalled());
-    };
-    const handleOpenAdminPortal = () => setIsAdminPortalOpen(true);
-
-    window.addEventListener('resize', handleCheckPwa);
-    window.addEventListener('hashchange', handleCheckPwa);
-    window.addEventListener('open-admin-portal', handleOpenAdminPortal);
-    return () => {
-      window.removeEventListener('resize', handleCheckPwa);
-      window.removeEventListener('hashchange', handleCheckPwa);
-      window.removeEventListener('open-admin-portal', handleOpenAdminPortal);
-    };
-  }, []);
-
-  // Global call modal and notification modal listeners
+  // Global call modal listener
   useEffect(() => {
     const handleOpenCall = () => setIsCallModalOpen(true);
-    const handleOpenNotifications = () => setIsNotificationModalOpen(true);
     window.addEventListener('open-call-modal', handleOpenCall);
-    window.addEventListener('open-notification-modal', handleOpenNotifications);
-    return () => {
-      window.removeEventListener('open-call-modal', handleOpenCall);
-      window.removeEventListener('open-notification-modal', handleOpenNotifications);
-    };
+    return () => window.removeEventListener('open-call-modal', handleOpenCall);
   }, []);
 
   // Timed VIP Welcome Promo Pop-up (strictly 5 seconds after arrival)
@@ -107,6 +131,7 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Waitlist status event listener
   useEffect(() => {
     const handleWaitlistChange = (e: any) => {
       if (e.detail && typeof e.detail.isOpen === 'boolean') {
@@ -117,191 +142,187 @@ export default function App() {
     return () => window.removeEventListener('waitlist-status-changed', handleWaitlistChange);
   }, []);
 
+  // Navigation handlers
+  const navigateTo = (view: ActiveView, params?: { barberId?: 'mika' | 'lusca'; service?: string }) => {
+    if (params?.barberId) {
+      setSelectedBarberId(params.barberId);
+    }
+    if (params?.service) {
+      setBookingService(params.service);
+    }
+
+    if (view === 'barber-profile') {
+      const bId = params?.barberId || selectedBarberId;
+      window.location.hash = `#barber-profile?id=${bId}`;
+    } else if (view === 'home') {
+      window.history.pushState(null, '', window.location.pathname);
+    } else {
+      window.location.hash = `#${view}`;
+    }
+
+    setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleOpenCheckStatus = (initialQuery?: string) => {
     setStatusQuery(initialQuery || '');
     setIsStatusModalOpen(true);
   };
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === '#booking') {
-        setCurrentView('booking');
-      } else if (window.location.hash === '#route') {
-        setCurrentView('route');
-      } else if (!window.location.hash || window.location.hash === '#') {
-        setCurrentView('home');
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const navigateToBooking = (serviceName?: string) => {
-    if (serviceName) {
-      window.location.hash = `#booking?service=${encodeURIComponent(serviceName)}`;
-    } else {
-      window.location.hash = '#booking';
-    }
-    setCurrentView('booking');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const navigateToRoutePlanner = () => {
-    window.location.hash = '#route';
-    setCurrentView('route');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const navigateToHome = () => {
-    window.history.pushState(null, '', window.location.pathname);
-    setCurrentView('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  if (currentView === 'booking') {
-    return <BookingPage onBackToHome={navigateToHome} />;
-  }
-
-  if (currentView === 'route') {
-    return <RoutePlannerPage onBackToHome={navigateToHome} />;
-  }
-
-  // Dedicated Mobile PWA Experience (Strictly for installed PWA mode, normal mobile browsers stay on web)
-  if (isPwaInstalled && !forceWebView && currentView === 'home') {
+  // 1. PAGE: Barber Profile Page (Dedicated Clickable Profile for Mika or Lusca)
+  if (currentView === 'barber-profile') {
     return (
-      <>
-        <MobilePwaApp
-          onNavigateToBooking={(serviceName) => {
-            if (serviceName) {
-              window.location.hash = `#booking?service=${encodeURIComponent(serviceName)}`;
-            } else {
-              window.location.hash = '#booking';
-            }
-            setCurrentView('booking');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onNavigateToRoutePlanner={navigateToRoutePlanner}
-          onOpenCheckStatus={() => handleOpenCheckStatus()}
-          onOpenCallModal={() => setIsCallModalOpen(true)}
-          onOpenWaitlist={() => setHubMode('waitlist')}
-          isWaitlistOpen={isWaitlistOpen}
-          onSwitchToWebView={() => setForceWebView(true)}
-          onOpenAdminPortal={() => setIsAdminPortalOpen(true)}
-        />
-
-        {/* 1. Dedicated 'Check My Status' Modal */}
-        <CheckStatusModal 
-          isOpen={isStatusModalOpen}
-          onClose={() => {
-            setIsStatusModalOpen(false);
-            setStatusQuery('');
-          }}
-          onOpenWaitlist={() => setHubMode('waitlist')}
-          initialQuery={statusQuery}
-          isWaitlistOpen={isWaitlistOpen}
-          onNavigateToBooking={navigateToBooking}
-        />
-
-        {/* 2. Walk-in Waitlist Modal */}
-        <WalkInHubModal 
-          mode={hubMode}
-          onClose={() => setHubMode(null)}
-          onOpenStatusCheck={() => handleOpenCheckStatus()}
-          isWaitlistOpen={isWaitlistOpen}
-          onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
-          onNavigateToBooking={navigateToBooking}
-        />
-
-        {/* 3. Shop Owner Waitlist Control Modal */}
-        <OwnerWaitlistModal 
-          isOpen={isOwnerModalOpen}
-          onClose={() => setIsOwnerModalOpen(false)}
-          isWaitlistOpen={isWaitlistOpen}
-          onStatusChange={(newState) => setIsWaitlistOpen(newState)}
-        />
-
-        {/* 4. Direct Phone Lines Modal (2 shop numbers) */}
-        <CallShopModal 
-          isOpen={isCallModalOpen}
-          onClose={() => setIsCallModalOpen(false)}
-        />
-
-        {/* 5. 6-Second Notification Permission Pop-up Banner */}
-        <NotificationPermissionBanner />
-
-        {/* 6. Admin Portal Modal */}
-        <AdminPortalModal
-          isOpen={isAdminPortalOpen}
-          onClose={() => setIsAdminPortalOpen(false)}
-          isWaitlistOpen={isWaitlistOpen}
-          onWaitlistChange={(newState) => setIsWaitlistOpen(newState)}
-        />
-      </>
+      <BarberProfilePage
+        barberId={selectedBarberId}
+        onBackToHome={() => navigateTo('home')}
+        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId: barberId as any })}
+        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId: barberId as any })}
+        onSwitchBarber={(nextBarberId) => navigateTo('barber-profile', { barberId: nextBarberId })}
+      />
     );
   }
 
+  // 2. PAGE: All Barbers Overview (Mika & Lusca - 20+ years of experience)
+  if (currentView === 'barbers') {
+    return (
+      <BarbersPage
+        onBackToHome={() => navigateTo('home')}
+        onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
+        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId: barberId as any })}
+        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId: barberId as any })}
+      />
+    );
+  }
+
+  // 3. PAGE: Full Services & Pricing Menu
+  if (currentView === 'services') {
+    return (
+      <ServicesPage
+        onBackToHome={() => navigateTo('home')}
+        onNavigateToBooking={(serviceId) => navigateTo('booking', { service: serviceId })}
+        onNavigateToBarbers={() => navigateTo('barbers')}
+      />
+    );
+  }
+
+  // 4. PAGE: Live Walk-In Waitlist & Queue
+  if (currentView === 'waitlist') {
+    return (
+      <WaitlistPage
+        onBackToHome={() => navigateTo('home')}
+        onNavigateToBooking={() => navigateTo('booking')}
+        initialBarber={selectedBarberId}
+        isWaitlistOpen={isWaitlistOpen}
+      />
+    );
+  }
+
+  // 5. PAGE: Full Booking Experience
+  if (currentView === 'booking') {
+    return (
+      <BookingPage 
+        onBackToHome={() => navigateTo('home')} 
+        initialBarber={selectedBarberId}
+        initialService={bookingService}
+      />
+    );
+  }
+
+  // 6. PAGE: Route Planner (Mapbox Directions)
+  if (currentView === 'route') {
+    return <RoutePlannerPage onBackToHome={() => navigateTo('home')} />;
+  }
+
+  // 7. PAGE: Portfolio Gallery
+  if (currentView === 'gallery') {
+    return (
+      <GalleryPage
+        onBackToHome={() => navigateTo('home')}
+        onNavigateToBooking={() => navigateTo('booking')}
+        onNavigateToBarbers={() => navigateTo('barbers')}
+      />
+    );
+  }
+
+  // 8. PAGE: Reviews Page
+  if (currentView === 'reviews') {
+    return (
+      <ReviewsPage
+        onBackToHome={() => navigateTo('home')}
+        onNavigateToBooking={() => navigateTo('booking')}
+        onNavigateToBarbers={() => navigateTo('barbers')}
+      />
+    );
+  }
+
+  // 9. PAGE: Admin Console & Firestore Database Management
+  if (currentView === 'admin') {
+    return (
+      <AdminPage
+        onBackToHome={() => navigateTo('home')}
+        isWaitlistOpen={isWaitlistOpen}
+        onWaitlistToggle={(isOpen) => setIsWaitlistOpen(isOpen)}
+      />
+    );
+  }
+
+  // 10. PAGE: Default Home Page
   return (
     <div className="min-h-screen bg-dark-bg text-gray-200">
-      {/* Switch back to mobile PWA mode pill if in PWA standalone */}
-      {isPwaInstalled && forceWebView && (
-        <button
-          type="button"
-          onClick={() => setForceWebView(false)}
-          className="fixed bottom-4 left-4 z-40 bg-gold hover:bg-gold-light text-black font-mono font-bold text-xs py-2 px-3.5 rounded-full shadow-2xl flex items-center gap-1.5 border border-black/20 cursor-pointer active:scale-95 transition-all"
-        >
-          <Smartphone className="w-4 h-4" />
-          <span>Mode App Mobile PWA</span>
-        </button>
-      )}
-
-      {/* Live Announcement Banner on Web */}
-      <AnnouncementBanner />
-
-      {/* Top Navbar with Client Services (Status check, Waitlist, VIP Club) */}
+      
+      {/* Top Navbar */}
       <Navbar 
-        onNavigateToBooking={navigateToBooking}
+        currentView="home"
+        onNavigateToBooking={() => navigateTo('booking')}
+        onNavigateToView={(view) => navigateTo(view as ActiveView)}
         onOpenCheckStatus={() => handleOpenCheckStatus()}
-        onOpenWaitlist={() => setHubMode('waitlist')}
+        onOpenWaitlist={() => navigateTo('waitlist')}
         onOpenPromo={() => setIsPromoModalOpen(true)}
         onOpenCallModal={() => setIsCallModalOpen(true)}
+        onOpenAdmin={() => navigateTo('admin')}
         isWaitlistOpen={isWaitlistOpen}
       />
 
-      {/* Hero section with Book Appointment & Explore Our Work */}
-      <Hero onNavigateToBooking={navigateToBooking} />
+      {/* Hero section */}
+      <Hero onNavigateToBooking={() => navigateTo('booking')} />
 
       <main>
-        {/* Barbers craft specialties and rates */}
-        <TeamAndPricing onNavigateToBooking={() => navigateToBooking()} />
+        {/* Clickable Barbers Section (Mika & Lusca, 20+ years) */}
+        <TeamAndPricing 
+          onNavigateToBooking={() => navigateTo('booking')}
+          onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
+          onNavigateToServices={() => navigateTo('services')}
+        />
         
         {/* Client Status Hub & Live Queue */}
         <ClientStatusHub 
           onOpenCheckStatus={handleOpenCheckStatus}
-          onOpenWaitlist={() => setHubMode('waitlist')}
+          onOpenWaitlist={() => navigateTo('waitlist')}
           onOpenPromo={() => setIsPromoModalOpen(true)}
           isWaitlistOpen={isWaitlistOpen}
           onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
-          onNavigateToBooking={navigateToBooking}
+          onNavigateToBooking={() => navigateTo('booking')}
         />
 
         {/* Realizations portfolio */}
         <Gallery />
         
         {/* Location & Map Section with interactive map & route planner */}
-        <MapSection onNavigateToRoutePlanner={navigateToRoutePlanner} />
+        <MapSection onNavigateToRoutePlanner={() => navigateTo('route')} />
 
         {/* Google Reviews testimonials */}
         <Testimonials />
         
-        {/* FAQ section (last) */}
+        {/* FAQ section */}
         <FAQ />
       </main>
 
+      {/* Footer */}
       <Footer 
-        onNavigateToBooking={navigateToBooking} 
+        onNavigateToBooking={() => navigateTo('booking')} 
+        onNavigateToView={(view) => navigateTo(view as ActiveView)}
         onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
-        onOpenAdminPortal={() => setIsAdminPortalOpen(true)}
+        onOpenAdmin={() => navigateTo('admin')}
       />
 
       {/* 1. Dedicated 'Check My Status' Modal */}
@@ -311,10 +332,10 @@ export default function App() {
           setIsStatusModalOpen(false);
           setStatusQuery('');
         }}
-        onOpenWaitlist={() => setHubMode('waitlist')}
+        onOpenWaitlist={() => navigateTo('waitlist')}
         initialQuery={statusQuery}
         isWaitlistOpen={isWaitlistOpen}
-        onNavigateToBooking={navigateToBooking}
+        onNavigateToBooking={() => navigateTo('booking')}
       />
 
       {/* 2. Walk-in Waitlist Modal */}
@@ -324,7 +345,7 @@ export default function App() {
         onOpenStatusCheck={() => handleOpenCheckStatus()}
         isWaitlistOpen={isWaitlistOpen}
         onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
-        onNavigateToBooking={navigateToBooking}
+        onNavigateToBooking={() => navigateTo('booking')}
       />
 
       {/* 3. Shop Owner Waitlist Control Modal */}
@@ -333,36 +354,20 @@ export default function App() {
         onClose={() => setIsOwnerModalOpen(false)}
         isWaitlistOpen={isWaitlistOpen}
         onStatusChange={(newState) => setIsWaitlistOpen(newState)}
+        onOpenFullAdmin={() => navigateTo('admin')}
       />
 
       {/* 4. Timed Welcome VIP 15% Off Pop-up Modal */}
       <WelcomePromoModal 
         isOpen={isPromoModalOpen}
         onClose={() => setIsPromoModalOpen(false)}
-        onNavigateToBooking={navigateToBooking}
+        onNavigateToBooking={() => navigateTo('booking')}
       />
 
-      {/* 5. Direct Phone Lines Modal (2 shop numbers) */}
+      {/* 5. Direct Phone Lines Modal */}
       <CallShopModal 
         isOpen={isCallModalOpen}
         onClose={() => setIsCallModalOpen(false)}
-      />
-
-      {/* 6. PWA Installation & Notifications Center */}
-      <NotificationAndPwaModal 
-        isOpen={isNotificationModalOpen}
-        onClose={() => setIsNotificationModalOpen(false)}
-      />
-
-      {/* 7. 6-Second Notification Permission Pop-up Banner */}
-      <NotificationPermissionBanner />
-
-      {/* 8. Secret Admin Portal (PIN + Google Login) */}
-      <AdminPortalModal
-        isOpen={isAdminPortalOpen}
-        onClose={() => setIsAdminPortalOpen(false)}
-        isWaitlistOpen={isWaitlistOpen}
-        onWaitlistChange={(newState) => setIsWaitlistOpen(newState)}
       />
     </div>
   );

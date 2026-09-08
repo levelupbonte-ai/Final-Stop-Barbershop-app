@@ -4,29 +4,31 @@ import MobilePricingModal, { ALL_SERVICES } from './MobilePricingModal';
 
 interface TeamAndPricingProps {
   onNavigateToBooking?: (serviceName?: string) => void;
+  onSelectBarber?: (barberId: 'mika' | 'lusca') => void;
+  onNavigateToServices?: () => void;
 }
 
-// 2 Barbers only, with stylized avatars (no photos)
+// 2 Barbers only, with stylized avatars, both with 20+ years of experience
 const BARBERS = [
   {
     id: 'mika',
     name: 'Mika',
-    role: 'Lead Master Barber & Founder',
-    experience: '12 Years in the Craft',
-    specialty: 'Specialized in surgical skin fades, razor-sharp straight razor lineups, textured crops, and signature beard detailing.',
+    role: 'Lead Master Barber & Co-Founder',
+    experience: 'Plus de 20 ans d’expérience',
+    specialty: 'Spécialisé dans les dégradés américains chirurgicaux, contours au rasoir coupe-chou, textured crops et sculpture de barbe haute précision.',
     initials: 'MK',
-    badge: 'Master Fade & Razor',
-    tags: ['Skin Fade', 'Straight Razor', 'Precision Styling']
+    badge: 'Maître Dégradé & Rasoir (20+ Ans)',
+    tags: ['Skin Fade Chirurgical', 'Rasoir Coupe-Chou', 'Contours Ultra-Précis', '20+ Ans']
   },
   {
-    id: 'luska',
-    name: 'Luska',
-    role: 'Artisan Barber & Traditional Grooming',
-    experience: '8 Years in the Craft',
-    specialty: 'Expert in bespoke beard sculpting, traditional eucalyptus hot towel steam rituals, and restorative hair treatments.',
-    initials: 'LK',
-    badge: 'Artisan Beard & Spa',
-    tags: ['Beard Sculpting', 'Hot Towel Steam', 'Relaxation Care']
+    id: 'lusca',
+    name: 'Lusca',
+    role: 'Artisan Master Barber & Soins Traditionnels',
+    experience: 'Plus de 20 ans d’expérience',
+    specialty: 'Expert en sculpture de barbe millimétrée, rituel vapeur eucalyptus & serviettes chaudes, braids, cornrows et dreadlocks.',
+    initials: 'LC',
+    badge: 'Maître Barbe, Soins & Textures (20+ Ans)',
+    tags: ['Sculpture Barbe', 'Serviettes Chaudes Eucalyptus', 'Braids & Dreads', '20+ Ans']
   }
 ];
 
@@ -69,7 +71,7 @@ const PRICING_LIST = [
   },
 ];
 
-export default function TeamAndPricing({ onNavigateToBooking }: TeamAndPricingProps) {
+export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, onNavigateToServices }: TeamAndPricingProps) {
   const [isMobilePricingOpen, setIsMobilePricingOpen] = useState(false);
 
   return (
@@ -79,25 +81,27 @@ export default function TeamAndPricing({ onNavigateToBooking }: TeamAndPricingPr
         {/* Section Header */}
         <div className="text-center mb-16">
           <span className="text-gold text-[11px] uppercase tracking-[0.25em] font-mono font-bold block mb-3">
-            Craftsmanship & Mastery
+            Maîtres Barbiers & Savoir-Faire
           </span>
           <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">
-            Our Barbers & Their Specialties
+            Nos Barbiers & Leurs Spécialités (20+ Ans d'Expérience)
           </h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Excellence at Final Stop Barber Shop is driven by two dedicated master craftsmen committed to precision, comfort, and unmatched consistency.
+            L'excellence chez Final Stop Barber Shop est incarnée par Mika et Lusca, deux maîtres artisans ayant chacun plus de 20 ans de métier. Cliquez sur leur profil pour découvrir leurs coupes et réserver directement.
           </p>
         </div>
 
-        {/* 2 Barbers Cards with Stylized Vector Avatars */}
+        {/* 2 Barbers Cards - Clickable to view their dedicated profile */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
           {BARBERS.map((barber) => (
             <div 
               key={barber.id}
-              className="bg-[#151517] border border-white/10 hover:border-gold/50 transition-all duration-300 p-7 flex flex-col justify-between shadow-2xl group relative overflow-hidden"
+              onClick={() => onSelectBarber?.(barber.id as any)}
+              className="bg-[#151517] border border-white/10 hover:border-gold transition-all duration-300 p-7 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer active:scale-[0.99]"
+              title={`Cliquer pour ouvrir le profil complet de ${barber.name} (20+ ans d'expérience)`}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-gold/15 transition-colors pointer-events-none"></div>
 
               <div>
                 {/* Stylized Vector Avatar & Info */}
@@ -115,13 +119,14 @@ export default function TeamAndPricing({ onNavigateToBooking }: TeamAndPricingPr
                   </div>
 
                   <div>
-                    <h3 className="text-lg sm:text-xl font-serif font-bold text-white group-hover:text-gold transition-colors">
-                      {barber.name}
+                    <h3 className="text-lg sm:text-xl font-serif font-bold text-white group-hover:text-gold transition-colors flex items-center gap-2">
+                      <span>{barber.name}</span>
+                      <ChevronRight className="w-4 h-4 text-gold opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                     </h3>
                     <p className="text-xs text-gold font-medium mt-0.5">
                       {barber.role}
                     </p>
-                    <span className="text-xs text-gray-400 block mt-1">
+                    <span className="text-xs text-gray-300 font-semibold block mt-1">
                       {barber.experience} &bull; {barber.badge}
                     </span>
                   </div>
@@ -133,16 +138,28 @@ export default function TeamAndPricing({ onNavigateToBooking }: TeamAndPricingPr
                 </p>
               </div>
 
-              {/* Skills Tags */}
-              <div className="pt-4 border-t border-white/5 flex flex-wrap gap-2">
-                {barber.tags.map((tag, i) => (
-                  <span 
-                    key={i} 
-                    className="text-[11px] font-medium tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm"
-                  >
-                    {tag}
+              {/* Skills Tags & Click indicator */}
+              <div className="pt-4 border-t border-white/5 space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {barber.tags.map((tag, i) => (
+                    <span 
+                      key={i} 
+                      className="text-[11px] font-medium tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm group-hover:border-gold/30 transition-colors"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between text-xs font-bold text-gold pt-2">
+                  <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    <span>Voir profil complet, techniques & photos</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </span>
-                ))}
+                  <span className="text-[10px] text-gray-400 font-mono hidden sm:inline">
+                    20+ Ans Métier
+                  </span>
+                </div>
               </div>
             </div>
           ))}

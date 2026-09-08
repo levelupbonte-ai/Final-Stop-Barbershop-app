@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { sendBarberNotification } from '../lib/notifications';
+import { saveWaitlistEntry } from '../lib/firestoreService';
 
 export type ModalMode = 'waitlist' | 'promo' | null;
 
@@ -68,28 +68,19 @@ export default function WalkInHubModal({
         phone: clientPhone.trim(),
         barber: selectedBarber,
         service: selectedService,
-        status: 'waiting',
+        status: 'waiting' as const,
         position,
         estMinutes,
-        joinedAt: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        createdAt: serverTimestamp(),
+        joinedAt: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
       };
 
       try {
-        await addDoc(collection(db, 'waitlist'), ticketData);
+        await saveWaitlistEntry(ticketData);
       } catch (err) {
-        console.warn('Firestore fallback for waitlist:', err);
+        console.warn('Waitlist save fallback:', err);
       }
 
       localStorage.setItem('finalstop_active_ticket', JSON.stringify(ticketData));
-      
-      // Dispatch notification
-      sendBarberNotification({
-        title: `Ticket #${ticketId} Confirmed! 💈`,
-        body: `You are in position #${position} in the live queue (~${estMinutes} mins wait). We'll notify you as your turn approaches.`,
-        url: '/'
-      });
-
       setWaitlistSuccess(ticketData);
     } catch (err) {
       console.error(err);
@@ -114,11 +105,6 @@ export default function WalkInHubModal({
       } catch (err) {
         console.warn('Firestore fallback for promo:', err);
       }
-      sendBarberNotification({
-        title: 'VIP 15% Code Unlocked! 🎟️',
-        body: 'Code FINALSTOP15 is ready to use for your next haircut or beard trim.',
-        url: '/'
-      });
       setPromoSuccess(true);
     } finally {
       setIsSubmitting(false);
@@ -164,8 +150,8 @@ export default function WalkInHubModal({
               <div className="flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <div className="text-xs text-gray-300 leading-relaxed font-sans">
-                  <span className="text-white font-mono font-bold block mb-0.5">Need a haircut today?</span>
-                  Please schedule an appointment with Mika or Luska to guarantee your chair time.
+                  <span className="text-white font-mono font-bold block mb-0.5">Besoin d'une coupe aujourd'hui ?</span>
+                  Prenez rendez-vous directement avec Mika ou Lusca (plus de 20 ans d'expérience) pour garantir votre fauteuil.
                 </div>
               </div>
             </div>
@@ -211,7 +197,7 @@ export default function WalkInHubModal({
             </h3>
 
             <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-              Visiting the shop today without an appointment? Secure your spot in our live waitlist now to save waiting time.
+              Visiting the shop today without an appointment? Secure your spot in our real-time waitlist now to save waiting time.
             </p>
 
             {waitlistSuccess ? (
@@ -301,9 +287,9 @@ export default function WalkInHubModal({
                     onChange={(e) => setSelectedBarber(e.target.value)}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
-                    <option value="First Available Barber">First Available Barber (Fastest)</option>
-                    <option value="Mika">Mika (Skin Fade Specialist)</option>
-                    <option value="Luska">Luska (Beard & Hot Towel)</option>
+                    <option value="First Available Barber">Premier Barbier Disponible (Le plus rapide)</option>
+                    <option value="Mika">Mika (20+ ans &bull; Dégradés & Rasoir)</option>
+                    <option value="Lusca">Lusca (20+ ans &bull; Barbe, Soins & Tresses)</option>
                   </select>
                 </div>
 
