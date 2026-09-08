@@ -1,6 +1,6 @@
 {
   "name": "Barber Shop Elite",
-  "description": "Premier San Diego unisex barber shop and hair artistry lounge. Precision skin fades, beard sculpting, women's and girls' protective braids, locs, and youth cuts.",
+  "description": "Premier San Diego unisex barber shop & hair artistry lounge. Precision skin fades, beard sculpting, women's & girls' knotless braids, dreadlocks, and youth cuts by Mika & Lusca at 5277 El Cajon Blvd.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

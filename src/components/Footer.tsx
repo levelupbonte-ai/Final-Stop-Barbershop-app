@@ -34,13 +34,13 @@ export default function Footer({
                 </span>
               </div>
             </div>
-            <p className="text-[11px] text-gray-400 leading-relaxed mb-6">
+            <p className="text-xs text-gray-300 leading-relaxed mb-6">
               San Diego's premier unisex destination for precision haircutting, razor fading, and master protective braids. Over 20 years of hands-on mastery by Mika and Lusca in a relaxed vintage lounge.
             </p>
             <button
               type="button"
               onClick={onOpenPolicies}
-              className="inline-flex items-center gap-2 text-[11px] font-mono text-gold hover:text-white border border-gold/30 hover:border-gold px-3.5 py-2 transition-colors bg-gold/5 rounded-xs cursor-pointer"
+              className="inline-flex items-center gap-2 text-xs font-mono text-gold hover:text-white border border-gold/40 hover:border-gold px-3.5 py-2 transition-colors bg-gold/10 rounded-xs cursor-pointer font-semibold"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-gold" />
               <span>Safety Rules & Policies</span>
@@ -48,8 +48,8 @@ export default function Footer({
           </div>
 
           <div>
-            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Navigation</h4>
-            <ul className="space-y-3 text-[11px] text-gray-400 uppercase tracking-widest font-mono">
+            <h4 className="text-xs uppercase tracking-[0.2em] font-black text-white mb-6">Navigation</h4>
+            <ul className="space-y-3 text-xs text-gray-300 uppercase tracking-wider font-medium">
               <li>
                 <button 
                   type="button" 

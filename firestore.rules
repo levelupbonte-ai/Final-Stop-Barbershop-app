@@ -41,6 +41,11 @@ service cloud.firestore {
     match /reviews/{reviewId} {
       allow read, write: if true;
     }
+
+    // Gallery portfolio photos
+    match /gallery/{imageId} {
+      allow read, write: if true;
+    }
     
     // User accounts
     match /users/{userId} {

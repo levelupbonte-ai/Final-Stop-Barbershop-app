@@ -170,8 +170,8 @@ export default function AdminPage({
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
       
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4">
+      {/* Header - Fixed/Sticky atop scrolling content */}
+      <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button
             type="button"
@@ -590,19 +590,34 @@ export default function AdminPage({
                   </select>
                 </div>
 
-                {/* Image URL */}
-                <div className="md:col-span-2">
-                  <label className="text-[11px] uppercase font-mono text-gray-300 block mb-1">
-                    Image Public URL * (e.g. imgur, ibb.co, or direct CDN)
-                  </label>
+                {/* Image URL & Host Helper */}
+                <div className="md:col-span-2 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] uppercase font-mono text-gray-300 block">
+                      Image Direct URL * (ImgBB, Cloudflare, etc.)
+                    </label>
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-gold">
+                      <a 
+                        href="https://imgbb.com/upload" 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="hover:underline flex items-center gap-1 bg-gold/10 px-2 py-0.5 rounded-xs border border-gold/30"
+                      >
+                        <span>Ouvrir ImgBB gratuit (1-clic) ↗</span>
+                      </a>
+                    </div>
+                  </div>
                   <input
                     type="url"
                     required
                     value={newImageUrl}
                     onChange={(e) => setNewImageUrl(e.target.value)}
-                    placeholder="https://i.ibb.co/... or https://images.unsplash.com/..."
+                    placeholder="https://i.ibb.co/... ou lien direct Cloudflare / CDN"
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none"
                   />
+                  <p className="text-[10px] text-gray-400 font-mono">
+                    💡 Astuce ImgBB : Après upload sur ImgBB, sélectionnez <strong className="text-gold">"Liens directs"</strong> et collez le lien finissant par <code className="text-white">.jpg</code> ou <code className="text-white">.png</code> (ex: <code className="text-gold">https://i.ibb.co/...</code>).
+                  </p>
                   {newImageUrl && (
                     <div className="mt-2 flex items-center gap-3 p-2 bg-black border border-white/10 rounded-xs">
                       <img 
@@ -613,7 +628,7 @@ export default function AdminPage({
                           (e.target as HTMLElement).style.display = 'none';
                         }}
                       />
-                      <span className="text-[11px] font-mono text-gray-400">Live Image URL Preview</span>
+                      <span className="text-[11px] font-mono text-gray-400">Aperçu en direct de l'image</span>
                     </div>
                   )}
                 </div>

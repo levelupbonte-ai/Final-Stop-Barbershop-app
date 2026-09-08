@@ -81,15 +81,15 @@ export default function Navbar({
                 <button 
                   type="button"
                   onClick={() => handleLinkClick(link.view)}
-                  className={`text-xs uppercase tracking-wider font-medium transition-colors cursor-pointer bg-transparent border-none py-1 relative ${
+                  className={`text-xs uppercase tracking-wider font-semibold transition-colors cursor-pointer bg-transparent border-none py-1 relative ${
                     currentView === link.view 
                       ? 'text-gold font-bold' 
-                      : 'text-gray-300 hover:text-gold'
+                      : 'text-gray-200 hover:text-gold'
                   }`}
                 >
                   <span>{link.name}</span>
                   {link.badge && (
-                    <span className="ml-1 text-[9px] font-mono text-gold bg-gold/10 px-1 py-0.2 rounded-xs border border-gold/30">
+                    <span className="ml-1.5 text-[10px] font-mono text-gold bg-gold/15 px-1.5 py-0.5 rounded-xs border border-gold/40 font-bold">
                       {link.badge}
                     </span>
                   )}
@@ -107,7 +107,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={onOpenCallModal}
-            className="text-xs font-medium text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5 px-2.5 py-2 cursor-pointer bg-transparent border-none font-mono"
+            className="text-xs font-semibold text-gray-200 hover:text-gold transition-colors flex items-center gap-1.5 px-2.5 py-2 cursor-pointer bg-transparent border-none font-mono"
             title="Shop direct line"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />

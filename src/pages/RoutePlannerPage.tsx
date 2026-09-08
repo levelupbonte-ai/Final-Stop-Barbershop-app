@@ -362,10 +362,10 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
     : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(DESTINATION.address)}`;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col w-full overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col w-full overflow-x-clip">
       
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4">
+      {/* Top Header - Sticky on scroll */}
+      <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           
           <button

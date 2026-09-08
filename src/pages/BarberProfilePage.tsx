@@ -46,8 +46,8 @@ export default function BarberProfilePage({
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
       
-      {/* Top Breadcrumb Header */}
-      <header className="sticky top-0 z-30 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4">
+      {/* Top Breadcrumb Header - Fixed/Sticky atop scrolling content */}
+      <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button
             type="button"

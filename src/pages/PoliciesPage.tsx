@@ -22,8 +22,8 @@ interface PoliciesPageProps {
 export default function PoliciesPage({ onBackToHome, onNavigateToBooking }: PoliciesPageProps) {
   return (
     <div className="min-h-screen bg-[#0E0E11] text-gray-200 pb-20 selection:bg-gold selection:text-black">
-      {/* Top Breadcrumb & Navigation */}
-      <div className="bg-[#121216] border-b border-white/10 sticky top-0 z-30 backdrop-blur-md bg-opacity-95">
+      {/* Top Breadcrumb & Navigation - Fixed/Sticky atop scrolling content */}
+      <div className="bg-[#0A0A0B]/95 border-b border-white/10 sticky top-0 z-50 backdrop-blur-md shadow-lg">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <button
             type="button"
