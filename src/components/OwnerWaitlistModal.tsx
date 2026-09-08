@@ -30,7 +30,7 @@ export default function OwnerWaitlistModal({
       setIsAuthenticated(true);
       setErrorMessage('');
     } else {
-      setErrorMessage('Code PIN incorrect. Veuillez réessayer.');
+      setErrorMessage('Incorrect PIN code. Please try again.');
     }
   };
 

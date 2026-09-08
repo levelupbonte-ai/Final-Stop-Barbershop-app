@@ -13,10 +13,10 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
     companyName: '',
     phone: '',
     email: '',
-    serviceType: 'Mariage / Groomsmen' as const,
+    serviceType: 'Wedding & Groomsmen' as const,
     headcount: 5,
     eventDate: '',
-    location: 'Salon Final Stop (Privatisation VIP)',
+    location: 'Final Stop Lounge (Private VIP Buyout)',
     estimatedBudget: '',
     notes: ''
   });
@@ -52,7 +52,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
       setSubmittedTicket(ticketId);
     } catch (err) {
-      setErrorMessage('Une erreur est survenue lors de l’envoi. Veuillez réessayer ou nous contacter directement.');
+      setErrorMessage('An error occurred while submitting. Please try again or call our shop directly.');
     } finally {
       setIsSubmitting(false);
     }
@@ -65,10 +65,10 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
       companyName: '',
       phone: '',
       email: '',
-      serviceType: 'Mariage / Groomsmen',
+      serviceType: 'Wedding & Groomsmen',
       headcount: 5,
       eventDate: '',
-      location: 'Salon Final Stop (Privatisation VIP)',
+      location: 'Final Stop Lounge (Private VIP Buyout)',
       estimatedBudget: '',
       notes: ''
     });
@@ -86,7 +86,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
           type="button"
           onClick={resetForm}
           className="absolute top-5 right-5 text-gray-400 hover:text-white p-2 rounded-xs bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border-none"
-          title="Fermer"
+          title="Close"
         >
           <X className="w-5 h-5" />
         </button>
@@ -99,44 +99,44 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
             <div className="space-y-2">
               <span className="text-[11px] font-mono uppercase tracking-widest text-gold font-bold">
-                Demande Pro Enregistrée
+                Inquiry Received
               </span>
               <h3 className="text-2xl font-serif font-bold text-white">
-                Devis #{submittedTicket} Transmis
+                Quote Request #{submittedTicket} Submitted
               </h3>
               <p className="text-sm text-gray-300 max-w-md mx-auto leading-relaxed">
-                Merci <strong className="text-white">{formData.clientName}</strong>. Notre maître barbier ou responsable événementiel vous contactera sous 24h ouvrées pour finaliser les détails et valider le planning.
+                Thank you <strong className="text-white">{formData.clientName}</strong>. Our master barber or events manager will contact you within 24 business hours to finalize package details and confirm scheduling.
               </p>
             </div>
 
             <div className="bg-black/50 border border-white/10 p-4 rounded-xs text-left text-xs font-mono space-y-1.5 max-w-sm mx-auto">
               <div className="flex justify-between text-gray-400">
-                <span>Prestation :</span>
+                <span>Service Package:</span>
                 <span className="text-white font-bold">{formData.serviceType}</span>
               </div>
               <div className="flex justify-between text-gray-400">
-                <span>Invités / Participants :</span>
-                <span className="text-white font-bold">{formData.headcount} personnes</span>
+                <span>Estimated Guests:</span>
+                <span className="text-white font-bold">{formData.headcount} guests</span>
               </div>
               <div className="flex justify-between text-gray-400">
-                <span>Date souhaitée :</span>
-                <span className="text-gold font-bold">{formData.eventDate || 'À convenir'}</span>
+                <span>Requested Date:</span>
+                <span className="text-gold font-bold">{formData.eventDate || 'To be determined'}</span>
               </div>
             </div>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href="tel:6192716161"
+                href="tel:16198861267"
                 className="w-full sm:w-auto px-5 py-2.5 bg-gold hover:bg-gold-light text-black font-bold text-xs uppercase tracking-wider rounded-xs transition-colors text-center cursor-pointer"
               >
-                Appeler Directement le Salon
+                Call Shop Directly
               </a>
               <button
                 type="button"
                 onClick={resetForm}
                 className="w-full sm:w-auto px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white font-mono text-xs uppercase rounded-xs transition-colors cursor-pointer"
               >
-                Fermer
+                Close
               </button>
             </div>
           </div>
@@ -145,13 +145,13 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
             <div className="mb-6">
               <div className="inline-flex items-center gap-2 bg-gold/15 border border-gold/40 px-3 py-1 text-[11px] font-mono font-bold text-gold uppercase tracking-wider rounded-xs mb-2">
                 <Briefcase className="w-3.5 h-3.5" />
-                <span>Espace Pro, Événements & Tournages</span>
+                <span>VIP Events, Group Packages & Productions</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-                Demande de Devis Professionnel
+                Request a VIP Group Quote
               </h2>
               <p className="text-xs sm:text-sm text-gray-400 mt-1">
-                Privatisation du salon Final Stop, mariages (groomsmen package), shootings vidéo, styling VIP & comités d'entreprise.
+                Full lounge buyout, wedding groomsmen parties, video productions, VIP styling, and corporate grooming days.
               </p>
             </div>
 
@@ -165,12 +165,12 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Nom & Prénom *
+                    Full Name *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Ex: Alexandre Martin"
+                    placeholder="e.g. Marcus Vance"
                     value={formData.clientName}
                     onChange={e => setFormData({ ...formData, clientName: e.target.value })}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -179,13 +179,13 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Société ou Projet (Optionnel)
+                    Company / Project (Optional)
                   </label>
                   <div className="relative">
                     <Building className="w-3.5 h-3.5 absolute left-3 top-3 text-gray-500" />
                     <input
                       type="text"
-                      placeholder="Ex: Production SD / Mariage VIP"
+                      placeholder="e.g. San Diego Media / Vance Wedding"
                       value={formData.companyName}
                       onChange={e => setFormData({ ...formData, companyName: e.target.value })}
                       className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -197,14 +197,14 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Téléphone de contact *
+                    Contact Phone *
                   </label>
                   <div className="relative">
                     <Phone className="w-3.5 h-3.5 absolute left-3 top-3 text-gray-500" />
                     <input
                       type="tel"
                       required
-                      placeholder="(619) 000-0000"
+                      placeholder="(619) 886-1267"
                       value={formData.phone}
                       onChange={e => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -214,14 +214,14 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Adresse Email *
+                    Email Address *
                   </label>
                   <div className="relative">
                     <Mail className="w-3.5 h-3.5 absolute left-3 top-3 text-gray-500" />
                     <input
                       type="email"
                       required
-                      placeholder="contact@entreprise.com"
+                      placeholder="contact@company.com"
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
                       className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -233,24 +233,24 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Type d'Événement *
+                    Event Type *
                   </label>
                   <select
                     value={formData.serviceType}
                     onChange={e => setFormData({ ...formData, serviceType: e.target.value as any })}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white outline-none rounded-xs"
                   >
-                    <option value="Mariage / Groomsmen">Mariage / Groomsmen Package</option>
-                    <option value="Entreprise / Corporate Grooming">Entreprise / Corporate Grooming Day</option>
-                    <option value="Privatisation Salon">Privatisation Complète du Salon</option>
-                    <option value="Tournage / VIP Backstage">Tournage Vidéo / VIP Backstage</option>
-                    <option value="Autre">Autre projet sur mesure</option>
+                    <option value="Wedding & Groomsmen">Wedding & Groomsmen Package</option>
+                    <option value="Corporate Grooming Day">Corporate Grooming & Executive Day</option>
+                    <option value="Full Lounge Buyout">Full Lounge Buyout & Private Session</option>
+                    <option value="Video Shoot / Backstage">Video Shoot / Backstage VIP Styling</option>
+                    <option value="Custom Event">Custom Tailored Event</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Nombre estimé de personnes *
+                    Estimated Headcount *
                   </label>
                   <div className="relative">
                     <Users className="w-3.5 h-3.5 absolute left-3 top-3 text-gray-500" />
@@ -270,7 +270,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Date souhaitée de l'événement *
+                    Target Event Date *
                   </label>
                   <div className="relative">
                     <Calendar className="w-3.5 h-3.5 absolute left-3 top-3 text-gray-500" />
@@ -286,11 +286,11 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
                 <div>
                   <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                    Budget estimé (Optionnel)
+                    Estimated Budget (Optional)
                   </label>
                   <input
                     type="text"
-                    placeholder="Ex: $300 - $600"
+                    placeholder="e.g. $300 - $600"
                     value={formData.estimatedBudget}
                     onChange={e => setFormData({ ...formData, estimatedBudget: e.target.value })}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -300,11 +300,11 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
               <div>
                 <label className="text-xs font-mono text-gray-300 uppercase block mb-1.5">
-                  Détails & Besoins Particuliers
+                  Details & Specific Requirements
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Ex: Boissons offertes, créneau privatisé le samedi matin dès 8h, coupes personnalisées et tresses pour les témoins..."
+                  placeholder="e.g. Morning private session starting at 8 AM, custom cuts and styling for wedding party..."
                   value={formData.notes}
                   onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -313,7 +313,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
               <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="text-[11px] text-gray-400 font-mono">
-                  Réponse de notre équipe sous 24h.
+                  Response from our team within 24 business hours.
                 </span>
 
                 <button
@@ -322,7 +322,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                   className="w-full sm:w-auto bg-gold hover:bg-gold-light disabled:opacity-50 text-black font-bold font-mono text-xs uppercase tracking-wider px-6 py-3 flex items-center justify-center gap-2 rounded-xs shadow-lg transition-transform active:scale-95 cursor-pointer"
                 >
                   <Send className={`w-3.5 h-3.5 ${isSubmitting ? 'animate-pulse' : ''}`} />
-                  <span>{isSubmitting ? 'Envoi en cours...' : 'Envoyer la Demande de Devis'}</span>
+                  <span>{isSubmitting ? 'Submitting Inquiry...' : 'Submit Quote Request'}</span>
                 </button>
               </div>
             </form>

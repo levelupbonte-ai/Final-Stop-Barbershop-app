@@ -258,48 +258,71 @@ export default function Footer({
               </li>
               <li className="flex items-start gap-3 min-w-0 pt-1">
                 <Mail className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <a 
-                  href="mailto:contact@finalstopbarbershop.com" 
-                  className="hover:text-gold transition-colors break-all text-[11px] leading-relaxed block font-mono"
-                >
-                  contact@finalstopbarbershop.com
-                </a>
+                <div className="space-y-1">
+                  <a 
+                    href="mailto:appointments@finalstop.org" 
+                    className="hover:text-gold transition-colors break-all text-[11px] leading-relaxed block font-mono text-white"
+                  >
+                    appointments@finalstop.org
+                  </a>
+                  <a 
+                    href="mailto:contact@finalstop.org" 
+                    className="hover:text-gold transition-colors break-all text-[11px] leading-relaxed block font-mono text-gray-300"
+                  >
+                    contact@finalstop.org
+                  </a>
+                </div>
               </li>
             </ul>
           </div>
 
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-gray-500 font-mono">
-          <p>
-            &copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; All rights reserved.
-          </p>
+        {/* Bottom Bar: Professional links without bubbles */}
+        <div className="pt-8 pb-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-5 font-mono text-xs text-gray-400">
+          <div className="text-center md:text-left">
+            <span>&copy; {new Date().getFullYear()} Final Stop Barber Shop</span>
+          </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => onNavigateToView?.('admin')}
-              className="text-white/20 hover:text-gold/80 transition-all cursor-pointer p-1 rounded-xs hover:bg-white/5 flex items-center gap-1 group bg-transparent border-none"
-              title="Staff Access"
-              aria-label="Staff Access"
-            >
-              <Lock className="w-2.5 h-2.5 text-white/30 group-hover:text-gold transition-colors" />
-              <span className="text-[9px] uppercase tracking-widest text-white/25 group-hover:text-gold/80 transition-colors font-mono">Staff</span>
-            </button>
-            <span className="text-white/20">&bull;</span>
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            {/* 1. House Rules & Policies Real Link */}
             <button
               type="button"
               onClick={onOpenPolicies}
-              className="hover:text-gold text-gray-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-[11px]"
+              className="text-gray-300 hover:text-gold transition-colors font-mono uppercase tracking-wider text-xs flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0"
             >
-              House Rules & Policies
+              <ShieldCheck className="w-3.5 h-3.5 text-gold" />
+              <span>House Rules & Policies</span>
             </button>
-            <span className="text-white/20">&bull;</span>
-            <span className="text-gold font-mono tracking-wider text-[11px] font-bold">finalstop.org</span>
-            <span className="text-white/20">&bull;</span>
-            <span className="text-gray-400 font-medium">
-              Powered By Levelup ecosystem
-            </span>
+
+            <span className="hidden sm:inline text-white/20">&bull;</span>
+
+            {/* 2. Powered By Levelup ecosystem (Clean pro text without arrow) */}
+            <a
+              href="https://levelup-ecosystem.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-mono tracking-wider no-underline transition-colors"
+            >
+              <span className="text-white font-medium">Powered By</span>
+              <span className="text-[#D4AF37] font-bold hover:text-yellow-400 transition-colors">
+                Levelup ecosystem
+              </span>
+            </a>
+
+            <span className="hidden sm:inline text-white/20">&bull;</span>
+
+            {/* 3. Staff Portal direct link */}
+            <button
+              type="button"
+              onClick={() => onNavigateToView?.('admin')}
+              className="text-white/30 hover:text-gold transition-colors cursor-pointer bg-transparent border-none p-0 flex items-center gap-1"
+              title="Staff Portal"
+              aria-label="Staff Portal"
+            >
+              <Lock className="w-3 h-3 text-white/40 hover:text-gold transition-colors" />
+              <span className="text-[10px] uppercase font-mono tracking-widest text-white/40 hover:text-gold transition-colors">Staff</span>
+            </button>
           </div>
         </div>
       </div>

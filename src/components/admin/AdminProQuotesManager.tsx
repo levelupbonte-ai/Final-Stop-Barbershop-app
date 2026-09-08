@@ -51,30 +51,30 @@ export default function AdminProQuotesManager() {
       await updateProQuoteStatus(quoteId, nextStatus);
       setNotification({
         type: 'success',
-        text: `Statut de la demande mis à jour en "${nextStatus}".`
+        text: `Quote request status updated to "${nextStatus}".`
       });
       await loadQuotes();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: 'Erreur lors de la mise à jour du statut. Veuillez réessayer.'
+        text: 'Error updating status. Please try again.'
       });
     }
   };
 
   const handleDelete = async (quoteId: string) => {
-    if (!window.confirm('Supprimer définitivement cette demande de devis pro ?')) return;
+    if (!window.confirm('Permanently delete this quote request?')) return;
     try {
       await deleteProQuote(quoteId);
       setNotification({
         type: 'success',
-        text: 'Demande de devis supprimée.'
+        text: 'Quote request deleted.'
       });
       await loadQuotes();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: 'Erreur lors de la suppression de la demande.'
+        text: 'Error deleting quote request.'
       });
     }
   };
@@ -87,15 +87,15 @@ export default function AdminProQuotesManager() {
   const getStatusBadge = (status: ProQuoteRequest['status']) => {
     switch (status) {
       case 'new':
-        return <span className="px-2.5 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-400 font-bold rounded-xs text-[10px] uppercase">Nouveau</span>;
+        return <span className="px-2.5 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-400 font-bold rounded-xs text-[10px] uppercase">New</span>;
       case 'contacted':
-        return <span className="px-2.5 py-1 bg-blue-500/15 border border-blue-500/30 text-blue-300 font-bold rounded-xs text-[10px] uppercase">Contacté</span>;
+        return <span className="px-2.5 py-1 bg-blue-500/15 border border-blue-500/30 text-blue-300 font-bold rounded-xs text-[10px] uppercase">Contacted</span>;
       case 'quoted':
-        return <span className="px-2.5 py-1 bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold rounded-xs text-[10px] uppercase">Devis Envoyé</span>;
+        return <span className="px-2.5 py-1 bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold rounded-xs text-[10px] uppercase">Quote Sent</span>;
       case 'approved':
-        return <span className="px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold rounded-xs text-[10px] uppercase">Validé / Payé</span>;
+        return <span className="px-2.5 py-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold rounded-xs text-[10px] uppercase">Approved &amp; Deposit</span>;
       case 'declined':
-        return <span className="px-2.5 py-1 bg-red-500/15 border border-red-500/30 text-red-400 font-bold rounded-xs text-[10px] uppercase">Refusé</span>;
+        return <span className="px-2.5 py-1 bg-red-500/15 border border-red-500/30 text-red-400 font-bold rounded-xs text-[10px] uppercase">Declined</span>;
       default:
         return <span className="px-2.5 py-1 bg-white/10 text-gray-300 rounded-xs text-[10px] uppercase">{status}</span>;
     }
@@ -109,11 +109,11 @@ export default function AdminProQuotesManager() {
           <div className="flex items-center gap-2 mb-1">
             <Briefcase className="w-5 h-5 text-gold" />
             <h3 className="text-lg font-serif font-bold text-white">
-              Devis Professionnels & Événements VIP ({quotes.length})
+              Pro Quotes &amp; VIP Event Bookings ({quotes.length})
             </h3>
           </div>
           <p className="text-xs text-gray-400">
-            Suivi des demandes d'entreprises, mariages, tournages ciné/clip et privatisations complètes du salon Final Stop.
+            Track corporate grooming requests, wedding parties, video productions, and full shop buyouts.
           </p>
         </div>
 
@@ -130,7 +130,7 @@ export default function AdminProQuotesManager() {
                   : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
               }`}
             >
-              {st === 'all' ? `Tous (${quotes.length})` : st}
+              {st === 'all' ? `All (${quotes.length})` : st}
             </button>
           ))}
         </div>
@@ -148,7 +148,7 @@ export default function AdminProQuotesManager() {
             <span>{notification.text}</span>
           </div>
           <button 
-            type="button"
+            type="button" 
             onClick={() => setNotification(null)}
             className="text-gray-400 hover:text-white cursor-pointer bg-transparent border-none"
           >
@@ -160,12 +160,12 @@ export default function AdminProQuotesManager() {
       {/* Quotes List */}
       {isLoading ? (
         <div className="bg-[#141418] border border-white/10 p-12 text-center text-xs font-mono text-gray-400 rounded-xs">
-          Chargement des devis professionnels...
+          Loading pro quote requests...
         </div>
       ) : filteredQuotes.length === 0 ? (
         <div className="bg-[#141418] border border-white/10 p-12 text-center text-xs font-mono text-gray-400 rounded-xs space-y-3">
           <Building2 className="w-8 h-8 text-gold/60 mx-auto" />
-          <p>Aucune demande de devis pro dans cette catégorie.</p>
+          <p>No quote requests in this category.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
@@ -188,7 +188,7 @@ export default function AdminProQuotesManager() {
                     {getStatusBadge(quote.status)}
                   </div>
                   <p className="text-[11px] text-gray-400 font-mono">
-                    Type d'événement : <strong className="text-gray-200">{quote.serviceType}</strong> &bull; Reçu le {extractDateString(quote.createdAt) || 'récemment'}
+                    Event Type: <strong className="text-gray-200">{quote.serviceType}</strong> &bull; Received: {extractDateString(quote.createdAt) || 'Recently'}
                   </p>
                 </div>
 
@@ -198,17 +198,17 @@ export default function AdminProQuotesManager() {
                     onChange={(e) => handleStatusChange(quote.id, e.target.value as any)}
                     className="bg-black/60 border border-white/20 focus:border-gold px-2.5 py-1.5 text-xs text-white rounded-xs font-mono outline-none"
                   >
-                    <option value="new">Nouveau</option>
-                    <option value="contacted">Contacté</option>
-                    <option value="quoted">Devis Envoyé</option>
-                    <option value="approved">Validé &amp; Acompte</option>
-                    <option value="declined">Refusé / Annulé</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="quoted">Quote Sent</option>
+                    <option value="approved">Approved &amp; Deposit</option>
+                    <option value="declined">Declined</option>
                   </select>
                   <button
                     type="button"
                     onClick={() => handleDelete(quote.id)}
                     className="p-1.5 bg-red-950/40 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 rounded-xs transition-colors cursor-pointer"
-                    title="Supprimer la demande"
+                    title="Delete quote request"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -219,31 +219,31 @@ export default function AdminProQuotesManager() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono bg-black/40 p-3.5 rounded-xs border border-white/5">
                 <div className="space-y-0.5">
                   <span className="text-[10px] text-gray-400 uppercase flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-gold" /> Date Souhaitée
+                    <Calendar className="w-3 h-3 text-gold" /> Target Date
                   </span>
-                  <span className="text-white font-bold">{quote.targetDate || 'Non spécifié'}</span>
+                  <span className="text-white font-bold">{quote.targetDate || 'Not specified'}</span>
                 </div>
 
                 <div className="space-y-0.5">
                   <span className="text-[10px] text-gray-400 uppercase flex items-center gap-1">
-                    <Users className="w-3 h-3 text-gold" /> Participants
+                    <Users className="w-3 h-3 text-gold" /> Guest Count
                   </span>
-                  <span className="text-white font-bold">{quote.guestCount || '1'} personne(s)</span>
+                  <span className="text-white font-bold">{quote.guestCount || '1'} guest(s)</span>
                 </div>
 
                 <div className="space-y-0.5">
                   <span className="text-[10px] text-gray-400 uppercase flex items-center gap-1">
-                    <DollarSign className="w-3 h-3 text-gold" /> Budget Estimé
+                    <DollarSign className="w-3 h-3 text-gold" /> Estimated Budget
                   </span>
-                  <span className="text-gold font-bold">{quote.estimatedBudget || 'À étudier'}</span>
+                  <span className="text-gold font-bold">{quote.estimatedBudget || 'Custom Quote'}</span>
                 </div>
 
                 <div className="space-y-0.5">
                   <span className="text-[10px] text-gray-400 uppercase flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-gold" /> Déplacement
+                    <Sparkles className="w-3 h-3 text-gold" /> Location
                   </span>
                   <span className="text-white font-bold">
-                    {quote.locationRequirement === 'on-site' ? 'Au Salon Final Stop' : 'Sur Lieu Externe'}
+                    {quote.locationRequirement === 'on-site' ? 'At Final Stop Salon' : 'On-Location (Mobile)'}
                   </span>
                 </div>
               </div>
@@ -252,7 +252,7 @@ export default function AdminProQuotesManager() {
               {quote.notes && (
                 <div className="p-3 bg-white/5 border border-white/10 rounded-xs text-xs text-gray-300 space-y-1">
                   <span className="text-[10px] font-mono uppercase text-gray-400 block font-bold">
-                    Détails & Besoins Particuliers :
+                    Details &amp; Specific Requirements:
                   </span>
                   <p className="leading-relaxed whitespace-pre-wrap">{quote.notes}</p>
                 </div>
@@ -265,16 +265,16 @@ export default function AdminProQuotesManager() {
                   className="px-3.5 py-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 rounded-xs text-xs font-mono font-bold flex items-center gap-1.5 transition-colors"
                 >
                   <Phone className="w-3.5 h-3.5" />
-                  <span>Appeler ({quote.phone})</span>
+                  <span>Call ({quote.phone})</span>
                 </a>
 
                 {quote.email && (
                   <a
-                    href={`mailto:${quote.email}?subject=Final Stop Barber Shop - Votre Demande de Devis Pro`}
+                    href={`mailto:${quote.email}?subject=Final Stop Barber Shop - Your Pro Quote Request`}
                     className="px-3.5 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 rounded-xs text-xs font-mono font-bold flex items-center gap-1.5 transition-colors"
                   >
                     <Mail className="w-3.5 h-3.5" />
-                    <span>Envoyer Email ({quote.email})</span>
+                    <span>Send Email ({quote.email})</span>
                   </a>
                 )}
 

@@ -913,7 +913,7 @@ export async function addAdminEmail(newEmail: string): Promise<string[]> {
   const cleanEmail = newEmail.toLowerCase().trim();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(cleanEmail)) {
-    throw new Error('Format d\'adresse email invalide.');
+    throw new Error('Invalid email address format.');
   }
 
   await ensureFirebaseAuth();
@@ -934,7 +934,7 @@ export async function removeAdminEmail(emailToRemove: string): Promise<string[]>
   const currentEmails = await getAdminEmails();
 
   if (currentEmails.length <= 1 && currentEmails.map(e => e.toLowerCase()).includes(cleanEmail)) {
-    throw new Error('Impossible de supprimer le dernier administrateur. Il doit toujours y avoir au moins un admin.');
+    throw new Error('Cannot remove the last administrator. There must always be at least one authorized admin.');
   }
 
   await ensureFirebaseAuth();

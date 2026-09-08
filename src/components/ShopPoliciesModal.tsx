@@ -1,4 +1,6 @@
+import React, { useRef } from 'react';
 import { Shield, Sparkles, AlertCircle, Clock, HeartHandshake, CheckCircle2, X, Scissors } from 'lucide-react';
+import ScrollIndicator from './ScrollIndicator';
 
 interface ShopPoliciesModalProps {
   isOpen: boolean;
@@ -6,12 +8,14 @@ interface ShopPoliciesModalProps {
 }
 
 export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModalProps) {
+  const modalBodyRef = useRef<HTMLDivElement>(null);
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
       <div 
-        className="bg-[#121215] border border-gold/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-sm shadow-2xl relative text-gray-300"
+        ref={modalBodyRef}
+        className="bg-[#121215] border border-gold/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-sm shadow-2xl relative text-gray-300 scroll-smooth"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -156,6 +160,11 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
             </ul>
           </div>
 
+        </div>
+
+        {/* Scroll down indicator */}
+        <div className="sticky bottom-14 left-0 right-0 z-10">
+          <ScrollIndicator containerRef={modalBodyRef} label="Scroll down for more policies" />
         </div>
 
         {/* Footer */}

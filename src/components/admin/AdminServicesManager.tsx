@@ -41,7 +41,7 @@ export default function AdminServicesManager() {
   const [newTitle, setNewTitle] = useState('');
   const [newPrice, setNewPrice] = useState<number>(35);
   const [newDuration, setNewDuration] = useState<number>(30);
-  const [newCategory, setNewCategory] = useState<string>('Coupes Hommes');
+  const [newCategory, setNewCategory] = useState<string>("Men's Cuts");
   const [newDesc, setNewDesc] = useState('');
   const [newBarber, setNewBarber] = useState<'Mika' | 'Lusca' | 'Both'>('Both');
   const [isAdding, setIsAdding] = useState(false);
@@ -64,7 +64,7 @@ export default function AdminServicesManager() {
     loadServices();
   }, []);
 
-  const categories = Array.from(new Set(services.map((s) => s.category || 'Général')));
+  const categories = Array.from(new Set(services.map((s) => s.category || 'General')));
 
   const filteredServices = services.filter((s) => {
     const sTitle = s.name || s.title || '';
@@ -95,21 +95,21 @@ export default function AdminServicesManager() {
   const handleSavePrice = async (service: ServiceItem) => {
     setIsUpdating(true);
     setNotification(null);
-    const displayName = service.name || service.title || 'Prestation';
+    const displayName = service.name || service.title || 'Service';
     try {
       const priceStr = `$${editPrice}`;
       const durStr = `${editDuration} min`;
       await updateServicePrice(service.id, priceStr, editPrice, durStr, editDesc);
       setNotification({
         type: 'success',
-        text: `Tarif pour "${displayName}" mis à jour : ${editPrice}$ (${editDuration} min). Synchronisé sur le site public !`
+        text: `Price for "${displayName}" updated to $${editPrice} (${editDuration} min). Synchronized live!`
       });
       setEditingId(null);
       await loadServices();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: 'Erreur lors de la mise à jour du tarif. Veuillez réessayer.'
+        text: 'Error updating price. Please try again.'
       });
     } finally {
       setIsUpdating(false);
@@ -133,15 +133,15 @@ export default function AdminServicesManager() {
         duration: `${newDuration} min`,
         durationMinutes: Number(newDuration),
         category: newCategory,
-        description: newDesc.trim() || 'Prestation professionnelle réalisée par l\'équipe Final Stop.',
+        description: newDesc.trim() || 'Professional salon grooming by Final Stop team.',
         barberPreference: newBarber,
-        inclusions: ['Prestation professionnelle']
+        inclusions: ['Professional grooming']
       };
 
       await saveCustomService(newService);
       setNotification({
         type: 'success',
-        text: `Nouvelle prestation "${newTitle}" ajoutée au catalogue avec succès !`
+        text: `New service "${newTitle}" added to catalog successfully!`
       });
 
       // Reset form
@@ -154,7 +154,7 @@ export default function AdminServicesManager() {
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: 'Erreur lors de la création de la prestation. Veuillez réessayer.'
+        text: 'Error creating service. Please try again.'
       });
     } finally {
       setIsAdding(false);
@@ -162,25 +162,25 @@ export default function AdminServicesManager() {
   };
 
   const handleDelete = async (service: ServiceItem) => {
-    const displayName = service.name || service.title || 'Prestation';
-    if (!window.confirm(`Supprimer définitivement la prestation "${displayName}" ?`)) return;
+    const displayName = service.name || service.title || 'Service';
+    if (!window.confirm(`Permanently delete service "${displayName}"?`)) return;
     try {
       await deleteCustomService(service.id);
       setNotification({
         type: 'success',
-        text: `Prestation "${displayName}" supprimée.`
+        text: `Service "${displayName}" deleted.`
       });
       await loadServices();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: 'Erreur lors de la suppression de la prestation.'
+        text: 'Error deleting service.'
       });
     }
   };
 
   const handleResetDefaults = async () => {
-    if (!window.confirm('Voulez-vous réinitialiser tous les tarifs aux valeurs officielles d\'origine ? Cette action effacera les modifications personnalisées.')) {
+    if (!window.confirm('Reset all service pricing to original defaults? This will erase custom adjustments.')) {
       return;
     }
     setIsLoading(true);
@@ -188,13 +188,13 @@ export default function AdminServicesManager() {
       await resetServicesToDefault();
       setNotification({
         type: 'success',
-        text: 'Tous les tarifs ont été réinitialisés aux valeurs standards du salon.'
+        text: 'All prices have been reset to shop defaults.'
       });
       await loadServices();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: 'Erreur lors de la réinitialisation des tarifs.'
+        text: 'Error resetting prices.'
       });
     } finally {
       setIsLoading(false);
@@ -209,11 +209,11 @@ export default function AdminServicesManager() {
           <div className="flex items-center gap-2 mb-1">
             <DollarSign className="w-5 h-5 text-gold" />
             <h3 className="text-lg font-serif font-bold text-white">
-              Gestionnaire des Tarifs & Prestations
+              Services & Pricing Manager
             </h3>
           </div>
           <p className="text-xs text-gray-400">
-            Ajustez en direct les prix, durées et descriptions visibles par vos clients sur la grille tarifaire et le module de réservation.
+            Adjust live prices, durations, and service descriptions visible to clients on the pricing menu and booking flow.
           </p>
         </div>
 
@@ -224,16 +224,16 @@ export default function AdminServicesManager() {
             className="px-4 py-2.5 bg-gold hover:bg-gold-light text-black font-bold text-xs font-mono uppercase tracking-wider rounded-xs flex items-center gap-1.5 cursor-pointer shadow-md"
           >
             <Plus className="w-4 h-4" />
-            <span>Ajouter une prestation</span>
+            <span>Add Service</span>
           </button>
           <button
             type="button"
             onClick={handleResetDefaults}
             className="px-3 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 font-bold text-xs font-mono uppercase rounded-xs flex items-center gap-1.5 cursor-pointer"
-            title="Réinitialiser aux tarifs d'origine"
+            title="Reset to original shop prices"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Réinitialiser</span>
+            <span>Reset Defaults</span>
           </button>
         </div>
       </div>
@@ -250,7 +250,7 @@ export default function AdminServicesManager() {
             <span>{notification.text}</span>
           </div>
           <button 
-            type="button"
+            type="button" 
             onClick={() => setNotification(null)}
             className="text-gray-400 hover:text-white cursor-pointer bg-transparent border-none"
           >
@@ -265,7 +265,7 @@ export default function AdminServicesManager() {
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <h4 className="text-sm font-bold text-gold uppercase tracking-wider font-mono flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-gold" />
-              <span>Nouvelle Prestation / Forfait</span>
+              <span>New Service / Package</span>
             </h4>
             <button
               type="button"
@@ -279,21 +279,21 @@ export default function AdminServicesManager() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-[11px] font-mono uppercase text-gray-400 mb-1">
-                Intitulé de la prestation *
+                Service Title *
               </label>
               <input
                 type="text"
                 required
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Ex: Dégradé Laser + Soin Barbe"
+                placeholder="e.g. Skin Fade + Hot Towel Shave"
                 className="w-full bg-black/60 border border-white/15 focus:border-gold px-3 py-2 text-xs text-white rounded-xs outline-none font-mono"
               />
             </div>
 
             <div>
               <label className="block text-[11px] font-mono uppercase text-gray-400 mb-1">
-                Prix en Dollars ($) *
+                Price ($ USD) *
               </label>
               <input
                 type="number"
@@ -308,7 +308,7 @@ export default function AdminServicesManager() {
 
             <div>
               <label className="block text-[11px] font-mono uppercase text-gray-400 mb-1">
-                Durée (Minutes) *
+                Duration (Minutes) *
               </label>
               <input
                 type="number"
@@ -323,16 +323,16 @@ export default function AdminServicesManager() {
 
             <div>
               <label className="block text-[11px] font-mono uppercase text-gray-400 mb-1">
-                Barbier assigné
+                Assigned Barber
               </label>
               <select
                 value={newBarber}
                 onChange={(e) => setNewBarber(e.target.value as any)}
                 className="w-full bg-black/60 border border-white/15 focus:border-gold px-3 py-2 text-xs text-white rounded-xs outline-none font-mono"
               >
-                <option value="Both">Mika & Lusca (Tous)</option>
-                <option value="Lusca">Lusca (Coupes & Barbes)</option>
-                <option value="Mika">Mika (Tresses & Soins)</option>
+                <option value="Both">Mika & Lusca (Both)</option>
+                <option value="Lusca">Lusca (Haircuts & Beards)</option>
+                <option value="Mika">Mika (Braids & Locs)</option>
               </select>
             </div>
           </div>
@@ -340,26 +340,26 @@ export default function AdminServicesManager() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-mono uppercase text-gray-400 mb-1">
-                Catégorie de prestation
+                Service Category
               </label>
               <input
                 type="text"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="Ex: Coupes Hommes, Tresses, Combos..."
+                placeholder="e.g. Men's Cuts, Braids, Combos..."
                 className="w-full bg-black/60 border border-white/15 focus:border-gold px-3 py-2 text-xs text-white rounded-xs outline-none font-mono"
               />
             </div>
 
             <div>
               <label className="block text-[11px] font-mono uppercase text-gray-400 mb-1">
-                Description du soin / technique
+                Technique & Style Description
               </label>
               <input
                 type="text"
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Ex: Finitions rasoir coupe-choux, serviette chaude et talc parfumé."
+                placeholder="e.g. Precision straight razor edge up, hot steam towel finish."
                 className="w-full bg-black/60 border border-white/15 focus:border-gold px-3 py-2 text-xs text-white rounded-xs outline-none font-mono"
               />
             </div>
@@ -371,14 +371,14 @@ export default function AdminServicesManager() {
               onClick={() => setShowAddForm(false)}
               className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-mono uppercase rounded-xs cursor-pointer"
             >
-              Annuler
+              Cancel
             </button>
             <button
               type="submit"
               disabled={isAdding}
               className="px-5 py-2 bg-gold hover:bg-gold-light text-black font-bold text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer shadow-md disabled:opacity-50"
             >
-              {isAdding ? 'Enregistrement...' : 'Enregistrer la prestation'}
+              {isAdding ? 'Saving...' : 'Save Service'}
             </button>
           </div>
         </form>
@@ -391,7 +391,7 @@ export default function AdminServicesManager() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher une coupe, tresse ou soin..."
+            placeholder="Search haircuts, braids, or grooming services..."
             className="w-full bg-[#141418] border border-white/15 focus:border-gold pl-9 pr-4 py-2 text-xs text-white rounded-xs outline-none font-mono placeholder-gray-500"
           />
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
@@ -408,7 +408,7 @@ export default function AdminServicesManager() {
                 : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
             }`}
           >
-            Tous ({services.length})
+            All ({services.length})
           </button>
           {categories.map((cat) => (
             <button
@@ -431,23 +431,23 @@ export default function AdminServicesManager() {
       <div className="bg-[#141418] border border-white/10 rounded-xs overflow-hidden">
         {isLoading ? (
           <div className="py-12 text-center text-xs font-mono text-gray-400">
-            Chargement des prestations en cours...
+            Loading services catalog...
           </div>
         ) : filteredServices.length === 0 ? (
           <div className="py-12 text-center text-xs font-mono text-gray-400 space-y-2">
             <AlertCircle className="w-6 h-6 text-gold/60 mx-auto" />
-            <p>Aucune prestation ne correspond à votre filtre.</p>
+            <p>No services match your filter criteria.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">
               <thead>
                 <tr className="border-b border-white/10 text-gray-400 text-[11px] uppercase bg-black/40">
-                  <th className="py-3 px-4">Prestation</th>
-                  <th className="py-3 px-3">Catégorie</th>
-                  <th className="py-3 px-3">Barbier</th>
-                  <th className="py-3 px-3">Durée</th>
-                  <th className="py-3 px-3">Tarif Actuel</th>
+                  <th className="py-3 px-4">Service</th>
+                  <th className="py-3 px-3">Category</th>
+                  <th className="py-3 px-3">Barber</th>
+                  <th className="py-3 px-3">Duration</th>
+                  <th className="py-3 px-3">Current Price</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -472,7 +472,7 @@ export default function AdminServicesManager() {
                           />
                         ) : (
                           <p className="text-[11px] text-gray-400 font-sans line-clamp-1 mt-0.5">
-                            {service.description || 'Prestation salon standard'}
+                            {service.description || 'Standard shop service'}
                           </p>
                         )}
                       </td>
@@ -480,7 +480,7 @@ export default function AdminServicesManager() {
                       {/* Category */}
                       <td className="py-3.5 px-3 text-gray-300">
                         <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-xs text-[10px] text-gray-300">
-                          {service.category || 'Général'}
+                          {service.category || 'General'}
                         </span>
                       </td>
 
@@ -488,10 +488,10 @@ export default function AdminServicesManager() {
                       <td className="py-3.5 px-3">
                         <span className="text-gold font-bold text-[11px]">
                           {service.barberPreference === 'Mika'
-                            ? 'Mika (Tresses)'
+                            ? 'Mika (Braids)'
                             : service.barberPreference === 'Lusca'
-                            ? 'Lusca (Coupes)'
-                            : 'Tous Barbiers'}
+                            ? 'Lusca (Haircuts)'
+                            : 'All Barbers'}
                         </span>
                       </td>
 
@@ -547,16 +547,16 @@ export default function AdminServicesManager() {
                               onClick={() => handleSavePrice(service)}
                               disabled={isUpdating}
                               className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xs flex items-center gap-1 font-bold text-[11px] cursor-pointer"
-                              title="Valider la modification"
+                              title="Save changes"
                             >
                               <Check className="w-3.5 h-3.5" />
-                              <span>Sauvegarder</span>
+                              <span>Save</span>
                             </button>
                             <button
                               type="button"
                               onClick={handleCancelEdit}
                               className="p-1 bg-white/10 hover:bg-white/20 text-gray-300 rounded-xs cursor-pointer"
-                              title="Annuler"
+                              title="Cancel"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -567,7 +567,7 @@ export default function AdminServicesManager() {
                               type="button"
                               onClick={() => handleStartEdit(service)}
                               className="p-1.5 bg-white/5 hover:bg-gold hover:text-black text-gray-300 border border-white/10 rounded-xs transition-colors cursor-pointer"
-                              title="Modifier le tarif et la durée"
+                              title="Edit price and duration"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
@@ -576,7 +576,7 @@ export default function AdminServicesManager() {
                                 type="button"
                                 onClick={() => handleDelete(service)}
                                 className="p-1.5 bg-red-950/40 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 rounded-xs transition-colors cursor-pointer"
-                                title="Supprimer la prestation personnalisée"
+                                title="Delete custom service"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>

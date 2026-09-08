@@ -207,14 +207,14 @@ export default function CheckStatusModal({
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse"></span>
             <span className="text-[10px] uppercase font-mono tracking-widest text-gold font-bold">
-              Suivi en Direct &bull; Rendez-vous & File d'attente
+              Live Tracking &bull; Appointments &amp; Waitlist
             </span>
           </div>
           <h3 className="text-2xl font-serif font-bold text-white mb-1.5">
-            Statut de ma Réservation / Ticket
+            Check Reservation / Ticket Status
           </h3>
           <p className="text-xs text-gray-400 leading-relaxed">
-            Entrez votre <strong>nom</strong> ou <strong>numéro de ticket</strong> (ex: FS-102, RES-892) pour suivre en direct votre avancée et l'état de votre fauteuil.
+            Enter your <strong>name</strong> or <strong>ticket ID</strong> (e.g., FS-102, RES-892) to track live queue position and chair status.
           </p>
         </div>
 
@@ -226,7 +226,7 @@ export default function CheckStatusModal({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Nom ou Ticket ID (ex: Thomas, FS-102)"
+                placeholder="Client Name or Ticket ID (e.g. Thomas, FS-102)"
                 className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 outline-none font-mono"
               />
               <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
@@ -236,7 +236,7 @@ export default function CheckStatusModal({
               disabled={isSearching || !searchQuery.trim()}
               className="bg-gold hover:bg-gold-light disabled:opacity-40 text-black px-5 py-2.5 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap active:scale-95"
             >
-              {isSearching ? 'Vérification...' : 'Vérifier'}
+              {isSearching ? 'Checking...' : 'Check Status'}
             </button>
           </div>
         </form>
@@ -246,12 +246,12 @@ export default function CheckStatusModal({
           <div className="p-4 bg-red-950/40 border border-red-500/30 text-red-300 text-xs mb-6 space-y-2">
             <div className="flex items-center gap-2 font-bold">
               <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-              <span>Aucun enregistrement actif trouvé pour "{searchQuery}"</span>
+              <span>No active record found for "{searchQuery}"</span>
             </div>
             <p className="text-[11px] text-gray-400 leading-relaxed pl-6">
               {isWaitlistOpen 
-                ? "Vérifiez l'orthographe ou le numéro de téléphone, ou rejoignez directement la file d'attente sans rendez-vous."
-                : "Vérifiez votre nom ou numéro de ticket. Vous pouvez également réserver votre créneau directement en ligne."}
+                ? "Please check the spelling or phone number, or join the live walk-in queue directly."
+                : "Please check your name or ticket ID. You can also book an appointment online."}
             </p>
             <div className="pl-6 pt-1 flex gap-4">
               {isWaitlistOpen && onOpenWaitlist ? (
@@ -263,7 +263,7 @@ export default function CheckStatusModal({
                   }}
                   className="text-xs text-gold underline font-bold uppercase tracking-wider hover:text-white cursor-pointer bg-transparent border-none"
                 >
-                  Rejoindre la File d'Attente &rarr;
+                  Join Live Waitlist &rarr;
                 </button>
               ) : onNavigateToBooking ? (
                 <button
@@ -274,7 +274,7 @@ export default function CheckStatusModal({
                   }}
                   className="text-xs text-gold underline font-bold uppercase tracking-wider hover:text-white cursor-pointer bg-transparent border-none"
                 >
-                  Prendre un Rendez-vous &rarr;
+                  Book an Appointment &rarr;
                 </button>
               ) : null}
             </div>
@@ -289,10 +289,10 @@ export default function CheckStatusModal({
             <div className="flex justify-between items-start pb-4 border-b border-white/10">
               <div>
                 <span className="text-[10px] font-mono uppercase text-gray-500 block">
-                  {result.type === 'reservation' ? 'Rendez-vous Programmé' : 'Ticket File d’Attente Live'}
+                  {result.type === 'reservation' ? 'Confirmed Appointment' : 'Live Walk-In Queue Ticket'}
                 </span>
                 <p className="text-xl font-mono font-bold text-gold mt-0.5">
-                  #{result.ticketId || 'CONFIRMÉ'}
+                  #{result.ticketId || 'CONFIRMED'}
                 </p>
                 <p className="text-sm text-white font-medium flex items-center gap-1.5 mt-1">
                   <User className="w-3.5 h-3.5 text-gold" />
@@ -301,16 +301,16 @@ export default function CheckStatusModal({
               </div>
 
               <div className="text-right">
-                <span className="text-[10px] font-mono uppercase text-gray-500 block">Barbier Assigné</span>
+                <span className="text-[10px] font-mono uppercase text-gray-500 block">Assigned Barber</span>
                 <span className="text-xs text-gray-200 font-mono font-bold block mt-0.5">
-                  {result.barber || 'Mika & Lusca (Final Stop)'}
+                  {result.barber || 'Mika &amp; Lusca (Final Stop)'}
                 </span>
                 <span className="text-[11px] text-gray-400 block mt-1">
                   {result.service}
                 </span>
                 {result.date && (
                   <span className="text-[10px] font-mono text-gold block mt-0.5">
-                    {result.date} à {result.time}
+                    {result.date} at {result.time}
                   </span>
                 )}
               </div>
@@ -342,25 +342,25 @@ export default function CheckStatusModal({
                   <div>
                     <h4 className="text-sm font-bold text-white mb-0.5">
                       {waitlistStatus === 'in-chair'
-                        ? "AU FAUTEUIL &bull; Coupe / Soin en cours d'exécution"
+                        ? "IN CHAIR &bull; Haircut / Styling in Progress"
                         : (waitlistStatus === 'called' || result.position === 1)
-                        ? "VOUS ÊTES LE PROCHAIN ! Veuillez vous approcher du comptoir"
+                        ? "YOU ARE NEXT! Please step up to the barber station"
                         : waitlistStatus === 'served'
-                        ? "PRESTATION TERMINÉE &bull; Merci de votre confiance"
+                        ? "SERVICE COMPLETED &bull; Thank you for visiting!"
                         : waitlistStatus === 'cancelled'
-                        ? "TICKET ANNULÉ PAR LE SALON"
-                        : `Vous êtes actuellement position #${result.position || 2} dans la file`}
+                        ? "TICKET CLOSED BY SHOP"
+                        : `You are currently #${result.position || 2} in line`}
                     </h4>
                     <p className="text-xs text-gray-300 leading-relaxed">
                       {waitlistStatus === 'in-chair'
-                        ? "Profitez de votre prestation avec notre maître barbier."
+                        ? "Enjoy your precision cut or master braids session."
                         : (waitlistStatus === 'called' || result.position === 1)
-                        ? "Votre barbier prépare les serviettes chaudes et les instruments. Vous serez pris en charge immédiatement."
+                        ? "Your barber is ready with fresh tools and hot towels. You will be seated right away."
                         : waitlistStatus === 'served'
-                        ? "Nous espérons que votre nouvelle coupe vous plaît !"
+                        ? "We hope you love your fresh cut and styling!"
                         : waitlistStatus === 'cancelled'
-                        ? "Ce ticket a été clôturé ou annulé. Contactez le salon pour toute question."
-                        : `Temps d'attente estimé : ~${result.estMinutes || 15} minutes. Restez attentif(ve) à l'appel de votre nom.`}
+                        ? "This ticket has been marked closed. Please contact the shop if you have questions."
+                        : `Estimated wait time: ~${result.estMinutes || 15} minutes. Please listen for your name.`}
                     </p>
                   </div>
                 </div>
@@ -380,17 +380,17 @@ export default function CheckStatusModal({
                   <div>
                     <h4 className="text-sm font-bold text-white mb-0.5">
                       {resStatus === 'completed'
-                        ? "RENDEZ-VOUS TERMINÉ"
+                        ? "APPOINTMENT COMPLETED"
                         : resStatus === 'cancelled'
-                        ? "RENDEZ-VOUS ANNULÉ"
-                        : "RENDEZ-VOUS CONFIRMÉ & ENREGISTRÉ"}
+                        ? "APPOINTMENT CANCELLED"
+                        : "APPOINTMENT CONFIRMED &amp; BOOKED"}
                     </h4>
                     <p className="text-xs text-gray-300 leading-relaxed">
                       {resStatus === 'completed'
-                        ? "Merci de votre visite chez Final Stop !"
+                        ? "Thank you for visiting Final Stop Barber Shop!"
                         : resStatus === 'cancelled'
-                        ? "Ce rendez-vous a été annulé."
-                        : `Votre créneau pour ${result.service} est validé avec ${result.barber || 'votre barbier'}. Présentez-vous 5 minutes avant l'heure prévue.`}
+                        ? "This appointment has been cancelled."
+                        : `Your slot for ${result.service} is confirmed with ${result.barber || 'your barber'}. Please arrive 5 minutes prior to your scheduled time.`}
                     </p>
                   </div>
                 </div>
@@ -400,14 +400,14 @@ export default function CheckStatusModal({
             {/* 4-Step Visual Progress Bar */}
             <div>
               <div className="flex items-center justify-between text-[10px] font-mono text-gray-400 mb-2 font-bold uppercase tracking-wider">
-                <span>Barre de progression en direct :</span>
-                <span className="text-gold">Mise à jour en temps réel</span>
+                <span>Live Progress Status:</span>
+                <span className="text-gold">Real-Time Sync</span>
               </div>
 
               {isWaitlist ? (
                 <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-mono">
                   <div className="bg-white/10 text-gray-300 py-2 border border-white/10 rounded-xs">
-                    1. Inscrit
+                    1. Registered
                   </div>
                   <div className={`py-2 border rounded-xs transition-colors ${
                     (result.position > 1 && waitlistStatus === 'waiting')
@@ -416,7 +416,7 @@ export default function CheckStatusModal({
                       ? 'bg-gold/20 text-gold border-gold/40'
                       : 'bg-white/5 text-gray-500 border-white/5'
                   }`}>
-                    2. En File (#{result.position || '1'})
+                    2. In Queue (#{result.position || '1'})
                   </div>
                   <div className={`py-2 border rounded-xs transition-colors ${
                     (waitlistStatus === 'called' || (result.position === 1 && waitlistStatus === 'waiting'))
@@ -425,20 +425,20 @@ export default function CheckStatusModal({
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                       : 'bg-white/5 text-gray-500 border-white/5'
                   }`}>
-                    3. Au Fauteuil
+                    3. In Chair
                   </div>
                   <div className={`py-2 border rounded-xs transition-colors ${
                     waitlistStatus === 'served'
                       ? 'bg-blue-500 text-white font-bold border-blue-400'
                       : 'bg-white/5 text-gray-500 border-white/5'
                   }`}>
-                    4. Terminé
+                    4. Completed
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-4 gap-1.5 text-center text-[10px] font-mono">
                   <div className="bg-white/10 text-gray-300 py-2 border border-white/10 rounded-xs">
-                    1. Reçue
+                    1. Received
                   </div>
                   <div className={`py-2 border rounded-xs transition-colors ${
                     resStatus === 'confirmed'
@@ -447,21 +447,21 @@ export default function CheckStatusModal({
                       ? 'bg-gold/20 text-gold border-gold/40'
                       : 'bg-white/5 text-gray-500 border-white/5'
                   }`}>
-                    2. Confirmé
+                    2. Confirmed
                   </div>
                   <div className={`py-2 border rounded-xs transition-colors ${
                     resStatus === 'confirmed'
                       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                       : 'bg-white/5 text-gray-500 border-white/5'
                   }`}>
-                    3. Prêt au Salon
+                    3. Ready at Shop
                   </div>
                   <div className={`py-2 border rounded-xs transition-colors ${
                     resStatus === 'completed'
                       ? 'bg-blue-500 text-white font-bold border-blue-400'
                       : 'bg-white/5 text-gray-500 border-white/5'
                   }`}>
-                    4. Terminé
+                    4. Completed
                   </div>
                 </div>
               )}
@@ -471,7 +471,7 @@ export default function CheckStatusModal({
             <div className="flex items-center justify-between pt-3 border-t border-white/10 text-xs text-gray-400 font-mono">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Système Central Final Stop Sécurisé</span>
+                <span>Final Stop Secure Central Sync</span>
               </span>
               <button
                 type="button"
@@ -480,7 +480,7 @@ export default function CheckStatusModal({
                 className="text-gold hover:text-gold-light flex items-center gap-1.5 font-bold cursor-pointer transition-colors bg-transparent border-none"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSearching ? 'animate-spin' : ''}`} />
-                <span>Rafraîchir le Statut</span>
+                <span>Refresh Status</span>
               </button>
             </div>
 
@@ -490,7 +490,7 @@ export default function CheckStatusModal({
             <div className="bg-[#0A0A0B] border border-white/5 p-6 text-center text-xs text-gray-400 space-y-3 rounded-xs">
               <Clock className="w-8 h-8 text-gold/60 mx-auto" />
               <p>
-                Consultez à tout moment la position de votre ticket ou la confirmation de votre créneau avec Mika et Lusca.
+                Check your live queue position or view confirmation details for your scheduled appointment with Mika &amp; Lusca anytime.
               </p>
             </div>
           )

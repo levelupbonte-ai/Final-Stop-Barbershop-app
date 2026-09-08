@@ -226,22 +226,22 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
 
             <div className="mb-6">
               <span className="text-emerald-400 font-mono text-xs uppercase tracking-widest font-bold block mb-2">
-                Réservation Confirmée &bull; Appointment Confirmed
+                Appointment Confirmed
               </span>
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white mb-3">
-                Votre réservation a été enregistrée avec succès !
+                Your reservation has been confirmed!
               </h1>
               <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-md mx-auto mb-4">
-                Merci <strong className="text-white">{confirmedData?.clientName}</strong>, votre créneau est validé. Un e-mail contenant tous les détails de votre ticket vous a été envoyé.
+                Thank you <strong className="text-white">{confirmedData?.clientName}</strong>, your appointment slot is locked in. A confirmation ticket with all details has been emailed to you.
               </p>
               
               <div className="bg-gold/10 border border-gold/40 p-3 rounded-xs inline-block max-w-md mx-auto text-left font-mono text-xs text-gold">
                 <p className="font-bold mb-1 flex items-center gap-1.5 text-white">
                   <Mail className="w-4 h-4 text-gold" />
-                  <span>Vérifiez vos e-mails :</span>
+                  <span>Check your inbox:</span>
                 </p>
                 <p className="text-gray-300 break-all">
-                  Un récapitulatif a été expédié à <strong className="text-gold">{confirmedData?.clientEmail || guestEmail}</strong>. (Pensez à regarder dans vos courriers indésirables/spams).
+                  A ticket summary was sent to <strong className="text-gold">{confirmedData?.clientEmail || guestEmail}</strong>. (Please check your spam or promotions folder if not found in your main inbox).
                 </p>
               </div>
             </div>
@@ -250,12 +250,12 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
             <div className="bg-[#0A0A0B] border border-white/10 p-3.5 mb-8 rounded-xs font-mono text-xs text-gray-400 flex flex-wrap items-center justify-center gap-3">
               <span className="text-gold font-bold">Ticket #{confirmedData?.ticketId}</span>
               <span className="text-white/20">&bull;</span>
-              <span className="text-white">{confirmedData?.date} à {confirmedData?.time}</span>
+              <span className="text-white">{confirmedData?.date} at {confirmedData?.time}</span>
               <span className="text-white/20">&bull;</span>
               <span className="text-gray-300">{confirmedData?.service}</span>
             </div>
 
-            {/* 3 Streamlined Buttons: Imprimer le Ticket / Retour Home / Réserver un autre rendez-vous */}
+            {/* 3 Streamlined Buttons: Print Ticket / Back to Home / Book Another */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto">
               <button
                 type="button"
@@ -263,7 +263,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                 className="w-full bg-[#1B1B20] hover:bg-white/10 text-white border border-white/20 hover:border-gold text-xs font-bold uppercase tracking-wider py-3.5 px-3 flex items-center justify-center gap-2 transition-all cursor-pointer rounded-xs"
               >
                 <Printer className="w-4 h-4 text-gold" />
-                <span>Imprimer Ticket</span>
+                <span>Print Ticket</span>
               </button>
 
               <button
@@ -271,7 +271,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                 onClick={onBackToHome}
                 className="w-full bg-gold hover:bg-gold-light text-black text-xs font-black uppercase tracking-wider py-3.5 px-3 flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 cursor-pointer rounded-xs"
               >
-                <span>Retour Accueil</span>
+                <span>Back to Home</span>
               </button>
 
               <button
@@ -286,7 +286,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                 className="w-full bg-[#1B1B20] hover:bg-white/10 text-gray-300 hover:text-white border border-white/20 text-xs font-bold uppercase tracking-wider py-3.5 px-3 flex items-center justify-center gap-2 transition-all cursor-pointer rounded-xs"
               >
                 <CalendarIcon className="w-4 h-4 text-gold" />
-                <span>Autre RDV</span>
+                <span>Book Another</span>
               </button>
             </div>
           </div>
@@ -634,7 +634,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
             )}
 
             {/* =====================================================================
-                STEP 3: GUEST INFORMATION ("tu mets ton nom est ton adresse mail pour ton ticket")
+                STEP 3: GUEST INFORMATION (Guest name, email, and phone for ticket)
                 ===================================================================== */}
             {currentStep === 3 && (
               <div className="bg-[#121215] border border-white/10 p-6 sm:p-8 animate-fadeIn">

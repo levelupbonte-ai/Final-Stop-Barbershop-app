@@ -113,7 +113,7 @@ export default async function handler(req: any, res: any) {
           </tr>
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.6;">
-              Final Stop Barber Shop &bull; All Rights Reserved.<br>
+              Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115<br>
               <span style="color: #4B5563; font-size: 10px;">Powered By Levelup ecosystem</span>
             </td>
           </tr>
@@ -369,7 +369,7 @@ export default async function handler(req: any, res: any) {
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.5;">
               Need to reschedule or cancel? Simply give us a call or text prior to your appointment.<br>
-              &copy; Final Stop Barber Shop &bull; All Rights Reserved.
+              &copy; Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115
             </td>
           </tr>
 

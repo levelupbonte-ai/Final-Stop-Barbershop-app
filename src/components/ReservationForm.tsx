@@ -36,7 +36,7 @@ export default function ReservationForm() {
   const handleBooking = async () => {
     setErrorMessage(null);
     if (!selectedTime) {
-      setErrorMessage("Veuillez sélectionner un créneau horaire.");
+      setErrorMessage("Please select an available time slot.");
       return;
     }
     
@@ -45,7 +45,7 @@ export default function ReservationForm() {
       try {
         currentUser = await loginWithGoogle();
       } catch (err) {
-        setErrorMessage("Connexion annulée ou impossible.");
+        setErrorMessage("Google sign-in was cancelled or unavailable.");
         return;
       }
     }
@@ -71,7 +71,7 @@ export default function ReservationForm() {
       setSelectedTime('');
     } catch (err) {
       console.error(err);
-      setErrorMessage("Une erreur est survenue lors de la réservation. Veuillez réessayer ou contacter le salon.");
+      setErrorMessage("An error occurred while booking. Please try again or call our shop directly.");
     } finally {
       setIsSubmitting(false);
     }

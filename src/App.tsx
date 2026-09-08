@@ -284,11 +284,10 @@ export default function App() {
     );
   }
 
-  // 9. PAGE: Admin Console & Firestore Database Management
+  // 9. PAGE: Admin Console & Firestore Database Management (Completely separated staff portal)
   if (currentView === 'admin') {
     return (
       <AdminPage
-        onBackToHome={() => navigateTo('home')}
         isWaitlistOpen={isWaitlistOpen}
         onWaitlistToggle={(isOpen) => setIsWaitlistOpen(isOpen)}
       />

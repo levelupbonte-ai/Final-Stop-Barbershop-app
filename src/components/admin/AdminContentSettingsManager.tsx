@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
   Phone, 
@@ -35,7 +35,7 @@ export default function AdminContentSettingsManager() {
   const [hoursWeekday, setHoursWeekday] = useState(DEFAULT_SHOP_CONFIG.hoursWeekday);
   const [hoursSunday, setHoursSunday] = useState(DEFAULT_SHOP_CONFIG.hoursSunday);
   const [announcement, setAnnouncement] = useState('');
-  const [adminAccessCode, setAdminAccessCode] = useState('92115');
+  const [adminAccessCode, setAdminAccessCode] = useState('');
 
   // Social Links
   const [instagram, setInstagram] = useState('');
@@ -56,7 +56,7 @@ export default function AdminContentSettingsManager() {
       setHoursWeekday(data.hoursWeekday || DEFAULT_SHOP_CONFIG.hoursWeekday);
       setHoursSunday(data.hoursSunday || DEFAULT_SHOP_CONFIG.hoursSunday);
       setAnnouncement(data.announcement || '');
-      setAdminAccessCode(data.adminAccessCode || '92115');
+      setAdminAccessCode(data.adminAccessCode || '');
       setInstagram(data.socialLinks?.instagram || '');
       setTiktok(data.socialLinks?.tiktok || '');
       setYoutube(data.socialLinks?.youtube || '');
@@ -364,10 +364,10 @@ export default function AdminContentSettingsManager() {
             <div className="relative">
               <Lock className="w-4 h-4 text-gold absolute left-3 top-1/2 -translate-y-1/2" />
               <input
-                type="text"
+                type="password"
                 value={adminAccessCode}
                 onChange={(e) => setAdminAccessCode(e.target.value)}
-                placeholder="92115"
+                placeholder="Enter secret PIN"
                 className="w-full bg-black/40 border border-white/15 rounded-xs pl-9 pr-3 py-2.5 text-xs text-gold font-mono font-bold tracking-widest focus:outline-none focus:border-gold"
               />
             </div>

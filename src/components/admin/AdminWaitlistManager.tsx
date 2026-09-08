@@ -79,13 +79,13 @@ export default function AdminWaitlistManager({
       await updateWaitlistStatus(docId, nextStatus);
       setNotification({
         type: 'success',
-        text: `Statut mis à jour : ${nextStatus}.`
+        text: `Status updated: ${nextStatus}.`
       });
       await onRefresh();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors du changement de statut.'
+        text: err?.message || 'Error updating status.'
       });
     } finally {
       setActionLoadingId(null);
@@ -98,13 +98,13 @@ export default function AdminWaitlistManager({
       await moveWaitlistToFront(docId);
       setNotification({
         type: 'success',
-        text: `${clientName} a été placé en tête de file (Position #1) !`
+        text: `${clientName} moved to front of queue (Position #1)!`
       });
       await onRefresh();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors du déplacement en tête de file.'
+        text: err?.message || 'Error moving client to front.'
       });
     } finally {
       setActionLoadingId(null);
@@ -127,7 +127,7 @@ export default function AdminWaitlistManager({
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors du réordonnancement.'
+        text: err?.message || 'Error reordering queue.'
       });
     } finally {
       setActionLoadingId(null);
@@ -135,14 +135,14 @@ export default function AdminWaitlistManager({
   };
 
   const handleArchiveOldTickets = async () => {
-    if (!window.confirm("Archiver tous les anciens tickets et repartir sur une file d'attente propre pour aujourd'hui ?")) {
+    if (!window.confirm("Archive all past tickets and start a clean queue for today?")) {
       return;
     }
     try {
       await archiveOldWaitlistTickets();
       setNotification({
         type: 'success',
-        text: "File d'attente mise à jour : seuls les tickets actifs du jour sont conservés."
+        text: "Queue updated: only active tickets for today are retained."
       });
       await onRefresh();
     } catch (err: any) {
