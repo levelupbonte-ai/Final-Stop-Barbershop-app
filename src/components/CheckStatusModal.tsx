@@ -471,7 +471,7 @@ export default function CheckStatusModal({
             <div className="flex items-center justify-between pt-3 border-t border-white/10 text-xs text-gray-400 font-mono">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Connecté à Final Stop Firestore</span>
+                <span>Système Central Final Stop Sécurisé</span>
               </span>
               <button
                 type="button"

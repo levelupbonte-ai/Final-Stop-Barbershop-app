@@ -32,7 +32,10 @@ import {
   Briefcase,
   Globe,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  Settings,
+  Tag,
+  Link
 } from 'lucide-react';
 import { 
   getReservations, 
@@ -51,6 +54,10 @@ import {
   verifyAndRegisterAdmin,
   getPromoPopupStatus,
   setPromoPopupStatus,
+  getShopRedirectConfig,
+  setShopRedirectConfig,
+  ShopRedirectConfig,
+  archiveOldWaitlistTickets,
   FirestoreReservation, 
   FirestoreWaitlistEntry,
   FirestoreGalleryItem
@@ -61,7 +68,6 @@ import { uploadImageToFreeCloud } from '../lib/freeImageUploadService';
 import AdminServicesManager from '../components/admin/AdminServicesManager';
 import AdminProQuotesManager from '../components/admin/AdminProQuotesManager';
 import AdminWaitlistManager from '../components/admin/AdminWaitlistManager';
-import DomainOAuthModal from '../components/admin/DomainOAuthModal';
 
 interface AdminPageProps {
   onBackToHome: () => void;
@@ -69,7 +75,7 @@ interface AdminPageProps {
   onWaitlistToggle: (isOpen: boolean) => void;
 }
 
-type AdminTab = 'appointments' | 'waitlist' | 'services' | 'quotes' | 'gallery';
+type AdminTab = 'appointments' | 'waitlist' | 'services' | 'quotes' | 'gallery' | 'settings';
 
 export default function AdminPage({
   onBackToHome,
@@ -92,7 +98,14 @@ export default function AdminPage({
   const [isFirstAdminNotice, setIsFirstAdminNotice] = useState(false);
   const [copiedDomain, setCopiedDomain] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [isDomainGuideOpen, setIsDomainGuideOpen] = useState(false);
+
+  // Redirection URL Management State
+  const [redirectConfig, setRedirectConfig] = useState<ShopRedirectConfig>({
+    redirectUrl: 'https://finalstop.org',
+    redirectEnabled: false,
+    redirectLabel: 'Avis Google & Réseaux Sociaux'
+  });
+  const [isSavingRedirect, setIsSavingRedirect] = useState(false);
 
   // 3-Minute Inactivity Auto-Logout Timer (180 seconds)
   const [secondsInactive, setSecondsInactive] = useState(0);
@@ -250,20 +263,44 @@ export default function AdminPage({
   const loadAllData = async () => {
     setIsLoading(true);
     try {
-      const [resList, wlList, photos, promoStatus] = await Promise.all([
+      const [resList, wlList, photos, promoStatus, redirectCfg] = await Promise.all([
         getReservations(),
         getWaitlistQueue(true), // Load all waitlist entries
         getGalleryItems(),
-        getPromoPopupStatus()
+        getPromoPopupStatus(),
+        getShopRedirectConfig()
       ]);
       setReservations(resList);
       setWaitlist(wlList);
       setGalleryPhotos(photos);
       setPromoPopupEnabled(promoStatus);
+      if (redirectCfg) {
+        setRedirectConfig(redirectCfg);
+      }
     } catch (err) {
       console.error('Error loading admin data:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveRedirectConfig = async (e?: FormEvent) => {
+    if (e) e.preventDefault();
+    setIsSavingRedirect(true);
+    setStatusMessage(null);
+    try {
+      await setShopRedirectConfig(redirectConfig);
+      setStatusMessage({
+        type: 'success',
+        text: 'Configuration de redirection mise à jour avec succès !'
+      });
+    } catch (err: any) {
+      setStatusMessage({
+        type: 'error',
+        text: err?.message || 'Erreur lors de la sauvegarde de la redirection.'
+      });
+    } finally {
+      setIsSavingRedirect(false);
     }
   };
 
@@ -715,29 +752,19 @@ export default function AdminPage({
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                       </svg>
-                      <span>Connectez-vous à finalstop.org (Google)</span>
+                      <span>Connectez-vous à finalstop.org</span>
                     </>
                   )}
-                </button>
-
-                {/* Guide for custom domain setup */}
-                <button
-                  type="button"
-                  onClick={() => setIsDomainGuideOpen(true)}
-                  className="w-full py-2 px-3 bg-white/5 hover:bg-white/10 text-gold hover:text-gold-light border border-gold/30 rounded-xs text-[11px] font-mono flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>Afficher finalstop.org au lieu de Firebase (Guide Domaine)</span>
                 </button>
 
                 {unauthorizedDomain && (
                   <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-xs text-left text-xs space-y-2.5">
                     <div className="flex items-center gap-2 text-amber-400 font-bold">
                       <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span>Domaine non autorisé dans Firebase Authentication</span>
+                      <span>Autorisation Requise pour l'Accès</span>
                     </div>
                     <p className="text-[11px] text-gray-300 leading-relaxed">
-                      Le domaine <code className="bg-black/60 px-1.5 py-0.5 rounded text-gold font-mono">{unauthorizedDomain}</code> doit être ajouté dans votre console Firebase (Authentication &gt; Settings &gt; Authorized domains) pour autoriser la connexion Google.
+                      L'accès administrateur depuis le domaine <code className="bg-black/60 px-1.5 py-0.5 rounded text-gold font-mono">{unauthorizedDomain}</code> requiert une autorisation active pour finalstop.org.
                     </p>
                     <div className="flex items-center gap-2 pt-1">
                       <button
@@ -754,24 +781,38 @@ export default function AdminPage({
               </div>
 
               <p className="text-[10px] text-gray-500 font-mono text-center pt-2">
-                Authentification Google sécurisée &bull; Final Stop Barber Shop
+                Authentification finalstop.org sécurisée &bull; Final Stop Barber Shop
               </p>
             </div>
           </div>
         </main>
-
-        {/* Domain OAuth Modal */}
-        <DomainOAuthModal 
-          isOpen={isDomainGuideOpen} 
-          onClose={() => setIsDomainGuideOpen(false)} 
-        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans relative">
       
+      {/* 3-Minute Inactivity Warning Floating Banner */}
+      {showInactivityWarning && (
+        <div className="fixed bottom-5 right-5 z-50 bg-amber-500 text-black px-5 py-3.5 rounded shadow-2xl flex items-center gap-4 border border-amber-400 font-mono text-xs animate-bounce">
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-black shrink-0 animate-spin" />
+            <div>
+              <p className="font-bold">Inactivité détectée : Déconnexion automatique dans {180 - secondsInactive}s</p>
+              <p className="text-[10px] text-black/80">Bougez la souris ou cliquez pour prolonger votre session de travail.</p>
+            </div>
+          </div>
+          <button 
+            type="button"
+            onClick={() => { setSecondsInactive(0); setShowInactivityWarning(false); }}
+            className="bg-black text-white px-3 py-1.5 font-bold text-xs uppercase cursor-pointer rounded hover:bg-gray-900 transition-colors shrink-0"
+          >
+            Rester connecté
+          </button>
+        </div>
+      )}
+
       {/* Header - Fixed/Sticky atop scrolling content */}
       <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3.5 shadow-lg">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
@@ -882,13 +923,13 @@ export default function AdminPage({
           <div>
             <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 px-3 py-1 text-xs font-mono font-bold text-gold uppercase tracking-widest mb-2">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Owner & Master Barber Portal</span>
+              <span>Portail de Gestion &bull; finalstop.org</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-serif font-bold text-white">
-              Final Stop Administration Hub
+              Administration Centrale du Salon
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-1">
-              Manage client reservations, real-time walk-in queue, and Firestore photo gallery.
+              Supervision en direct des rendez-vous, de la file walk-in, des tarifs, devis pro et redirection.
             </p>
           </div>
 
@@ -897,11 +938,11 @@ export default function AdminPage({
               type="button"
               onClick={handleSeedFirestore}
               disabled={isSeeding}
-              className="bg-gold hover:bg-gold-light disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex items-center gap-2 shadow-lg active:scale-95 cursor-pointer rounded-sm"
-              title="Seed initial Firestore data & curated photos"
+              className="bg-gold hover:bg-gold-light disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-4 py-2.5 flex items-center gap-2 shadow-lg active:scale-95 cursor-pointer rounded-xs"
+              title="Synchroniser et recharger toutes les données du système"
             >
               <Sparkles className={`w-3.5 h-3.5 ${isSeeding ? 'animate-spin' : ''}`} />
-              <span>{isSeeding ? 'Syncing...' : 'Sync Firestore Database'}</span>
+              <span>{isSeeding ? 'Synchronisation...' : 'Actualiser les Données Centrales'}</span>
             </button>
           </div>
         </div>
@@ -922,7 +963,7 @@ export default function AdminPage({
               <span>{statusMessage.text}</span>
             </div>
             <button 
-              type="button"
+              type="button" 
               onClick={() => setStatusMessage(null)}
               className="text-gray-400 hover:text-white cursor-pointer"
             >
@@ -931,34 +972,56 @@ export default function AdminPage({
           </div>
         )}
 
-        {/* Top Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+        {/* Top Summary Cards (4 Cards) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           
-          {/* Card 1: Waitlist Toggle */}
-          <div className="bg-[#141418] border border-white/10 p-5 flex flex-col justify-between rounded-sm">
+          {/* Card 1: Walk-in Desk Toggle */}
+          <div className="bg-[#141418] border border-white/10 p-5 flex flex-col justify-between rounded-xs">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-mono uppercase text-gray-400">Walk-In Desk State</span>
+              <span className="text-xs font-mono uppercase text-gray-400">Guichet Walk-In</span>
               <Users className="w-4 h-4 text-gold" />
             </div>
             <div className="my-2">
-              <span className={`text-lg font-bold font-serif ${isWaitlistOpen ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {isWaitlistOpen ? 'OPEN (Walk-ins active)' : 'CLOSED (Appointments only)'}
+              <span className={`text-base font-bold font-serif ${isWaitlistOpen ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {isWaitlistOpen ? 'OUVERT (Sans rdv actif)' : 'FERMÉ (Complet)'}
               </span>
             </div>
             <button
               type="button"
               onClick={handleToggleWaitlist}
-              className="mt-2 text-xs font-bold uppercase tracking-wider py-2 px-3 border border-white/15 hover:border-gold text-white flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="mt-2 text-xs font-bold uppercase tracking-wider py-2 px-3 border border-white/15 hover:border-gold text-white flex items-center justify-center gap-2 transition-colors cursor-pointer rounded-xs"
             >
               {isWaitlistOpen ? <ToggleRight className="w-4 h-4 text-emerald-400" /> : <ToggleLeft className="w-4 h-4 text-gray-500" />}
-              <span>Toggle Walk-In Desk</span>
+              <span>{isWaitlistOpen ? 'Fermer la File' : 'Ouvrir la File'}</span>
             </button>
           </div>
 
-          {/* Card 2: Reservations count */}
-          <div className="bg-[#141418] border border-white/10 p-5 flex flex-col justify-between rounded-sm">
+          {/* Card 2: Promo Pop-up VIP Toggle */}
+          <div className="bg-[#141418] border border-white/10 p-5 flex flex-col justify-between rounded-xs">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-mono uppercase text-gray-400">Total Bookings</span>
+              <span className="text-xs font-mono uppercase text-gray-400">Pop-up Promo VIP (-$5)</span>
+              <Tag className="w-4 h-4 text-gold" />
+            </div>
+            <div className="my-2">
+              <span className={`text-base font-bold font-serif ${promoPopupEnabled ? 'text-emerald-400' : 'text-gray-400'}`}>
+                {promoPopupEnabled ? 'ACTIF (Affiché sur le site)' : 'MASQUÉ (Désactivé)'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleTogglePromo}
+              disabled={isTogglingPromo}
+              className="mt-2 text-xs font-bold uppercase tracking-wider py-2 px-3 border border-white/15 hover:border-gold text-white flex items-center justify-center gap-2 transition-colors cursor-pointer rounded-xs disabled:opacity-50"
+            >
+              {promoPopupEnabled ? <ToggleRight className="w-4 h-4 text-emerald-400" /> : <ToggleLeft className="w-4 h-4 text-gray-500" />}
+              <span>{isTogglingPromo ? 'Mise à jour...' : promoPopupEnabled ? 'Désactiver le Pop-up' : 'Activer le Pop-up'}</span>
+            </button>
+          </div>
+
+          {/* Card 3: Reservations count */}
+          <div className="bg-[#141418] border border-white/10 p-5 flex flex-col justify-between rounded-xs">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-mono uppercase text-gray-400">Rendez-vous Clients</span>
               <Calendar className="w-4 h-4 text-gold" />
             </div>
             <div className="my-2">
@@ -967,14 +1030,14 @@ export default function AdminPage({
               </span>
             </div>
             <span className="text-[11px] text-gray-400 font-mono">
-              Confirmed client slots
+              Créneaux planifiés
             </span>
           </div>
 
-          {/* Card 3: Gallery Photos in Database */}
-          <div className="bg-[#141418] border border-white/10 p-5 flex flex-col justify-between rounded-sm">
+          {/* Card 4: Gallery Photos */}
+          <div className="bg-[#141418] border border-white/10 p-5 flex flex-col justify-between rounded-xs">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-mono uppercase text-gray-400">Database Photos</span>
+              <span className="text-xs font-mono uppercase text-gray-400">Portfolio & Photos</span>
               <ImageIcon className="w-4 h-4 text-gold" />
             </div>
             <div className="my-2">
@@ -983,66 +1046,105 @@ export default function AdminPage({
               </span>
             </div>
             <span className="text-[11px] text-gray-400 font-mono">
-              Mika (Braids) &bull; Lusca (Cuts)
+              Mika (Tresses) &bull; Lusca (Coupes)
             </span>
           </div>
 
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-white/10 mb-8">
+        {/* Tab Navigation (6 Tabs) */}
+        <div className="flex items-center gap-2 border-b border-white/10 mb-8 overflow-x-auto pb-1 font-mono">
           <button
             type="button"
             onClick={() => setActiveTab('appointments')}
-            className={`px-5 py-3 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold ${
+            className={`px-4 py-3 text-xs uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'appointments'
                 ? 'border-gold text-gold bg-white/5'
                 : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
-            Appointments ({reservations.length})
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Rendez-vous ({reservations.length})</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('waitlist')}
-            className={`px-5 py-3 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold ${
+            className={`px-4 py-3 text-xs uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'waitlist'
                 ? 'border-gold text-gold bg-white/5'
                 : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
-            Walk-In Queue ({waitlist.length})
+            <Users className="w-3.5 h-3.5" />
+            <span>File Walk-In ({waitlist.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('services')}
+            className={`px-4 py-3 text-xs uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'services'
+                ? 'border-gold text-gold bg-white/5'
+                : 'border-transparent text-gray-400 hover:text-white'
+            }`}
+          >
+            <DollarSign className="w-3.5 h-3.5 text-gold" />
+            <span>Tarifs & Prestations</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('quotes')}
+            className={`px-4 py-3 text-xs uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'quotes'
+                ? 'border-gold text-gold bg-white/5'
+                : 'border-transparent text-gray-400 hover:text-white'
+            }`}
+          >
+            <Briefcase className="w-3.5 h-3.5 text-gold" />
+            <span>Devis Pro & Mariages</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('gallery')}
-            className={`px-5 py-3 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold flex items-center gap-2 ${
+            className={`px-4 py-3 text-xs uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'gallery'
                 ? 'border-gold text-gold bg-white/5'
                 : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
             <ImageIcon className="w-3.5 h-3.5 text-gold" />
-            <span>Photos Database ({galleryPhotos.length})</span>
+            <span>Portfolio ({galleryPhotos.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            className={`px-4 py-3 text-xs uppercase tracking-wider transition-all cursor-pointer border-b-2 font-bold whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'settings'
+                ? 'border-gold text-gold bg-white/5'
+                : 'border-transparent text-gray-400 hover:text-white'
+            }`}
+          >
+            <Settings className="w-3.5 h-3.5 text-gold" />
+            <span>Redirection & Paramètres</span>
           </button>
         </div>
 
         {/* TAB 1: Appointments Table */}
         {activeTab === 'appointments' && (
-          <div className="bg-[#141418] border border-white/10 p-6 rounded-sm">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+          <div className="bg-[#141418] border border-white/10 p-6 rounded-xs space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
               <h2 className="text-lg sm:text-xl font-serif font-bold text-white flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-gold" />
-                <span>Confirmed Bookings in Firestore ({reservations.length})</span>
+                <span>Rendez-vous Enregistrés ({reservations.length})</span>
               </h2>
-              <span className="text-xs font-mono text-gray-400">
-                Synced with Firestore
+              <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Synchronisé en direct</span>
               </span>
             </div>
 
             {reservations.length === 0 ? (
               <div className="py-12 text-center text-gray-400 text-xs font-mono">
-                No appointments recorded at this moment. Click "Sync Firestore Database" to load sample bookings.
+                Aucun rendez-vous pour le moment. Cliquez sur "Actualiser les Données Centrales" pour charger les réservations.
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -1051,11 +1153,12 @@ export default function AdminPage({
                     <tr className="border-b border-white/10 text-gray-400 text-[11px] uppercase">
                       <th className="pb-3 pr-4">Ticket</th>
                       <th className="pb-3 px-4">Client</th>
-                      <th className="pb-3 px-4">Barber</th>
-                      <th className="pb-3 px-4">Service</th>
-                      <th className="pb-3 px-4">Date & Time</th>
-                      <th className="pb-3 px-4">Price</th>
-                      <th className="pb-3 pl-4">Status</th>
+                      <th className="pb-3 px-4">Barbier</th>
+                      <th className="pb-3 px-4">Prestation</th>
+                      <th className="pb-3 px-4">Date & Heure</th>
+                      <th className="pb-3 px-4">Tarif</th>
+                      <th className="pb-3 px-4">Statut Actuel</th>
+                      <th className="pb-3 pl-4 text-right">Changer Statut</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -1081,11 +1184,36 @@ export default function AdminPage({
                         <td className="py-3.5 px-4 text-white font-bold">
                           ${res.price}
                         </td>
-                        <td className="py-3.5 pl-4">
-                          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 text-[10px] uppercase font-bold">
-                            {res.status || 'Confirmed'}
+                        <td className="py-3.5 px-4">
+                          <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded-xs ${
+                            res.status === 'confirmed' || res.status === 'Confirmed'
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                              : res.status === 'in-chair'
+                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                              : res.status === 'completed'
+                              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                              : res.status === 'cancelled'
+                              ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                              : 'bg-white/10 text-gray-300'
+                          }`}>
+                            {res.status === 'confirmed' || res.status === 'Confirmed' ? 'Confirmé' :
+                             res.status === 'in-chair' ? 'Au Fauteuil' :
+                             res.status === 'completed' ? 'Terminé' :
+                             res.status === 'cancelled' ? 'Annulé' : res.status}
                           </span>
                         </td>
+                        <td className="py-3.5 pl-4 text-right">
+                          <select
+                            value={res.status || 'confirmed'}
+                            onChange={(e) => handleUpdateReservationStatus(res.id, e.target.value as any)}
+                            className="bg-black/60 border border-white/20 hover:border-gold px-2 py-1 text-[10px] text-white rounded-xs outline-none cursor-pointer"
+                          >
+                            <option value="confirmed">Confirmé</option>
+                            <option value="in-chair">Au Fauteuil</option>
+                            <option value="completed">Terminé</option>
+                            <option value="cancelled">Annulé</option>
+                          </select>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1095,91 +1223,186 @@ export default function AdminPage({
           </div>
         )}
 
-        {/* TAB 2: Walk-In Queue Table */}
+        {/* TAB 2: Walk-In Queue Manager */}
         {activeTab === 'waitlist' && (
-          <div className="bg-[#141418] border border-white/10 p-6 rounded-sm">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
-              <h2 className="text-lg sm:text-xl font-serif font-bold text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-gold" />
-                <span>Live Walk-In Queue ({waitlist.length})</span>
-              </h2>
-              <span className="text-xs font-mono text-gray-400">
-                Real-time queue desk
-              </span>
+          <AdminWaitlistManager
+            waitlist={waitlist}
+            onRefresh={loadAllData}
+            isWaitlistOpen={isWaitlistOpen}
+            onToggleWaitlist={handleToggleWaitlist}
+          />
+        )}
+
+        {/* TAB 3: Services & Pricing Manager */}
+        {activeTab === 'services' && (
+          <AdminServicesManager />
+        )}
+
+        {/* TAB 4: Pro Quotes Manager */}
+        {activeTab === 'quotes' && (
+          <AdminProQuotesManager />
+        )}
+
+        {/* TAB 6: Settings & Redirection URL Manager */}
+        {activeTab === 'settings' && (
+          <div className="space-y-8">
+            {/* Redirection Configuration Card */}
+            <div className="bg-[#141418] border border-white/10 p-6 rounded-xs space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div>
+                  <h3 className="text-lg font-serif font-bold text-white flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-gold" />
+                    <span>Configuration de l'URL de Redirection</span>
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Définissez où rediriger vos clients (avis Google, Instagram, page partenaire, etc.) directement depuis votre panel.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded-xs ${
+                    redirectConfig.redirectEnabled 
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      : 'bg-white/10 text-gray-400'
+                  }`}>
+                    {redirectConfig.redirectEnabled ? 'Redirection Active' : 'Désactivée'}
+                  </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleSaveRedirectConfig} className="space-y-4 max-w-xl font-mono text-xs">
+                <div>
+                  <label className="text-gray-300 font-bold block mb-1.5 uppercase text-[11px]">
+                    URL de Destination (ex: lien Avis Google)
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    value={redirectConfig.redirectUrl}
+                    onChange={(e) => setRedirectConfig(prev => ({ ...prev, redirectUrl: e.target.value }))}
+                    placeholder="https://g.page/r/finalstop/review"
+                    className="w-full bg-[#0A0A0B] border border-white/20 focus:border-gold px-3.5 py-2.5 text-white rounded-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-gray-300 font-bold block mb-1.5 uppercase text-[11px]">
+                    Libellé du Bouton Public
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={redirectConfig.redirectLabel}
+                    onChange={(e) => setRedirectConfig(prev => ({ ...prev, redirectLabel: e.target.value }))}
+                    placeholder="Laisser un Avis Google 5 Étoiles"
+                    className="w-full bg-[#0A0A0B] border border-white/20 focus:border-gold px-3.5 py-2.5 text-white rounded-xs outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={redirectConfig.redirectEnabled}
+                      onChange={(e) => setRedirectConfig(prev => ({ ...prev, redirectEnabled: e.target.checked }))}
+                      className="w-4 h-4 accent-gold"
+                    />
+                    <span>Activer la redirection sur le site</span>
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3 pt-3">
+                  <button
+                    type="submit"
+                    disabled={isSavingRedirect}
+                    className="px-5 py-2.5 bg-gold hover:bg-gold-light text-black font-bold uppercase tracking-wider rounded-xs cursor-pointer flex items-center gap-2 transition-colors disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>{isSavingRedirect ? 'Sauvegarde...' : 'Enregistrer la Redirection'}</span>
+                  </button>
+
+                  {redirectConfig.redirectUrl && (
+                    <a
+                      href={redirectConfig.redirectUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/15 rounded-xs flex items-center gap-1.5 transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Tester le lien</span>
+                    </a>
+                  )}
+                </div>
+              </form>
             </div>
 
-            {waitlist.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 text-xs font-mono">
-                No clients currently waiting in the live queue.
+            {/* Quick Actions & Shop State */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* VIP Promo Manager */}
+              <div className="bg-[#141418] border border-white/10 p-6 rounded-xs space-y-3 font-mono text-xs">
+                <div className="flex items-center gap-2 text-white font-serif font-bold text-base">
+                  <Tag className="w-4 h-4 text-gold" />
+                  <span>Pop-up Promotionnel VIP (-$5)</span>
+                </div>
+                <p className="text-gray-400 text-[11px] leading-relaxed">
+                  Active ou désactive la fenêtre pop-up offrant $5 de réduction aux nouveaux visiteurs du salon.
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleTogglePromo}
+                    disabled={isTogglingPromo}
+                    className="px-4 py-2 bg-white/5 hover:bg-gold/20 text-white hover:text-gold border border-white/20 hover:border-gold/50 rounded-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    {promoPopupEnabled ? <ToggleRight className="w-4 h-4 text-emerald-400" /> : <ToggleLeft className="w-4 h-4 text-gray-400" />}
+                    <span>{promoPopupEnabled ? 'Désactiver le Pop-up VIP' : 'Activer le Pop-up VIP'}</span>
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-mono text-xs">
-                  <thead>
-                    <tr className="border-b border-white/10 text-gray-400 text-[11px] uppercase">
-                      <th className="pb-3 pr-4">Pos</th>
-                      <th className="pb-3 px-4">Ticket</th>
-                      <th className="pb-3 px-4">Client Name</th>
-                      <th className="pb-3 px-4">Barber</th>
-                      <th className="pb-3 px-4">Service</th>
-                      <th className="pb-3 px-4">Check-in Time</th>
-                      <th className="pb-3 pl-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {waitlist.map((item, idx) => (
-                      <tr key={item.id || item.ticketId || idx} className="hover:bg-white/5 transition-colors">
-                        <td className="py-3.5 pr-4 text-gold font-bold">
-                          #{idx + 1}
-                        </td>
-                        <td className="py-3.5 px-4 text-white font-bold">
-                          {item.ticketId}
-                        </td>
-                        <td className="py-3.5 px-4 text-white">
-                          <div className="font-bold">{item.name}</div>
-                          <div className="text-[10px] text-gray-400">{item.phone}</div>
-                        </td>
-                        <td className="py-3.5 px-4 text-gold font-bold">
-                          {item.barber}
-                        </td>
-                        <td className="py-3.5 px-4 text-gray-300">
-                          {item.service}
-                        </td>
-                        <td className="py-3.5 px-4 text-gray-400">
-                          {item.joinedAt}
-                        </td>
-                        <td className="py-3.5 pl-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleServeTicket(item.id || item.ticketId)}
-                            className="bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 px-2.5 py-1 text-[11px] uppercase font-bold transition-all cursor-pointer"
-                          >
-                            Mark Completed
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+              {/* Day Waitlist Archive */}
+              <div className="bg-[#141418] border border-white/10 p-6 rounded-xs space-y-3 font-mono text-xs">
+                <div className="flex items-center gap-2 text-white font-serif font-bold text-base">
+                  <Sparkles className="w-4 h-4 text-gold" />
+                  <span>Réinitialisation File du Jour</span>
+                </div>
+                <p className="text-gray-400 text-[11px] leading-relaxed">
+                  Permet au coiffeur de clôturer les anciens tickets et de ne garder que les clients actifs du jour dans la file walk-in.
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (window.confirm("Archiver les anciens tickets et repartir sur une file propre pour aujourd'hui ?")) {
+                        await archiveOldWaitlistTickets();
+                        await loadAllData();
+                        setStatusMessage({ type: 'success', text: "File d'attente réinitialisée pour aujourd'hui." });
+                      }
+                    }}
+                    className="px-4 py-2 bg-white/5 hover:bg-gold/20 text-white hover:text-gold border border-white/20 hover:border-gold/50 rounded-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <Sparkles className="w-4 h-4 text-gold" />
+                    <span>Nettoyer la File du Jour</span>
+                  </button>
+                </div>
               </div>
-            )}
+            </div>
           </div>
         )}
 
-        {/* TAB 3: Photos & Gallery Database */}
+        {/* TAB 5: Photos & Portfolio */}
         {activeTab === 'gallery' && (
           <div className="space-y-10">
             
             {/* Add New Photo Form */}
-            <div className="bg-[#141418] border border-gold/30 p-6 rounded-sm shadow-xl">
+            <div className="bg-[#141418] border border-gold/30 p-6 rounded-xs shadow-xl">
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
                 <div>
                   <h2 className="text-lg sm:text-xl font-serif font-bold text-white flex items-center gap-2">
                     <Plus className="w-5 h-5 text-gold" />
-                    <span>Add New Photo to Firestore Database</span>
+                    <span>Ajouter une Nouvelle Réalisation au Portfolio</span>
                   </h2>
                   <p className="text-xs text-gray-400 mt-1">
-                    Upload hairstyles with attribution (Mika for girls' braids, Lusca for boys' cuts).
+                    Téléversez vos créations coiffure avec attribution (Mika pour tresses femmes/filles, Lusca pour coupes hommes/garçons).
                   </p>
                 </div>
               </div>
@@ -1390,29 +1613,29 @@ export default function AdminPage({
                       {isUploadingFile 
                         ? 'Téléversement de la photo...' 
                         : isSavingImage 
-                        ? 'Enregistrement dans Firebase...' 
-                        : 'Enregistrer la photo dans la galerie'}
+                        ? 'Enregistrement de la photo...' 
+                        : 'Enregistrer la photo dans le portfolio'}
                     </span>
                   </button>
                 </div>
               </form>
             </div>
 
-            {/* Current Photos in Firestore Grid */}
-            <div className="bg-[#141418] border border-white/10 p-6 rounded-sm">
+            {/* Current Photos in System Grid */}
+            <div className="bg-[#141418] border border-white/10 p-6 rounded-xs">
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
                 <h2 className="text-lg sm:text-xl font-serif font-bold text-white flex items-center gap-2">
                   <ImageIcon className="w-5 h-5 text-gold" />
-                  <span>Photos Active in Database ({galleryPhotos.length})</span>
+                  <span>Réalisations Publiées sur le Site ({galleryPhotos.length})</span>
                 </h2>
                 <span className="text-xs font-mono text-gray-400">
-                  Visible to public clients
+                  Visibles par les clients
                 </span>
               </div>
 
               {galleryPhotos.length === 0 ? (
                 <div className="py-12 text-center text-gray-400 text-xs font-mono">
-                  No photos found in database. Click "Sync Firestore Database" above to load initial portfolio.
+                  Aucune réalisation enregistrée pour l'instant. Cliquez sur "Actualiser les Données Centrales" pour charger la galerie.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -1,5 +1,7 @@
-import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink, ShieldCheck, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink, ShieldCheck, Lock, Globe } from 'lucide-react';
 import { NavView } from './Navbar';
+import { getShopRedirectConfig, ShopRedirectConfig } from '../lib/firestoreService';
 
 interface FooterProps {
   onNavigateToBooking?: () => void;
@@ -12,6 +14,15 @@ export default function Footer({
   onNavigateToView,
   onOpenPolicies
 }: FooterProps) {
+  const [redirectConfig, setRedirectConfig] = useState<ShopRedirectConfig | null>(null);
+
+  useEffect(() => {
+    getShopRedirectConfig().then(cfg => {
+      if (cfg && cfg.redirectEnabled && cfg.redirectUrl) {
+        setRedirectConfig(cfg);
+      }
+    }).catch(() => {});
+  }, []);
   return (
     <footer className="bg-[#0A0A0C] pt-20 pb-10 border-t border-white/10 overflow-hidden text-gray-400">
       <div className="max-w-7xl mx-auto px-6">
@@ -37,14 +48,29 @@ export default function Footer({
             <p className="text-xs text-gray-300 leading-relaxed mb-6">
               San Diego's premier unisex destination for precision haircutting, razor fading, and master protective braids. Over 20 years of hands-on mastery by Mika and Lusca in a relaxed vintage lounge.
             </p>
-            <button
-              type="button"
-              onClick={onOpenPolicies}
-              className="inline-flex items-center gap-2 text-xs font-mono text-gold hover:text-white border border-gold/40 hover:border-gold px-3.5 py-2 transition-colors bg-gold/10 rounded-xs cursor-pointer font-semibold"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-gold" />
-              <span>Safety Rules & Policies</span>
-            </button>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
+              <button
+                type="button"
+                onClick={onOpenPolicies}
+                className="inline-flex items-center gap-2 text-xs font-mono text-gold hover:text-white border border-gold/40 hover:border-gold px-3.5 py-2 transition-colors bg-gold/10 rounded-xs cursor-pointer font-semibold"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-gold" />
+                <span>Safety Rules & Policies</span>
+              </button>
+
+              {redirectConfig && (
+                <a
+                  href={redirectConfig.redirectUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs font-mono text-white hover:text-gold border border-white/20 hover:border-gold px-3.5 py-2 transition-colors bg-white/5 hover:bg-gold/10 rounded-xs cursor-pointer font-semibold group"
+                >
+                  <Globe className="w-3.5 h-3.5 text-gold" />
+                  <span>{redirectConfig.redirectLabel || 'Lien Officiel'}</span>
+                  <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-gold" />
+                </a>
+              )}
+            </div>
           </div>
 
           <div>

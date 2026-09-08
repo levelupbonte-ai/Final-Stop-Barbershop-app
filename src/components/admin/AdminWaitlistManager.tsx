@@ -19,7 +19,8 @@ import {
   FirestoreWaitlistEntry, 
   updateWaitlistStatus, 
   moveWaitlistToFront, 
-  reorderWaitlistQueue 
+  reorderWaitlistQueue,
+  archiveOldWaitlistTickets
 } from '../../lib/firestoreService';
 
 interface AdminWaitlistManagerProps {
@@ -120,12 +121,7 @@ export default function AdminWaitlistManager({
 
     setActionLoadingId(currentEntry.id);
     try {
-      await reorderWaitlistQueue(
-        currentEntry.id, 
-        currentEntry.position || (index + 1), 
-        targetEntry.id, 
-        targetEntry.position || (targetIndex + 1)
-      );
+      await reorderWaitlistQueue(currentEntry.id, direction);
       await onRefresh();
     } catch (err: any) {
       setNotification({
@@ -134,6 +130,25 @@ export default function AdminWaitlistManager({
       });
     } finally {
       setActionLoadingId(null);
+    }
+  };
+
+  const handleArchiveOldTickets = async () => {
+    if (!window.confirm("Archiver tous les anciens tickets et repartir sur une file d'attente propre pour aujourd'hui ?")) {
+      return;
+    }
+    try {
+      await archiveOldWaitlistTickets();
+      setNotification({
+        type: 'success',
+        text: "File d'attente mise à jour : seuls les tickets actifs du jour sont conservés."
+      });
+      await onRefresh();
+    } catch (err: any) {
+      setNotification({
+        type: 'error',
+        text: err?.message || "Erreur lors de l'archivage des anciens tickets."
+      });
     }
   };
 
@@ -249,6 +264,19 @@ export default function AdminWaitlistManager({
             <option value="served">Servis / Terminés</option>
             <option value="cancelled">Annulés</option>
           </select>
+        </div>
+
+        {/* Clean / Reset Day Waitlist Button */}
+        <div>
+          <button
+            type="button"
+            onClick={handleArchiveOldTickets}
+            className="px-3 py-1.5 bg-white/5 hover:bg-gold/20 text-gray-300 hover:text-gold border border-white/15 hover:border-gold/50 rounded-xs text-[11px] font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
+            title="Archiver les tickets passés et commencer une nouvelle file d'attente du jour"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-gold" />
+            <span>File du Jour Uniquement (Nettoyer)</span>
+          </button>
         </div>
 
       </div>

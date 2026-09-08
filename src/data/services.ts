@@ -4,11 +4,14 @@ export interface ServiceItem {
   duration: string;
   price: string;
   numericPrice: number;
-  category: 'Haircuts' | 'Combos' | 'Beard & Shave' | 'Lineups & Detailing' | 'Treatments';
+  category: 'Haircuts' | 'Combos' | 'Beard & Shave' | 'Lineups & Detailing' | 'Treatments' | string;
   badge?: string;
   description: string;
   inclusions: string[];
   featured?: boolean;
+  barberPreference?: 'Mika' | 'Lusca' | 'Both';
+  title?: string;
+  durationMinutes?: number;
 }
 
 /**

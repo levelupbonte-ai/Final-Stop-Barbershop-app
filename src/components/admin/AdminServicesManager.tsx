@@ -67,7 +67,8 @@ export default function AdminServicesManager() {
   const categories = Array.from(new Set(services.map((s) => s.category || 'Général')));
 
   const filteredServices = services.filter((s) => {
-    const matchesSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const sTitle = s.name || s.title || '';
+    const matchesSearch = sTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           s.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCat = selectedCategory === 'all' || s.category === selectedCategory;
     return matchesSearch && matchesCat;
@@ -75,8 +76,12 @@ export default function AdminServicesManager() {
 
   const handleStartEdit = (service: ServiceItem) => {
     setEditingId(service.id);
-    setEditPrice(service.price);
-    setEditDuration(service.durationMinutes || 30);
+    const numPrice = typeof service.price === 'number' 
+      ? service.price 
+      : (service.numericPrice || Number(String(service.price).replace(/[^0-9]/g, '')) || 0);
+    setEditPrice(numPrice);
+    const numDur = service.durationMinutes || parseInt(String(service.duration).replace(/[^0-9]/g, '')) || 30;
+    setEditDuration(numDur);
     setEditDesc(service.description || '');
   };
 
@@ -90,11 +95,14 @@ export default function AdminServicesManager() {
   const handleSavePrice = async (service: ServiceItem) => {
     setIsUpdating(true);
     setNotification(null);
+    const displayName = service.name || service.title || 'Prestation';
     try {
-      await updateServicePrice(service.id, editPrice, editDuration, editDesc);
+      const priceStr = `$${editPrice}`;
+      const durStr = `${editDuration} min`;
+      await updateServicePrice(service.id, priceStr, editPrice, durStr, editDesc);
       setNotification({
         type: 'success',
-        text: `Tarif pour "${service.title}" mis à jour : ${editPrice}$ (${editDuration} min). Synchronisé sur le site public !`
+        text: `Tarif pour "${displayName}" mis à jour : ${editPrice}$ (${editDuration} min). Synchronisé sur le site public !`
       });
       setEditingId(null);
       await loadServices();
@@ -118,12 +126,16 @@ export default function AdminServicesManager() {
       const newId = `custom_${Date.now()}_${newTitle.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 15)}`;
       const newService: ServiceItem = {
         id: newId,
+        name: newTitle.trim(),
         title: newTitle.trim(),
-        price: Number(newPrice),
+        price: `$${newPrice}`,
+        numericPrice: Number(newPrice),
+        duration: `${newDuration} min`,
         durationMinutes: Number(newDuration),
         category: newCategory,
         description: newDesc.trim() || 'Prestation professionnelle réalisée par l\'équipe Final Stop.',
-        barberPreference: newBarber
+        barberPreference: newBarber,
+        inclusions: ['Prestation professionnelle']
       };
 
       await saveCustomService(newService);
@@ -150,12 +162,13 @@ export default function AdminServicesManager() {
   };
 
   const handleDelete = async (service: ServiceItem) => {
-    if (!window.confirm(`Supprimer définitivement la prestation "${service.title}" ?`)) return;
+    const displayName = service.name || service.title || 'Prestation';
+    if (!window.confirm(`Supprimer définitivement la prestation "${displayName}" ?`)) return;
     try {
       await deleteCustomService(service.id);
       setNotification({
         type: 'success',
-        text: `Prestation "${service.title}" supprimée.`
+        text: `Prestation "${displayName}" supprimée.`
       });
       await loadServices();
     } catch (err: any) {
@@ -447,7 +460,7 @@ export default function AdminServicesManager() {
                       {/* Title & Description */}
                       <td className="py-3.5 px-4">
                         <p className="font-bold text-white text-sm">
-                          {service.title}
+                          {service.name || service.title}
                         </p>
                         {isEditing ? (
                           <input

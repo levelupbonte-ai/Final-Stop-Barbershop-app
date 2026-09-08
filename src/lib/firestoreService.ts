@@ -351,6 +351,85 @@ export async function reorderWaitlistQueue(docId: string, direction: 'up' | 'dow
 }
 
 /**
+ * Clôture et archive les anciens tickets pour repartir sur une file propre pour le barbier.
+ * Conserve uniquement les tickets actifs d'aujourd'hui.
+ */
+export async function archiveOldWaitlistTickets(): Promise<FirestoreWaitlistEntry[]> {
+  const current = await getWaitlistQueue(true);
+  const todayStr = new Date().toISOString().split('T')[0];
+  
+  // Conserver uniquement les tickets actifs du jour
+  const activeToday = current.filter(item => {
+    const itemDate = item.joinedDate || (item.createdAt ? item.createdAt.split('T')[0] : '');
+    const isToday = itemDate === todayStr || !itemDate;
+    const isActive = item.status === 'waiting' || item.status === 'called' || item.status === 'in-chair';
+    return isToday && isActive;
+  });
+
+  activeToday.forEach((item, idx) => {
+    item.position = idx + 1;
+    item.estMinutes = Math.max(5, idx * 15);
+  });
+
+  localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(activeToday));
+  window.dispatchEvent(new CustomEvent('waitlist-reordered', { detail: { list: activeToday } }));
+  return activeToday;
+}
+
+export interface ShopRedirectConfig {
+  redirectUrl: string;
+  redirectEnabled: boolean;
+  redirectLabel: string;
+}
+
+export const LOCAL_STORAGE_REDIRECT_KEY = 'finalstop_shop_redirect';
+
+export async function getShopRedirectConfig(): Promise<ShopRedirectConfig> {
+  const defaultConfig: ShopRedirectConfig = {
+    redirectUrl: 'https://finalstop.org',
+    redirectEnabled: false,
+    redirectLabel: 'Avis Google & Réseaux Sociaux'
+  };
+
+  try {
+    const snap = await getDoc(doc(db, 'shop_config', 'status'));
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data?.redirectConfig) {
+        localStorage.setItem(LOCAL_STORAGE_REDIRECT_KEY, JSON.stringify(data.redirectConfig));
+        return data.redirectConfig;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not read redirect config:', err);
+  }
+
+  if (typeof window !== 'undefined') {
+    const cached = localStorage.getItem(LOCAL_STORAGE_REDIRECT_KEY);
+    if (cached) {
+      try { return JSON.parse(cached); } catch {}
+    }
+  }
+  return defaultConfig;
+}
+
+export async function setShopRedirectConfig(config: ShopRedirectConfig): Promise<void> {
+  localStorage.setItem(LOCAL_STORAGE_REDIRECT_KEY, JSON.stringify(config));
+  window.dispatchEvent(new CustomEvent('redirect-config-changed', { detail: config }));
+
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    await setDoc(configRef, {
+      redirectConfig: config,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (err) {
+    console.warn('Shop redirect config sync notice:', err);
+  }
+}
+
+/**
  * Updates shop waitlist open/closed status in Firestore.
  */
 export async function setShopWaitlistOpen(isOpen: boolean): Promise<void> {
@@ -460,7 +539,7 @@ export async function verifyAdminAccessCode(enteredCode: string): Promise<{ vali
     return { valid: true, isInitialSetup: true };
   } catch (err: any) {
     console.error('Error verifying admin access code in Firestore:', err);
-    return { valid: false, message: 'Erreur lors de la vérification avec la base de données Firestore.' };
+    return { valid: false, message: 'Erreur lors de la vérification du code d\'accès administrateur.' };
   }
 }
 
