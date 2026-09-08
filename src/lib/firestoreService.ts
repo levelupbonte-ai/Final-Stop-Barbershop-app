@@ -11,11 +11,15 @@ import {
   serverTimestamp, 
   query, 
   orderBy,
-  limit 
+  limit,
+  arrayUnion,
+  arrayRemove,
+  deleteField
 } from 'firebase/firestore';
 import { db, auth, storage } from './firebase';
 import { signInAnonymously } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { OFFICIAL_SERVICES, ServiceItem } from '../data/services';
 
 export interface FirestoreReservation {
   id?: string;
@@ -43,19 +47,39 @@ export interface FirestoreWaitlistEntry {
   service: string;
   position: number;
   estMinutes: number;
-  status: 'waiting' | 'in-chair' | 'served' | 'cancelled';
+  status: 'waiting' | 'called' | 'in-chair' | 'served' | 'cancelled';
   joinedAt: string;
+  joinedDate?: string;
+  createdAt?: any;
+}
+
+export interface ProQuoteRequest {
+  id?: string;
+  ticketId: string;
+  clientName: string;
+  companyName?: string;
+  phone: string;
+  email: string;
+  serviceType: string;
+  headcount: number;
+  eventDate: string;
+  location?: string;
+  estimatedBudget?: string;
+  notes?: string;
+  status: 'new' | 'contacted' | 'quoted' | 'approved' | 'declined';
   createdAt?: any;
 }
 
 export interface ShopConfig {
   waitlistOpen: boolean;
+  promoPopupEnabled?: boolean;
   announcement?: string;
   phone1: string;
   phone2: string;
   address: string;
   hoursWeekday: string;
   hoursSunday: string;
+  adminAccessCode?: string;
 }
 
 export interface FirestoreGalleryItem {
@@ -118,6 +142,29 @@ export async function saveReservation(data: Omit<FirestoreReservation, 'id'>): P
 }
 
 /**
+ * Updates an appointment reservation status (e.g. pending, confirmed, completed, cancelled).
+ */
+export async function updateReservationStatus(docId: string, status: FirestoreReservation['status']): Promise<void> {
+  try {
+    const ref = doc(db, 'reservations', docId);
+    await updateDoc(ref, { 
+      status,
+      updatedAt: serverTimestamp() 
+    });
+  } catch (err) {
+    console.warn('Could not update Firestore reservation directly:', err);
+  }
+
+  // Update local cache
+  const current = getLocalReservations();
+  const idx = current.findIndex(r => r.id === docId || r.ticketId === docId);
+  if (idx !== -1) {
+    current[idx].status = status;
+    localStorage.setItem(LOCAL_STORAGE_RESERVATIONS_KEY, JSON.stringify(current));
+  }
+}
+
+/**
  * Retrieves all reservations (with realtime snapshot support or fallback).
  */
 export async function getReservations(): Promise<FirestoreReservation[]> {
@@ -140,8 +187,10 @@ export async function getReservations(): Promise<FirestoreReservation[]> {
  */
 export async function saveWaitlistEntry(entry: Omit<FirestoreWaitlistEntry, 'id'>): Promise<string> {
   await ensureFirebaseAuth();
+  const todayStr = new Date().toISOString().split('T')[0];
   const payload = {
     ...entry,
+    joinedDate: entry.joinedDate || todayStr,
     createdAt: serverTimestamp()
   };
 
@@ -150,7 +199,7 @@ export async function saveWaitlistEntry(entry: Omit<FirestoreWaitlistEntry, 'id'
     const savedId = docRef.id;
 
     const current = getLocalWaitlist();
-    current.push({ ...entry, id: savedId });
+    current.push({ ...entry, id: savedId, joinedDate: todayStr });
     localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(current));
 
     return savedId;
@@ -158,7 +207,7 @@ export async function saveWaitlistEntry(entry: Omit<FirestoreWaitlistEntry, 'id'
     console.warn('Firestore waitlist write error:', err);
     const fallbackId = 'wl_' + Date.now();
     const current = getLocalWaitlist();
-    current.push({ ...entry, id: fallbackId });
+    current.push({ ...entry, id: fallbackId, joinedDate: todayStr });
     localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(current));
     return fallbackId;
   }
@@ -166,42 +215,139 @@ export async function saveWaitlistEntry(entry: Omit<FirestoreWaitlistEntry, 'id'
 
 /**
  * Retrieves the current waitlist queue.
+ * @param includeCompleted If true, returns all entries including served and cancelled (useful for admin daily log).
  */
-export async function getWaitlistQueue(): Promise<FirestoreWaitlistEntry[]> {
+export async function getWaitlistQueue(includeCompleted: boolean = false): Promise<FirestoreWaitlistEntry[]> {
   try {
-    const q = query(collection(db, 'waitlist'), orderBy('createdAt', 'asc'), limit(50));
+    const q = query(collection(db, 'waitlist'), orderBy('createdAt', 'asc'), limit(100));
     const snap = await getDocs(q);
     if (!snap.empty) {
       const list = snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as FirestoreWaitlistEntry))
-        .filter(item => item.status === 'waiting' || item.status === 'in-chair');
+        .map(d => ({ id: d.id, ...d.data() } as FirestoreWaitlistEntry));
+      
       localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(list));
+      if (!includeCompleted) {
+        return list.filter(item => item.status === 'waiting' || item.status === 'called' || item.status === 'in-chair');
+      }
       return list;
     }
   } catch (err) {
     console.warn('Error fetching waitlist from Firestore:', err);
   }
-  return getLocalWaitlist();
+  const local = getLocalWaitlist();
+  if (!includeCompleted) {
+    return local.filter(item => item.status === 'waiting' || item.status === 'called' || item.status === 'in-chair');
+  }
+  return local;
 }
 
 /**
- * Updates a waitlist entry status (e.g. served, cancelled, in-chair).
+ * Updates a waitlist entry status (e.g. waiting, called, in-chair, served, cancelled).
  */
 export async function updateWaitlistStatus(docId: string, status: FirestoreWaitlistEntry['status']): Promise<void> {
   try {
     const ref = doc(db, 'waitlist', docId);
-    await updateDoc(ref, { status });
+    await updateDoc(ref, { 
+      status,
+      updatedAt: serverTimestamp() 
+    });
   } catch (err) {
     console.warn('Could not update Firestore waitlist entry directly:', err);
   }
 
   // Update local
   const current = getLocalWaitlist();
-  const idx = current.findIndex(w => w.id === docId);
+  const idx = current.findIndex(w => w.id === docId || w.ticketId === docId);
   if (idx !== -1) {
     current[idx].status = status;
     localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(current));
   }
+}
+
+/**
+ * Moves a specific waitlist ticket straight to the front of the line (Position #1).
+ * Recalculates other positions automatically in Firestore.
+ */
+export async function moveWaitlistToFront(docId: string): Promise<FirestoreWaitlistEntry[]> {
+  const current = await getWaitlistQueue(true);
+  const targetIndex = current.findIndex(w => w.id === docId || w.ticketId === docId);
+  if (targetIndex === -1) return current;
+
+  const [targetItem] = current.splice(targetIndex, 1);
+  // Re-insert at the beginning of active waiting/in-chair entries
+  current.unshift(targetItem);
+
+  // Recalculate positions
+  let activePos = 1;
+  const updatedList = current.map(item => {
+    if (item.status === 'waiting' || item.status === 'called' || item.status === 'in-chair') {
+      const updated = { ...item, position: activePos, estMinutes: Math.max(5, (activePos - 1) * 15) };
+      activePos++;
+      return updated;
+    }
+    return item;
+  });
+
+  // Update in Firestore
+  for (const item of updatedList) {
+    if (item.id) {
+      try {
+        const ref = doc(db, 'waitlist', item.id);
+        await updateDoc(ref, { 
+          position: item.position,
+          estMinutes: item.estMinutes 
+        });
+      } catch (e) {
+        // ignore individual write error
+      }
+    }
+  }
+
+  localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(updatedList));
+  window.dispatchEvent(new CustomEvent('waitlist-reordered', { detail: { list: updatedList } }));
+  return updatedList;
+}
+
+/**
+ * Reorders waitlist entries by swapping positions (e.g. Move Up or Move Down).
+ */
+export async function reorderWaitlistQueue(docId: string, direction: 'up' | 'down'): Promise<FirestoreWaitlistEntry[]> {
+  const current = await getWaitlistQueue(true);
+  const activeItems = current.filter(w => w.status === 'waiting' || w.status === 'called' || w.status === 'in-chair');
+  const index = activeItems.findIndex(w => w.id === docId || w.ticketId === docId);
+  if (index === -1) return current;
+
+  if (direction === 'up' && index > 0) {
+    const temp = activeItems[index];
+    activeItems[index] = activeItems[index - 1];
+    activeItems[index - 1] = temp;
+  } else if (direction === 'down' && index < activeItems.length - 1) {
+    const temp = activeItems[index];
+    activeItems[index] = activeItems[index + 1];
+    activeItems[index + 1] = temp;
+  } else {
+    return current;
+  }
+
+  // Re-assign positions
+  activeItems.forEach((item, idx) => {
+    item.position = idx + 1;
+    item.estMinutes = Math.max(5, idx * 15);
+    if (item.id) {
+      try {
+        updateDoc(doc(db, 'waitlist', item.id), { 
+          position: item.position,
+          estMinutes: item.estMinutes 
+        });
+      } catch {}
+    }
+  });
+
+  const remaining = current.filter(w => w.status !== 'waiting' && w.status !== 'called' && w.status !== 'in-chair');
+  const merged = [...activeItems, ...remaining];
+  localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(merged));
+  window.dispatchEvent(new CustomEvent('waitlist-reordered', { detail: { list: merged } }));
+  return merged;
 }
 
 /**
@@ -221,6 +367,219 @@ export async function setShopWaitlistOpen(isOpen: boolean): Promise<void> {
   } catch (err) {
     console.warn('Firestore shop config sync notice:', err);
   }
+}
+
+/**
+ * Retrieves the admin access code configured in Firestore database.
+ * Returns null if no code is configured yet.
+ */
+export async function getAdminAccessCode(): Promise<string | null> {
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    const snap = await getDoc(configRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data?.adminAccessCode && typeof data.adminAccessCode === 'string') {
+        return data.adminAccessCode;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not read admin access code from Firestore:', err);
+  }
+  return null;
+}
+
+/**
+ * Updates the admin access code in Firestore database.
+ */
+export async function setAdminAccessCode(newCode: string): Promise<void> {
+  const cleanCode = newCode.trim();
+  if (!cleanCode) throw new Error('Le code d\'accès ne peut pas être vide.');
+
+  await ensureFirebaseAuth();
+  const configRef = doc(db, 'shop_config', 'status');
+  await setDoc(configRef, {
+    adminAccessCode: cleanCode,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+/**
+ * Resets the admin access code in Firestore database so that a new code can be defined.
+ */
+export async function resetAdminAccessCode(): Promise<void> {
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    await updateDoc(configRef, {
+      adminAccessCode: deleteField(),
+      updatedAt: serverTimestamp()
+    });
+  } catch (err) {
+    console.error('Error resetting admin access code in Firestore:', err);
+    throw err;
+  }
+}
+
+/**
+ * Verifies if entered code matches the code from Firestore database.
+ * If no code has been initialized yet in the database, sets this code as the master code!
+ */
+export async function verifyAdminAccessCode(enteredCode: string): Promise<{ valid: boolean; message?: string; isInitialSetup?: boolean }> {
+  const cleanEntered = enteredCode.trim();
+  if (!cleanEntered) {
+    return { valid: false, message: 'Veuillez saisir le code d\'accès de la boutique.' };
+  }
+
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    const snap = await getDoc(configRef);
+
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data?.adminAccessCode && typeof data.adminAccessCode === 'string' && data.adminAccessCode.trim().length > 0) {
+        const isMatch = cleanEntered.toLowerCase() === data.adminAccessCode.trim().toLowerCase();
+        if (isMatch) {
+          return { valid: true };
+        }
+        return { 
+          valid: false, 
+          message: 'Code de sécurité boutique incorrect. Vous pouvez réinitialiser le code ci-dessous si nécessaire.' 
+        };
+      }
+    }
+
+    // If no code exists yet in Firestore, initialize securely with the code entered by the manager
+    await setDoc(configRef, {
+      adminAccessCode: cleanEntered,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    return { valid: true, isInitialSetup: true };
+  } catch (err: any) {
+    console.error('Error verifying admin access code in Firestore:', err);
+    return { valid: false, message: 'Erreur lors de la vérification avec la base de données Firestore.' };
+  }
+}
+
+/**
+ * Retrieves the list of authorized admin emails from Firestore.
+ */
+export async function getAdminEmails(): Promise<string[]> {
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    const snap = await getDoc(configRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (Array.isArray(data?.adminEmails)) {
+        return data.adminEmails.filter((e: any) => typeof e === 'string' && e.trim().length > 0);
+      }
+    }
+  } catch (err) {
+    console.warn('Could not read admin emails from Firestore:', err);
+  }
+  return [];
+}
+
+/**
+ * Verifies if a user's Google email is an authorized admin.
+ * If no admin has been registered yet, the first user to connect is automatically registered as the initial admin!
+ */
+export async function verifyAndRegisterAdmin(userEmail: string): Promise<{
+  authorized: boolean;
+  isFirstAdmin: boolean;
+  adminEmails: string[];
+}> {
+  const cleanEmail = userEmail.toLowerCase().trim();
+  if (!cleanEmail) {
+    return { authorized: false, isFirstAdmin: false, adminEmails: [] };
+  }
+
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    const snap = await getDoc(configRef);
+    let existingEmails: string[] = [];
+
+    if (snap.exists()) {
+      const data = snap.data();
+      if (Array.isArray(data?.adminEmails)) {
+        existingEmails = data.adminEmails
+          .filter((e: any) => typeof e === 'string' && e.trim().length > 0)
+          .map((e: string) => e.toLowerCase().trim());
+      }
+    }
+
+    // FIRST PERSON CONNECTED BECOMES THE INITIAL ADMIN!
+    if (existingEmails.length === 0) {
+      const initialList = [cleanEmail];
+      await setDoc(configRef, {
+        adminEmails: initialList,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      return {
+        authorized: true,
+        isFirstAdmin: true,
+        adminEmails: initialList
+      };
+    }
+
+    // Check if user's email is in the authorized list
+    const isAuthorized = existingEmails.includes(cleanEmail);
+    return {
+      authorized: isAuthorized,
+      isFirstAdmin: false,
+      adminEmails: existingEmails
+    };
+  } catch (err) {
+    console.error('Error verifying admin authorization in Firestore:', err);
+    throw err;
+  }
+}
+
+/**
+ * Adds an authorized admin email in Firestore.
+ */
+export async function addAdminEmail(newEmail: string): Promise<string[]> {
+  const cleanEmail = newEmail.toLowerCase().trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(cleanEmail)) {
+    throw new Error('Format d\'adresse email invalide.');
+  }
+
+  await ensureFirebaseAuth();
+  const configRef = doc(db, 'shop_config', 'status');
+  await setDoc(configRef, {
+    adminEmails: arrayUnion(cleanEmail),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  return await getAdminEmails();
+}
+
+/**
+ * Removes an authorized admin email in Firestore.
+ */
+export async function removeAdminEmail(emailToRemove: string): Promise<string[]> {
+  const cleanEmail = emailToRemove.toLowerCase().trim();
+  const currentEmails = await getAdminEmails();
+
+  if (currentEmails.length <= 1 && currentEmails.map(e => e.toLowerCase()).includes(cleanEmail)) {
+    throw new Error('Impossible de supprimer le dernier administrateur. Il doit toujours y avoir au moins un admin.');
+  }
+
+  await ensureFirebaseAuth();
+  const configRef = doc(db, 'shop_config', 'status');
+  await setDoc(configRef, {
+    adminEmails: arrayRemove(cleanEmail),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  return await getAdminEmails();
 }
 
 /**
@@ -667,6 +1026,305 @@ export async function uploadGalleryImageFile(file: File): Promise<string> {
       reader.readAsDataURL(file);
     });
   }
+}
+
+// Keys for additional feature caches
+export const LOCAL_STORAGE_SERVICES_KEY = 'finalstop_services_cache';
+export const LOCAL_STORAGE_PRO_QUOTES_KEY = 'finalstop_pro_quotes_cache';
+export const LOCAL_STORAGE_PROMO_POPUP_KEY = 'finalstop_promo_popup_enabled';
+
+/**
+ * Retrieves the promo popup enabled status from Firestore or cache.
+ * Defaults to true if not set.
+ */
+export async function getPromoPopupStatus(): Promise<boolean> {
+  try {
+    const snap = await getDoc(doc(db, 'shop_config', 'status'));
+    if (snap.exists()) {
+      const data = snap.data();
+      if (typeof data?.promoPopupEnabled === 'boolean') {
+        localStorage.setItem(LOCAL_STORAGE_PROMO_POPUP_KEY, data.promoPopupEnabled ? 'true' : 'false');
+        return data.promoPopupEnabled;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not read promo popup status from Firestore:', err);
+  }
+
+  if (typeof window !== 'undefined') {
+    const cached = localStorage.getItem(LOCAL_STORAGE_PROMO_POPUP_KEY);
+    if (cached !== null) return cached === 'true';
+  }
+  return true; // default enabled
+}
+
+/**
+ * Updates the promo popup enabled status in Firestore and locally.
+ */
+export async function setPromoPopupStatus(enabled: boolean): Promise<void> {
+  localStorage.setItem(LOCAL_STORAGE_PROMO_POPUP_KEY, enabled ? 'true' : 'false');
+  window.dispatchEvent(new CustomEvent('promo-popup-status-changed', { detail: { enabled } }));
+
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    await setDoc(configRef, {
+      promoPopupEnabled: enabled,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (err) {
+    console.warn('Firestore promo popup sync notice:', err);
+  }
+}
+
+/**
+ * Retrieves all salon services. Merges any custom price/duration updates from Firestore
+ * or returns default OFFICIAL_SERVICES.
+ */
+export async function getCustomServices(): Promise<ServiceItem[]> {
+  try {
+    const snap = await getDocs(collection(db, 'services'));
+    if (!snap.empty) {
+      const firestoreServices: ServiceItem[] = snap.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      } as ServiceItem));
+
+      // Merge with default services to ensure no built-in service is lost
+      const serviceMap = new Map<string, ServiceItem>();
+      OFFICIAL_SERVICES.forEach(s => serviceMap.set(s.id, s));
+      firestoreServices.forEach(s => serviceMap.set(s.id, s));
+
+      const merged = Array.from(serviceMap.values());
+      localStorage.setItem(LOCAL_STORAGE_SERVICES_KEY, JSON.stringify(merged));
+      return merged;
+    }
+  } catch (err) {
+    console.warn('Could not read services from Firestore:', err);
+  }
+
+  // Local storage fallback
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem(LOCAL_STORAGE_SERVICES_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+  }
+
+  return OFFICIAL_SERVICES;
+}
+
+/**
+ * Saves or updates a service (price, duration, description, etc.) in Firestore.
+ */
+export async function saveCustomService(service: ServiceItem): Promise<void> {
+  await ensureFirebaseAuth();
+  const serviceId = service.id || `srv_${Date.now()}`;
+  const payload = {
+    ...service,
+    id: serviceId,
+    updatedAt: serverTimestamp()
+  };
+
+  try {
+    const ref = doc(db, 'services', serviceId);
+    await setDoc(ref, payload, { merge: true });
+  } catch (err) {
+    console.warn('Firestore service save notice:', err);
+  }
+
+  // Update local cache
+  const current = await getCustomServices();
+  const idx = current.findIndex(s => s.id === serviceId);
+  if (idx !== -1) {
+    current[idx] = { ...current[idx], ...service };
+  } else {
+    current.push({ ...service, id: serviceId });
+  }
+  localStorage.setItem(LOCAL_STORAGE_SERVICES_KEY, JSON.stringify(current));
+  window.dispatchEvent(new CustomEvent('services-updated', { detail: { services: current } }));
+}
+
+/**
+ * Fast helper to update just the price and duration of a service.
+ */
+export async function updateServicePrice(
+  id: string, 
+  newPrice: string, 
+  newNumericPrice?: number, 
+  newDuration?: string,
+  newDescription?: string
+): Promise<void> {
+  const current = await getCustomServices();
+  const target = current.find(s => s.id === id);
+  if (!target) return;
+
+  const updated: ServiceItem = {
+    ...target,
+    price: newPrice,
+    numericPrice: newNumericPrice !== undefined ? newNumericPrice : parseInt(newPrice.replace(/[^0-9]/g, '')) || target.numericPrice,
+    ...(newDuration ? { duration: newDuration } : {}),
+    ...(newDescription ? { description: newDescription } : {})
+  };
+
+  await saveCustomService(updated);
+}
+
+/**
+ * Deletes a custom service from Firestore.
+ */
+export async function deleteCustomService(id: string): Promise<void> {
+  try {
+    await ensureFirebaseAuth();
+    await deleteDoc(doc(db, 'services', id));
+  } catch (err) {
+    console.warn('Could not delete service from Firestore:', err);
+  }
+
+  const current = await getCustomServices();
+  const filtered = current.filter(s => s.id !== id);
+  localStorage.setItem(LOCAL_STORAGE_SERVICES_KEY, JSON.stringify(filtered));
+  window.dispatchEvent(new CustomEvent('services-updated', { detail: { services: filtered } }));
+}
+
+/**
+ * Resets all services back to shop official defaults.
+ */
+export async function resetServicesToDefault(): Promise<ServiceItem[]> {
+  localStorage.setItem(LOCAL_STORAGE_SERVICES_KEY, JSON.stringify(OFFICIAL_SERVICES));
+  window.dispatchEvent(new CustomEvent('services-updated', { detail: { services: OFFICIAL_SERVICES } }));
+  return OFFICIAL_SERVICES;
+}
+
+/**
+ * Retrieves all "Devis Pro" / Corporate & Event quote requests from Firestore.
+ */
+export async function getProQuotes(): Promise<ProQuoteRequest[]> {
+  try {
+    const q = query(collection(db, 'pro_quotes'), orderBy('createdAt', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() } as ProQuoteRequest));
+      localStorage.setItem(LOCAL_STORAGE_PRO_QUOTES_KEY, JSON.stringify(list));
+      return list;
+    }
+  } catch (err) {
+    console.warn('Could not fetch pro quotes from Firestore:', err);
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem(LOCAL_STORAGE_PRO_QUOTES_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+  }
+  return [
+    {
+      id: 'pro-sample-1',
+      ticketId: 'PRO-201',
+      clientName: 'Thomas Beaumont',
+      companyName: 'Studio Production San Diego',
+      phone: '(619) 555-8392',
+      email: 'thomas@studiosd.com',
+      serviceType: 'Tournage / VIP Backstage',
+      headcount: 6,
+      eventDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
+      location: 'Studio Downtown SD',
+      estimatedBudget: '$600 - $900',
+      notes: 'Grooming & coiffure pour 6 acteurs avant tournage pub',
+      status: 'new',
+      createdAt: null
+    },
+    {
+      id: 'pro-sample-2',
+      ticketId: 'PRO-202',
+      clientName: 'David K.',
+      companyName: 'Mariage K. & M.',
+      phone: '(619) 555-4019',
+      email: 'david.k@gmail.com',
+      serviceType: 'Mariage / Groomsmen',
+      headcount: 5,
+      eventDate: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
+      location: 'Final Stop Lounge (Privatisé)',
+      estimatedBudget: '$450+',
+      notes: 'Matinée complète pour marié et 4 témoins : coupes, barbes et serviettes chaudes',
+      status: 'contacted',
+      createdAt: null
+    }
+  ];
+}
+
+/**
+ * Saves a new Pro Quote request to Firestore.
+ */
+export async function saveProQuote(data: Omit<ProQuoteRequest, 'id'>): Promise<string> {
+  await ensureFirebaseAuth();
+  const payload = {
+    ...data,
+    createdAt: serverTimestamp()
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, 'pro_quotes'), payload);
+    const savedId = docRef.id;
+
+    const current = await getProQuotes();
+    current.unshift({ ...data, id: savedId });
+    localStorage.setItem(LOCAL_STORAGE_PRO_QUOTES_KEY, JSON.stringify(current));
+    window.dispatchEvent(new CustomEvent('pro-quotes-updated', { detail: { quotes: current } }));
+
+    return savedId;
+  } catch (err) {
+    console.warn('Firestore pro quote write error:', err);
+    const fallbackId = 'pro_' + Date.now();
+    const current = await getProQuotes();
+    current.unshift({ ...data, id: fallbackId });
+    localStorage.setItem(LOCAL_STORAGE_PRO_QUOTES_KEY, JSON.stringify(current));
+    window.dispatchEvent(new CustomEvent('pro-quotes-updated', { detail: { quotes: current } }));
+    return fallbackId;
+  }
+}
+
+/**
+ * Updates the status of a Pro Quote (new, contacted, quoted, approved, declined).
+ */
+export async function updateProQuoteStatus(docId: string, status: ProQuoteRequest['status']): Promise<void> {
+  try {
+    const ref = doc(db, 'pro_quotes', docId);
+    await updateDoc(ref, { 
+      status,
+      updatedAt: serverTimestamp() 
+    });
+  } catch (err) {
+    console.warn('Could not update pro quote in Firestore:', err);
+  }
+
+  const current = await getProQuotes();
+  const idx = current.findIndex(q => q.id === docId || q.ticketId === docId);
+  if (idx !== -1) {
+    current[idx].status = status;
+    localStorage.setItem(LOCAL_STORAGE_PRO_QUOTES_KEY, JSON.stringify(current));
+    window.dispatchEvent(new CustomEvent('pro-quotes-updated', { detail: { quotes: current } }));
+  }
+}
+
+/**
+ * Deletes a Pro Quote request from Firestore.
+ */
+export async function deleteProQuote(docId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'pro_quotes', docId));
+  } catch (err) {
+    console.warn('Could not delete pro quote:', err);
+  }
+
+  const current = await getProQuotes();
+  const filtered = current.filter(q => q.id !== docId && q.ticketId !== docId);
+  localStorage.setItem(LOCAL_STORAGE_PRO_QUOTES_KEY, JSON.stringify(filtered));
+  window.dispatchEvent(new CustomEvent('pro-quotes-updated', { detail: { quotes: filtered } }));
 }
 
 

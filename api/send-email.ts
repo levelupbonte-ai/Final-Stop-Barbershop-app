@@ -10,7 +10,7 @@ export default async function handler(req: any, res: any) {
     console.warn('RESEND_API_KEY is not set. Skipping email dispatch.');
     return res.status(200).json({ 
       success: false, 
-      message: 'RESEND_API_KEY not configured. Add it in Vercel environment variables.' 
+      message: 'RESEND_API_KEY not configured. Add it in environment variables.' 
     });
   }
 

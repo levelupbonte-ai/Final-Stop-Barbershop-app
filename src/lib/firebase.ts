@@ -20,16 +20,16 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Add calendar scopes to provider
-googleProvider.addScope('https://www.googleapis.com/auth/calendar');
-googleProvider.addScope('https://www.googleapis.com/auth/presentations');
-
 export const loginWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
-  } catch (error) {
-    console.error('Error signing in with Google', error);
+  } catch (error: any) {
+    if (error?.code === 'auth/unauthorized-domain' || error?.message?.includes('unauthorized-domain')) {
+      console.warn('Firebase Auth: Current domain is not in the Firebase Authorized Domains list.', error);
+    } else {
+      console.error('Error signing in with Google:', error);
+    }
     throw error;
   }
 };

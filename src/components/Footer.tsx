@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Instagram, Facebook, Twitter, MapPin, Phone, Mail, ExternalLink, ShieldCheck, Lock } from 'lucide-react';
 import { NavView } from './Navbar';
 
 interface FooterProps {
@@ -175,16 +175,16 @@ export default function Footer({
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="/admin"
-              onClick={(e) => {
-                e.preventDefault();
-                onNavigateToView?.('admin');
-              }}
-              className="hover:text-gold text-gray-400 transition-colors cursor-pointer text-[11px] font-mono flex items-center gap-1"
+            <button
+              type="button"
+              onClick={() => onNavigateToView?.('admin')}
+              className="text-white/20 hover:text-gold/80 transition-all cursor-pointer p-1 rounded-xs hover:bg-white/5 flex items-center gap-1 group bg-transparent border-none"
+              title="Staff Access"
+              aria-label="Staff Access"
             >
-              <span>Portail Admin</span>
-            </a>
+              <Lock className="w-2.5 h-2.5 text-white/30 group-hover:text-gold transition-colors" />
+              <span className="text-[9px] uppercase tracking-widest text-white/25 group-hover:text-gold/80 transition-colors font-mono">Staff</span>
+            </button>
             <span className="text-white/20">&bull;</span>
             <button
               type="button"
