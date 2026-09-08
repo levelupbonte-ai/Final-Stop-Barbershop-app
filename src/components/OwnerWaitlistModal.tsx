@@ -30,7 +30,7 @@ export default function OwnerWaitlistModal({
       setIsAuthenticated(true);
       setErrorMessage('');
     } else {
-      setErrorMessage('Incorrect PIN. (Default PIN: 1234)');
+      setErrorMessage('Code PIN incorrect. Veuillez réessayer.');
     }
   };
 
@@ -102,7 +102,6 @@ export default function OwnerWaitlistModal({
             <div>
               <label className="text-[11px] font-mono uppercase text-gray-300 block mb-1.5 flex items-center justify-between">
                 <span>Enter Owner PIN</span>
-                <span className="text-[10px] text-gray-500 lowercase">(Default: {DEFAULT_OWNER_PIN})</span>
               </label>
               <div className="relative">
                 <input

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Menu, X, Calendar, Phone, Search, Users, Scissors, Award, Database, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Menu, X, Calendar, Phone, Search, Users, ChevronRight, ChevronLeft, ChevronDown } from 'lucide-react';
 
 export type NavView = 'home' | 'barbers' | 'services' | 'waitlist' | 'gallery' | 'reviews' | 'route' | 'admin';
 
@@ -26,6 +26,9 @@ export default function Navbar({
 }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,6 +37,28 @@ export default function Navbar({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const checkScrollability = () => {
+    if (navContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = navContainerRef.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollability();
+    window.addEventListener('resize', checkScrollability);
+    return () => window.removeEventListener('resize', checkScrollability);
+  }, []);
+
+  const handleScrollMenu = (direction: 'left' | 'right') => {
+    if (navContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -180 : 180;
+      navContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(checkScrollability, 300);
+    }
+  };
 
   const navLinks: { name: string; view: NavView; badge?: string }[] = [
     { name: 'Home', view: 'home' },
@@ -56,13 +81,13 @@ export default function Navbar({
     <nav className={`fixed w-full z-40 transition-all duration-300 ${
       isScrolled ? 'bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 py-3' : 'bg-gradient-to-b from-[#0A0A0B]/95 to-transparent py-4'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center gap-4">
         
-        {/* Brand Logo Only */}
+        {/* Brand Logo */}
         <button 
           type="button"
           onClick={() => handleLinkClick('home')}
-          className="flex items-center group bg-transparent border-none p-0 cursor-pointer"
+          className="flex items-center group bg-transparent border-none p-0 cursor-pointer shrink-0"
           aria-label="Final Stop Barber Shop Home"
         >
           <img 
@@ -73,37 +98,65 @@ export default function Navbar({
           />
         </button>
 
-        {/* Desktop Menu Links */}
-        <div className="hidden lg:flex items-center gap-5 xl:gap-6">
-          <ul className="flex items-center gap-4 xl:gap-5">
-            {navLinks.map((link) => (
-              <li key={link.name}>
-                <button 
-                  type="button"
-                  onClick={() => handleLinkClick(link.view)}
-                  className={`text-xs uppercase tracking-wider font-semibold transition-colors cursor-pointer bg-transparent border-none py-1 relative ${
-                    currentView === link.view 
-                      ? 'text-gold font-bold' 
-                      : 'text-gray-200 hover:text-gold'
-                  }`}
-                >
-                  <span>{link.name}</span>
-                  {link.badge && (
-                    <span className="ml-1.5 text-[10px] font-mono text-gold bg-gold/15 px-1.5 py-0.5 rounded-xs border border-gold/40 font-bold">
-                      {link.badge}
-                    </span>
-                  )}
-                  {currentView === link.view && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gold"></span>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
+        {/* Desktop Menu Links with PC Scroll Indicators */}
+        <div className="hidden lg:flex items-center relative min-w-0 max-w-2xl">
+          {canScrollLeft && (
+            <button
+              type="button"
+              onClick={() => handleScrollMenu('left')}
+              className="absolute -left-3 z-10 p-1 rounded-full bg-[#111115] border border-white/20 text-gold hover:text-white shadow-md cursor-pointer"
+              title="Scroll previous items"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <div
+            ref={navContainerRef}
+            onScroll={checkScrollability}
+            className="overflow-x-auto no-scrollbar py-1 px-1 flex items-center"
+          >
+            <ul className="flex items-center gap-4 xl:gap-5 whitespace-nowrap">
+              {navLinks.map((link) => (
+                <li key={link.name}>
+                  <button 
+                    type="button"
+                    onClick={() => handleLinkClick(link.view)}
+                    className={`text-xs uppercase tracking-wider font-semibold transition-colors cursor-pointer bg-transparent border-none py-1 relative whitespace-nowrap ${
+                      currentView === link.view 
+                        ? 'text-gold font-bold' 
+                        : 'text-gray-200 hover:text-gold'
+                    }`}
+                  >
+                    <span>{link.name}</span>
+                    {link.badge && (
+                      <span className="ml-1.5 text-[10px] font-mono text-gold bg-gold/15 px-1.5 py-0.5 rounded-xs border border-gold/40 font-bold">
+                        {link.badge}
+                      </span>
+                    )}
+                    {currentView === link.view && (
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gold"></span>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {canScrollRight && (
+            <button
+              type="button"
+              onClick={() => handleScrollMenu('right')}
+              className="absolute -right-3 z-10 p-1 rounded-full bg-[#111115] border border-gold/50 text-gold hover:text-white shadow-md cursor-pointer animate-pulse"
+              title="Scroll more menu items"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Clean Top Actions */}
-        <div className="hidden sm:flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={onOpenCallModal}
@@ -148,18 +201,19 @@ export default function Navbar({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-[#0A0A0B]/98 backdrop-blur-xl border-b border-white/10 py-5 px-6 shadow-2xl animate-fadeIn">
+        <div className="lg:hidden absolute top-full left-0 w-full max-h-[85vh] overflow-y-auto bg-[#0A0A0B]/98 backdrop-blur-xl border-b border-white/10 py-5 px-6 shadow-2xl animate-fadeIn">
           <ul className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <li key={link.name}>
                 <button 
                   type="button"
                   onClick={() => handleLinkClick(link.view)}
-                  className={`w-full text-left block text-sm font-serif font-medium uppercase tracking-wider py-1.5 bg-transparent border-none cursor-pointer ${
+                  className={`w-full text-left flex items-center justify-between text-sm font-serif font-medium uppercase tracking-wider py-1.5 bg-transparent border-none cursor-pointer ${
                     currentView === link.view ? 'text-gold font-bold' : 'text-gray-200 hover:text-gold'
                   }`}
                 >
-                  {link.name}
+                  <span>{link.name}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-500" />
                 </button>
               </li>
             ))}
@@ -212,6 +266,12 @@ export default function Navbar({
                 <Phone className="w-3.5 h-3.5 text-gold" />
                 <span>Direct Line: (619) 886-1267</span>
               </button>
+            </li>
+
+            {/* Mobile Scroll indicator prompt */}
+            <li className="text-center pt-2 text-[10px] text-gray-500 font-mono flex items-center justify-center gap-1">
+              <span>Scroll for more options</span>
+              <ChevronDown className="w-3 h-3 text-gold animate-bounce" />
             </li>
           </ul>
         </div>

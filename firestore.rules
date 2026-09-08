@@ -46,6 +46,11 @@ service cloud.firestore {
     match /gallery/{imageId} {
       allow read, write: if true;
     }
+
+    // Professional quote requests
+    match /pro_quotes/{quoteId} {
+      allow read, write: if true;
+    }
     
     // User accounts
     match /users/{userId} {

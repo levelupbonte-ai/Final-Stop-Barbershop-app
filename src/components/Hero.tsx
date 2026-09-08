@@ -1,12 +1,16 @@
-import { ChevronRight, Calendar } from 'lucide-react';
+import { ChevronRight, Calendar, ChevronDown } from 'lucide-react';
 
 interface HeroProps {
   onNavigateToBooking?: () => void;
 }
 
 export default function Hero({ onNavigateToBooking }: HeroProps) {
+  const handleScrollDown = () => {
+    window.scrollBy({ top: window.innerHeight * 0.75, behavior: 'smooth' });
+  };
+
   return (
-    <section className="relative min-h-[85vh] md:min-h-[92vh] flex items-center justify-center border-b border-white/10 pt-24 pb-16 px-6 bg-[#0A0A0B]">
+    <section className="relative min-h-[88vh] md:min-h-[94vh] flex items-center justify-center border-b border-white/10 pt-24 pb-20 px-6 bg-[#0A0A0B]">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-hero-pattern opacity-50 mix-blend-luminosity z-0"></div>
       <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-[#0A0A0B]/40 to-[#0A0A0B]/80 z-0"></div>
@@ -54,6 +58,19 @@ export default function Hero({ onNavigateToBooking }: HeroProps) {
           </a>
         </div>
       </div>
+
+      {/* Scroll Down Indicator Arrow (Mobile & Desktop) */}
+      <button
+        type="button"
+        onClick={handleScrollDown}
+        className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-gray-400 hover:text-gold transition-all duration-300 cursor-pointer group select-none bg-transparent border-none p-2"
+        aria-label="Scroll down to read more"
+      >
+        <span className="text-[10px] font-mono tracking-widest uppercase text-gray-400 group-hover:text-gold transition-colors">
+          Scroll Down
+        </span>
+        <ChevronDown className="w-4 h-4 text-gold animate-bounce" />
+      </button>
     </section>
   );
 }

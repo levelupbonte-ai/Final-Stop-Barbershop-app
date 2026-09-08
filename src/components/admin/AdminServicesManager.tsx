@@ -109,7 +109,7 @@ export default function AdminServicesManager() {
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors de la mise à jour du tarif.'
+        text: 'Erreur lors de la mise à jour du tarif. Veuillez réessayer.'
       });
     } finally {
       setIsUpdating(false);
@@ -154,7 +154,7 @@ export default function AdminServicesManager() {
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors de la création de la prestation.'
+        text: 'Erreur lors de la création de la prestation. Veuillez réessayer.'
       });
     } finally {
       setIsAdding(false);
@@ -174,7 +174,7 @@ export default function AdminServicesManager() {
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors de la suppression.'
+        text: 'Erreur lors de la suppression de la prestation.'
       });
     }
   };
@@ -194,7 +194,7 @@ export default function AdminServicesManager() {
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors de la réinitialisation.'
+        text: 'Erreur lors de la réinitialisation des tarifs.'
       });
     } finally {
       setIsLoading(false);

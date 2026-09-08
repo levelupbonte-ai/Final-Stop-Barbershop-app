@@ -20,7 +20,8 @@ import {
   getProQuotes, 
   updateProQuoteStatus, 
   deleteProQuote, 
-  ProQuoteRequest 
+  ProQuoteRequest,
+  extractDateString
 } from '../../lib/firestoreService';
 
 export default function AdminProQuotesManager() {
@@ -50,13 +51,13 @@ export default function AdminProQuotesManager() {
       await updateProQuoteStatus(quoteId, nextStatus);
       setNotification({
         type: 'success',
-        text: `Statut du devis #${quoteId.slice(0, 8)} mis à jour en "${nextStatus}".`
+        text: `Statut de la demande mis à jour en "${nextStatus}".`
       });
       await loadQuotes();
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors de la mise à jour du statut.'
+        text: 'Erreur lors de la mise à jour du statut. Veuillez réessayer.'
       });
     }
   };
@@ -73,7 +74,7 @@ export default function AdminProQuotesManager() {
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || 'Erreur lors de la suppression.'
+        text: 'Erreur lors de la suppression de la demande.'
       });
     }
   };
@@ -187,7 +188,7 @@ export default function AdminProQuotesManager() {
                     {getStatusBadge(quote.status)}
                   </div>
                   <p className="text-[11px] text-gray-400 font-mono">
-                    Type d'événement : <strong className="text-gray-200">{quote.serviceType}</strong> &bull; Reçu le {quote.createdAt?.split('T')[0] || 'récemment'}
+                    Type d'événement : <strong className="text-gray-200">{quote.serviceType}</strong> &bull; Reçu le {extractDateString(quote.createdAt) || 'récemment'}
                   </p>
                 </div>
 

@@ -20,7 +20,8 @@ import {
   updateWaitlistStatus, 
   moveWaitlistToFront, 
   reorderWaitlistQueue,
-  archiveOldWaitlistTickets
+  archiveOldWaitlistTickets,
+  extractDateString
 } from '../../lib/firestoreService';
 
 interface AdminWaitlistManagerProps {
@@ -48,7 +49,7 @@ export default function AdminWaitlistManager({
   const filteredWaitlist = waitlist.filter((entry) => {
     // Date filter
     if (dateFilter === 'today') {
-      const entryDate = entry.joinedDate || (entry.createdAt ? entry.createdAt.split('T')[0] : '');
+      const entryDate = entry.joinedDate || extractDateString(entry.createdAt);
       if (entryDate && entryDate !== todayStr) {
         return false;
       }
@@ -147,7 +148,7 @@ export default function AdminWaitlistManager({
     } catch (err: any) {
       setNotification({
         type: 'error',
-        text: err?.message || "Erreur lors de l'archivage des anciens tickets."
+        text: err?.message || "Error while resetting old tickets."
       });
     }
   };
@@ -160,11 +161,11 @@ export default function AdminWaitlistManager({
           <div className="flex items-center gap-2 mb-1">
             <Users className="w-5 h-5 text-gold" />
             <h3 className="text-lg font-serif font-bold text-white">
-              Gestion de la File d'Attente Walk-In ({filteredWaitlist.length})
+              Walk-In Queue Management ({filteredWaitlist.length})
             </h3>
           </div>
           <p className="text-xs text-gray-400">
-            Ordonnez la file en temps réel, faites passer un client prioritaire devant, et changez les étapes de progression.
+            Reorder live queue tickets in real time, move VIP clients forward, and manage progression steps.
           </p>
         </div>
 
@@ -180,7 +181,7 @@ export default function AdminWaitlistManager({
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${isWaitlistOpen ? 'bg-white animate-pulse' : 'bg-red-400'}`} />
-            <span>{isWaitlistOpen ? 'File Ouverte aux Inscriptions' : 'File Fermée (Complet)'}</span>
+            <span>{isWaitlistOpen ? 'Walk-Ins OPEN (Active Registration)' : 'Walk-Ins CLOSED (Lounge Full)'}</span>
           </button>
         </div>
       </div>
@@ -197,7 +198,7 @@ export default function AdminWaitlistManager({
             <span>{notification.text}</span>
           </div>
           <button 
-            type="button"
+            type="button" 
             onClick={() => setNotification(null)}
             className="text-gray-400 hover:text-white cursor-pointer bg-transparent border-none"
           >
@@ -211,7 +212,7 @@ export default function AdminWaitlistManager({
         
         {/* Date Selector (Day vs All) */}
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 font-bold uppercase text-[10px]">Affichage :</span>
+          <span className="text-gray-400 font-bold uppercase text-[10px]">View:</span>
           <button
             type="button"
             onClick={() => setDateFilter('today')}
@@ -221,7 +222,7 @@ export default function AdminWaitlistManager({
                 : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
             }`}
           >
-            Aujourd'hui ({todayStr})
+            Today ({todayStr})
           </button>
           <button
             type="button"
@@ -232,37 +233,37 @@ export default function AdminWaitlistManager({
                 : 'bg-white/5 text-gray-400 hover:text-white border border-white/10'
             }`}
           >
-            Toutes les dates
+            All Dates
           </button>
         </div>
 
         {/* Barber filter */}
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 font-bold uppercase text-[10px]">Barbier :</span>
+          <span className="text-gray-400 font-bold uppercase text-[10px]">Barber:</span>
           <select
             value={barberFilter}
             onChange={(e) => setBarberFilter(e.target.value)}
             className="bg-black/60 border border-white/20 focus:border-gold px-2.5 py-1.5 text-xs text-white rounded-xs outline-none"
           >
-            <option value="all">Tous les barbiers</option>
-            <option value="Lusca">Lusca (Coupes)</option>
-            <option value="Mika">Mika (Tresses)</option>
+            <option value="all">All Barbers</option>
+            <option value="Lusca">Lusca (Haircuts & Fades)</option>
+            <option value="Mika">Mika (Braids & Locs)</option>
           </select>
         </div>
 
         {/* Status filter */}
         <div className="flex items-center gap-2">
-          <span className="text-gray-400 font-bold uppercase text-[10px]">Statut :</span>
+          <span className="text-gray-400 font-bold uppercase text-[10px]">Status:</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-black/60 border border-white/20 focus:border-gold px-2.5 py-1.5 text-xs text-white rounded-xs outline-none"
           >
-            <option value="active">En attente / Au fauteuil</option>
-            <option value="all">Tous les tickets</option>
-            <option value="waiting">En attente uniquement</option>
-            <option value="served">Servis / Terminés</option>
-            <option value="cancelled">Annulés</option>
+            <option value="active">Active (Waiting & In Chair)</option>
+            <option value="all">All Tickets</option>
+            <option value="waiting">Waiting Only</option>
+            <option value="served">Served / Completed</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
 
@@ -272,10 +273,10 @@ export default function AdminWaitlistManager({
             type="button"
             onClick={handleArchiveOldTickets}
             className="px-3 py-1.5 bg-white/5 hover:bg-gold/20 text-gray-300 hover:text-gold border border-white/15 hover:border-gold/50 rounded-xs text-[11px] font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
-            title="Archiver les tickets passés et commencer une nouvelle file d'attente du jour"
+            title="Archive past tickets and start a clean daily queue"
           >
             <Sparkles className="w-3.5 h-3.5 text-gold" />
-            <span>File du Jour Uniquement (Nettoyer)</span>
+            <span>Reset Today's Queue</span>
           </button>
         </div>
 
@@ -288,8 +289,8 @@ export default function AdminWaitlistManager({
             <Clock className="w-8 h-8 text-gold/60 mx-auto" />
             <p>
               {dateFilter === 'today'
-                ? "Aucun client dans la file d'attente d'aujourd'hui."
-                : "Aucun client enregistré dans cette catégorie."}
+                ? "No clients in today's walk-in waitlist queue."
+                : "No clients recorded under this filter."}
             </p>
           </div>
         ) : (
@@ -333,7 +334,7 @@ export default function AdminWaitlistManager({
                             disabled={index === 0 || isLoadingThis}
                             onClick={() => handleMoveOrder(index, 'up')}
                             className="p-1 bg-white/5 hover:bg-gold hover:text-black text-gray-400 rounded-xs disabled:opacity-20 cursor-pointer"
-                            title="Monter d'une place"
+                            title="Move Up"
                           >
                             <ArrowUp className="w-3 h-3" />
                           </button>
@@ -342,7 +343,7 @@ export default function AdminWaitlistManager({
                             disabled={index === filteredWaitlist.length - 1 || isLoadingThis}
                             onClick={() => handleMoveOrder(index, 'down')}
                             className="p-1 bg-white/5 hover:bg-gold hover:text-black text-gray-400 rounded-xs disabled:opacity-20 cursor-pointer"
-                            title="Descendre d'une place"
+                            title="Move Down"
                           >
                             <ArrowDown className="w-3 h-3" />
                           </button>
@@ -361,18 +362,18 @@ export default function AdminWaitlistManager({
                         </span>
                         {isFront && (
                           <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-xs uppercase tracking-wider animate-pulse">
-                            &bull; Prochain au Fauteuil
+                            &bull; Next In Chair
                           </span>
                         )}
                         {entry.status === 'in-chair' && (
                           <span className="text-[10px] font-mono font-bold text-purple-300 bg-purple-950/60 border border-purple-500/40 px-2 py-0.5 rounded-xs uppercase tracking-wider">
-                            &bull; Au Fauteuil Actuellement
+                            &bull; Currently In Chair
                           </span>
                         )}
                       </div>
 
                       <p className="text-xs text-gray-300 font-mono">
-                        <strong className="text-white">{entry.service}</strong> &bull; Barbier : <span className="text-gold font-bold">{entry.barber || 'Mika/Lusca'}</span>
+                        <strong className="text-white">{entry.service}</strong> &bull; Barber: <span className="text-gold font-bold">{entry.barber || 'Mika/Lusca'}</span>
                       </p>
 
                       <div className="flex items-center gap-3 text-[11px] text-gray-400 font-mono flex-wrap">
@@ -382,8 +383,8 @@ export default function AdminWaitlistManager({
                             <span>{entry.phone}</span>
                           </a>
                         )}
-                        <span>Temps estimé : ~{entry.estMinutes || 15} min</span>
-                        <span>Date : {entry.joinedDate || todayStr}</span>
+                        <span>Est. Duration: ~{entry.estMinutes || 15} min</span>
+                        <span>Date: {entry.joinedDate || todayStr}</span>
                       </div>
                     </div>
                   </div>
@@ -391,32 +392,32 @@ export default function AdminWaitlistManager({
                   {/* Middle: 4-Step Progress Bar (Client & Admin sync) */}
                   <div className="w-full lg:w-72 bg-black/40 p-2.5 rounded-xs border border-white/10">
                     <span className="text-[9px] font-mono uppercase text-gray-400 block mb-1 font-bold">
-                      Barre de progression en direct :
+                      Live Queue Progress:
                     </span>
                     <div className="grid grid-cols-4 gap-1 text-center text-[9px] font-mono">
                       <div className="bg-white/10 text-gray-300 py-1 rounded-xs">
-                        1. Inscrit
+                        1. Joined
                       </div>
                       <div className={`py-1 rounded-xs font-bold ${
                         entry.status === 'waiting'
                           ? 'bg-gold text-black'
                           : 'bg-white/10 text-gray-400'
                       }`}>
-                        2. En File
+                        2. Waiting
                       </div>
                       <div className={`py-1 rounded-xs font-bold ${
                         (entry.status === 'called' || entry.status === 'in-chair')
                           ? 'bg-purple-500 text-white'
                           : 'bg-white/5 text-gray-500'
                       }`}>
-                        3. Fauteuil
+                        3. In Chair
                       </div>
                       <div className={`py-1 rounded-xs font-bold ${
                         entry.status === 'served'
                           ? 'bg-blue-500 text-white'
                           : 'bg-white/5 text-gray-500'
                       }`}>
-                        4. Fini
+                        4. Finished
                       </div>
                     </div>
                   </div>
@@ -424,17 +425,17 @@ export default function AdminWaitlistManager({
                   {/* Right: Quick Action Controls */}
                   <div className="flex items-center gap-2 flex-wrap justify-end shrink-0">
                     
-                    {/* "Passer Devant" button for priority */}
+                    {/* Move to Front button for priority */}
                     {index > 0 && entry.status === 'waiting' && (
                       <button
                         type="button"
                         disabled={isLoadingThis}
                         onClick={() => handleMoveToFront(entry.id!, entry.name)}
                         className="px-2.5 py-1.5 bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 text-[11px] font-mono font-bold uppercase tracking-wider rounded-xs flex items-center gap-1 cursor-pointer transition-colors"
-                        title="Placer immédiatement en tête de file (Position #1)"
+                        title="Move immediately to Position #1"
                       >
                         <ChevronsUp className="w-3.5 h-3.5" />
-                        <span>Passer Devant (#1)</span>
+                        <span>Move to Front (#1)</span>
                       </button>
                     )}
 
@@ -447,11 +448,11 @@ export default function AdminWaitlistManager({
                         className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-mono font-bold uppercase rounded-xs flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
                       >
                         <Scissors className="w-3.5 h-3.5" />
-                        <span>Au Fauteuil</span>
+                        <span>In Chair</span>
                       </button>
                     )}
 
-                    {/* Step: Terminer / Complete */}
+                    {/* Step: Complete */}
                     {(entry.status === 'waiting' || entry.status === 'called' || entry.status === 'in-chair') && (
                       <button
                         type="button"
@@ -460,7 +461,7 @@ export default function AdminWaitlistManager({
                         className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-mono font-bold uppercase rounded-xs flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Terminé</span>
+                        <span>Completed</span>
                       </button>
                     )}
 
@@ -471,10 +472,10 @@ export default function AdminWaitlistManager({
                         disabled={isLoadingThis}
                         onClick={() => handleStatusUpdate(entry.id!, 'cancelled')}
                         className="px-2.5 py-1.5 bg-red-950/40 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 text-[11px] font-mono uppercase rounded-xs flex items-center gap-1 cursor-pointer transition-colors"
-                        title="Annuler ce ticket"
+                        title="Cancel this ticket"
                       >
                         <XCircle className="w-3.5 h-3.5" />
-                        <span>Annuler</span>
+                        <span>Cancel</span>
                       </button>
                     )}
 
@@ -486,7 +487,7 @@ export default function AdminWaitlistManager({
                         onClick={() => handleStatusUpdate(entry.id!, 'waiting')}
                         className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 text-[11px] font-mono uppercase rounded-xs cursor-pointer"
                       >
-                        Remettre en file
+                        Return to Queue
                       </button>
                     )}
 

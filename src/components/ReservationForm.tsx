@@ -24,6 +24,7 @@ export default function ReservationForm() {
   const [user, setUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((u) => {
@@ -33,13 +34,18 @@ export default function ReservationForm() {
   }, []);
 
   const handleBooking = async () => {
-    if (!selectedTime) return alert("Please select a time slot.");
+    setErrorMessage(null);
+    if (!selectedTime) {
+      setErrorMessage("Veuillez sélectionner un créneau horaire.");
+      return;
+    }
     
     let currentUser = user;
     if (!currentUser) {
       try {
         currentUser = await loginWithGoogle();
       } catch (err) {
+        setErrorMessage("Connexion annulée ou impossible.");
         return;
       }
     }
@@ -65,7 +71,7 @@ export default function ReservationForm() {
       setSelectedTime('');
     } catch (err) {
       console.error(err);
-      alert("An error occurred while booking. Please try again or call the shop.");
+      setErrorMessage("Une erreur est survenue lors de la réservation. Veuillez réessayer ou contacter le salon.");
     } finally {
       setIsSubmitting(false);
     }
@@ -242,6 +248,13 @@ export default function ReservationForm() {
                     ))}
                   </div>
                 </div>
+
+                {/* Error Message */}
+                {errorMessage && (
+                  <div className="p-3 bg-red-950/40 border border-red-500/30 text-red-300 text-xs font-mono">
+                    {errorMessage}
+                  </div>
+                )}
 
                 {/* Submit */}
                 <button

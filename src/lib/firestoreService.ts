@@ -70,6 +70,14 @@ export interface ProQuoteRequest {
   createdAt?: any;
 }
 
+export interface ShopSocialLinks {
+  instagram?: string;
+  tiktok?: string;
+  youtube?: string;
+  facebook?: string;
+  twitter?: string;
+}
+
 export interface ShopConfig {
   waitlistOpen: boolean;
   promoPopupEnabled?: boolean;
@@ -80,6 +88,17 @@ export interface ShopConfig {
   hoursWeekday: string;
   hoursSunday: string;
   adminAccessCode?: string;
+  socialLinks?: ShopSocialLinks;
+}
+
+export interface CollectedClientContact {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  source: 'appointment' | 'waitlist' | 'vip_club' | 'user_account';
+  lastActivity?: string;
+  notes?: string;
 }
 
 export interface FirestoreGalleryItem {
@@ -97,6 +116,60 @@ const LOCAL_STORAGE_RESERVATIONS_KEY = 'finalstop_reservations_cache';
 const LOCAL_STORAGE_WAITLIST_KEY = 'finalstop_waitlist_cache';
 const LOCAL_STORAGE_CONFIG_KEY = 'finalstop_config_cache';
 const LOCAL_STORAGE_GALLERY_KEY = 'finalstop_gallery_cache';
+
+/**
+ * Safely extracts a YYYY-MM-DD date string from any date format:
+ * - String (ISO string or YYYY-MM-DD)
+ * - Firestore Timestamp instance ({ toDate() })
+ * - Serialized Firestore Timestamp ({ seconds, _seconds })
+ * - JavaScript Date object
+ * - Milliseconds/Seconds numeric timestamp
+ */
+export function extractDateString(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'string') {
+    if (val.includes('T')) {
+      return val.split('T')[0];
+    }
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+      return val.slice(0, 10);
+    }
+    return val;
+  }
+  if (typeof val?.toDate === 'function') {
+    try {
+      return val.toDate().toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  }
+  if (val instanceof Date) {
+    try {
+      return val.toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  }
+  if (typeof val === 'object') {
+    const sec = val.seconds ?? val._seconds;
+    if (typeof sec === 'number') {
+      try {
+        return new Date(sec * 1000).toISOString().split('T')[0];
+      } catch {
+        return '';
+      }
+    }
+  }
+  if (typeof val === 'number' && !isNaN(val)) {
+    try {
+      const date = val > 1e11 ? new Date(val) : new Date(val * 1000);
+      return date.toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  }
+  return '';
+}
 
 // Helper to ensure authenticated state if needed
 export async function ensureFirebaseAuth() {
@@ -223,7 +296,14 @@ export async function getWaitlistQueue(includeCompleted: boolean = false): Promi
     const snap = await getDocs(q);
     if (!snap.empty) {
       const list = snap.docs
-        .map(d => ({ id: d.id, ...d.data() } as FirestoreWaitlistEntry));
+        .map(d => {
+          const data = d.data();
+          return {
+            id: d.id,
+            ...data,
+            joinedDate: data.joinedDate || extractDateString(data.createdAt) || new Date().toISOString().split('T')[0]
+          } as FirestoreWaitlistEntry;
+        });
       
       localStorage.setItem(LOCAL_STORAGE_WAITLIST_KEY, JSON.stringify(list));
       if (!includeCompleted) {
@@ -360,7 +440,7 @@ export async function archiveOldWaitlistTickets(): Promise<FirestoreWaitlistEntr
   
   // Conserver uniquement les tickets actifs du jour
   const activeToday = current.filter(item => {
-    const itemDate = item.joinedDate || (item.createdAt ? item.createdAt.split('T')[0] : '');
+    const itemDate = item.joinedDate || extractDateString(item.createdAt);
     const isToday = itemDate === todayStr || !itemDate;
     const isActive = item.status === 'waiting' || item.status === 'called' || item.status === 'in-chair';
     return isToday && isActive;
@@ -448,25 +528,100 @@ export async function setShopWaitlistOpen(isOpen: boolean): Promise<void> {
   }
 }
 
+export const DEFAULT_SHOP_CONFIG: ShopConfig = {
+  waitlistOpen: true,
+  promoPopupEnabled: true,
+  announcement: '',
+  phone1: '(619) 886-1267',
+  phone2: '(619) 928-7084',
+  address: '5277 El Cajon Blvd, San Diego, CA 92115',
+  hoursWeekday: 'Monday - Saturday: 10:00 AM - 6:00 PM',
+  hoursSunday: 'Sunday: Closed',
+  adminAccessCode: '92115',
+  socialLinks: {
+    instagram: 'https://instagram.com/finalstopbarbershop',
+    tiktok: 'https://tiktok.com/@finalstopbarbershop',
+    youtube: '',
+    facebook: '',
+    twitter: ''
+  }
+};
+
 /**
- * Retrieves the admin access code configured in Firestore database.
- * Returns null if no code is configured yet.
+ * Retrieves full shop configuration from Firestore database.
  */
-export async function getAdminAccessCode(): Promise<string | null> {
+export async function getShopConfig(): Promise<ShopConfig> {
   try {
     await ensureFirebaseAuth();
     const configRef = doc(db, 'shop_config', 'status');
     const snap = await getDoc(configRef);
     if (snap.exists()) {
       const data = snap.data();
-      if (data?.adminAccessCode && typeof data.adminAccessCode === 'string') {
-        return data.adminAccessCode;
+      return {
+        waitlistOpen: typeof data.waitlistOpen === 'boolean' ? data.waitlistOpen : true,
+        promoPopupEnabled: typeof data.promoPopupEnabled === 'boolean' ? data.promoPopupEnabled : true,
+        announcement: data.announcement || '',
+        phone1: data.phone1 || DEFAULT_SHOP_CONFIG.phone1,
+        phone2: data.phone2 || DEFAULT_SHOP_CONFIG.phone2,
+        address: data.address || DEFAULT_SHOP_CONFIG.address,
+        hoursWeekday: data.hoursWeekday || DEFAULT_SHOP_CONFIG.hoursWeekday,
+        hoursSunday: data.hoursSunday || DEFAULT_SHOP_CONFIG.hoursSunday,
+        adminAccessCode: data.adminAccessCode || DEFAULT_SHOP_CONFIG.adminAccessCode,
+        socialLinks: {
+          instagram: data.socialLinks?.instagram ?? DEFAULT_SHOP_CONFIG.socialLinks?.instagram,
+          tiktok: data.socialLinks?.tiktok ?? DEFAULT_SHOP_CONFIG.socialLinks?.tiktok,
+          youtube: data.socialLinks?.youtube ?? '',
+          facebook: data.socialLinks?.facebook ?? '',
+          twitter: data.socialLinks?.twitter ?? ''
+        }
+      };
+    }
+  } catch (err) {
+    console.warn('Could not read shop config from Firestore, using defaults:', err);
+  }
+  return DEFAULT_SHOP_CONFIG;
+}
+
+/**
+ * Updates shop configuration in Firestore database and notifies the application.
+ */
+export async function updateShopConfig(updates: Partial<ShopConfig>): Promise<void> {
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    await setDoc(configRef, {
+      ...updates,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('shop-config-changed', { detail: updates }));
+    }
+  } catch (err) {
+    console.error('Error updating shop config in Firestore:', err);
+    throw err;
+  }
+}
+
+/**
+ * Retrieves the admin access code configured in Firestore database.
+ * Returns '92115' as initial master default if not configured yet.
+ */
+export async function getAdminAccessCode(): Promise<string> {
+  try {
+    await ensureFirebaseAuth();
+    const configRef = doc(db, 'shop_config', 'status');
+    const snap = await getDoc(configRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data?.adminAccessCode && typeof data.adminAccessCode === 'string' && data.adminAccessCode.trim().length > 0) {
+        return data.adminAccessCode.trim();
       }
     }
   } catch (err) {
     console.warn('Could not read admin access code from Firestore:', err);
   }
-  return null;
+  return '92115';
 }
 
 /**
@@ -474,7 +629,7 @@ export async function getAdminAccessCode(): Promise<string | null> {
  */
 export async function setAdminAccessCode(newCode: string): Promise<void> {
   const cleanCode = newCode.trim();
-  if (!cleanCode) throw new Error('Le code d\'accès ne peut pas être vide.');
+  if (!cleanCode) throw new Error('Security access code cannot be empty.');
 
   await ensureFirebaseAuth();
   const configRef = doc(db, 'shop_config', 'status');
@@ -482,6 +637,10 @@ export async function setAdminAccessCode(newCode: string): Promise<void> {
     adminAccessCode: cleanCode,
     updatedAt: serverTimestamp()
   }, { merge: true });
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('shop-config-changed', { detail: { adminAccessCode: cleanCode } }));
+  }
 }
 
 /**
@@ -492,7 +651,7 @@ export async function resetAdminAccessCode(): Promise<void> {
     await ensureFirebaseAuth();
     const configRef = doc(db, 'shop_config', 'status');
     await updateDoc(configRef, {
-      adminAccessCode: deleteField(),
+      adminAccessCode: '92115',
       updatedAt: serverTimestamp()
     });
   } catch (err) {
@@ -503,12 +662,12 @@ export async function resetAdminAccessCode(): Promise<void> {
 
 /**
  * Verifies if entered code matches the code from Firestore database.
- * If no code has been initialized yet in the database, sets this code as the master code!
+ * If no code has been initialized yet in the database, sets '92115' as the master database code!
  */
 export async function verifyAdminAccessCode(enteredCode: string): Promise<{ valid: boolean; message?: string; isInitialSetup?: boolean }> {
   const cleanEntered = enteredCode.trim();
   if (!cleanEntered) {
-    return { valid: false, message: 'Veuillez saisir le code d\'accès de la boutique.' };
+    return { valid: false, message: 'Please enter the staff security PIN.' };
   }
 
   try {
@@ -516,31 +675,158 @@ export async function verifyAdminAccessCode(enteredCode: string): Promise<{ vali
     const configRef = doc(db, 'shop_config', 'status');
     const snap = await getDoc(configRef);
 
+    let storedCode = '92115';
+
     if (snap.exists()) {
       const data = snap.data();
       if (data?.adminAccessCode && typeof data.adminAccessCode === 'string' && data.adminAccessCode.trim().length > 0) {
-        const isMatch = cleanEntered.toLowerCase() === data.adminAccessCode.trim().toLowerCase();
-        if (isMatch) {
-          return { valid: true };
-        }
-        return { 
-          valid: false, 
-          message: 'Code de sécurité boutique incorrect. Vous pouvez réinitialiser le code ci-dessous si nécessaire.' 
-        };
+        storedCode = data.adminAccessCode.trim();
+      } else {
+        // Initialize Firestore with default '92115'
+        await setDoc(configRef, {
+          adminAccessCode: '92115',
+          updatedAt: serverTimestamp()
+        }, { merge: true });
       }
+    } else {
+      // Initialize shop config in Firestore with '92115'
+      await setDoc(configRef, {
+        ...DEFAULT_SHOP_CONFIG,
+        adminAccessCode: '92115',
+        updatedAt: serverTimestamp()
+      }, { merge: true });
     }
 
-    // If no code exists yet in Firestore, initialize securely with the code entered by the manager
-    await setDoc(configRef, {
-      adminAccessCode: cleanEntered,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    return { valid: true, isInitialSetup: true };
+    const isMatch = cleanEntered.toLowerCase() === storedCode.toLowerCase();
+    if (isMatch) {
+      return { valid: true };
+    }
+    return { 
+      valid: false, 
+      message: 'Invalid Staff PIN code. Access denied.' 
+    };
   } catch (err: any) {
     console.error('Error verifying admin access code in Firestore:', err);
-    return { valid: false, message: 'Erreur lors de la vérification du code d\'accès administrateur.' };
+    // Graceful fallback to default master code if offline
+    if (cleanEntered === '92115') {
+      return { valid: true };
+    }
+    return { valid: false, message: 'Verification error. Please check database connection.' };
   }
+}
+
+/**
+ * Retrieves all collected client contact emails across reservations, waitlist, VIP club, and users.
+ */
+export async function getClientContactList(): Promise<CollectedClientContact[]> {
+  const contactsMap = new Map<string, CollectedClientContact>();
+
+  try {
+    await ensureFirebaseAuth();
+
+    // 1. Fetch reservations
+    try {
+      const resSnap = await getDocs(collection(db, 'reservations'));
+      resSnap.forEach(docSnap => {
+        const d = docSnap.data();
+        const email = (d.email || d.clientEmail || '').trim().toLowerCase();
+        if (email && email.includes('@')) {
+          const name = d.clientName || d.name || 'Client';
+          const phone = d.phone || d.clientPhone || '';
+          const date = extractDateString(d.date) || extractDateString(d.createdAt) || 'Recent';
+          contactsMap.set(email, {
+            id: docSnap.id,
+            name,
+            email,
+            phone,
+            source: 'appointment',
+            lastActivity: date,
+            notes: `Service: ${d.service || 'Appointment'}`
+          });
+        }
+      });
+    } catch (e) {
+      console.warn('Reservations contacts notice:', e);
+    }
+
+    // 2. Fetch VIP club signups
+    try {
+      const vipSnap = await getDocs(collection(db, 'vip_club'));
+      vipSnap.forEach(docSnap => {
+        const d = docSnap.data();
+        const contact = (d.contact || d.email || '').trim().toLowerCase();
+        if (contact && contact.includes('@')) {
+          const existing = contactsMap.get(contact);
+          const date = extractDateString(d.createdAt) || 'VIP Member';
+          if (!existing) {
+            contactsMap.set(contact, {
+              id: docSnap.id,
+              name: d.name || 'VIP Member',
+              email: contact,
+              phone: d.phone || '',
+              source: 'vip_club',
+              lastActivity: date,
+              notes: `Code: ${d.codeGranted || 'FINALSTOP15'}`
+            });
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('VIP club contacts notice:', e);
+    }
+
+    // 3. Fetch Waitlist queue tickets
+    try {
+      const waitSnap = await getDocs(collection(db, 'waitlist'));
+      waitSnap.forEach(docSnap => {
+        const d = docSnap.data();
+        const email = (d.email || '').trim().toLowerCase();
+        if (email && email.includes('@')) {
+          if (!contactsMap.has(email)) {
+            contactsMap.set(email, {
+              id: docSnap.id,
+              name: d.clientName || d.name || 'Walk-In Guest',
+              email,
+              phone: d.phone || '',
+              source: 'waitlist',
+              lastActivity: extractDateString(d.createdAt) || 'Walk-In',
+              notes: `Barber: ${d.barber || 'Mika/Lusca'}`
+            });
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('Waitlist contacts notice:', e);
+    }
+
+    // 4. Fetch User accounts
+    try {
+      const userSnap = await getDocs(collection(db, 'users'));
+      userSnap.forEach(docSnap => {
+        const d = docSnap.data();
+        const email = (d.email || '').trim().toLowerCase();
+        if (email && email.includes('@')) {
+          if (!contactsMap.has(email)) {
+            contactsMap.set(email, {
+              id: docSnap.id,
+              name: d.displayName || d.name || 'Account User',
+              email,
+              source: 'user_account',
+              lastActivity: extractDateString(d.lastLogin) || 'Registered User',
+              notes: `Role: ${d.role || 'client'}`
+            });
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('Users contacts notice:', e);
+    }
+
+  } catch (err) {
+    console.error('Error fetching collected client contacts:', err);
+  }
+
+  return Array.from(contactsMap.values());
 }
 
 /**

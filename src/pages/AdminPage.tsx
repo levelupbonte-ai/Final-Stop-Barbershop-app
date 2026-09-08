@@ -35,7 +35,12 @@ import {
   AlertTriangle,
   Settings,
   Tag,
-  Link
+  Link,
+  ChevronLeft,
+  ChevronRight,
+  KeyRound,
+  Sliders,
+  Send
 } from 'lucide-react';
 import { 
   getReservations, 
@@ -58,6 +63,7 @@ import {
   setShopRedirectConfig,
   ShopRedirectConfig,
   archiveOldWaitlistTickets,
+  verifyAdminAccessCode,
   FirestoreReservation, 
   FirestoreWaitlistEntry,
   FirestoreGalleryItem
@@ -68,17 +74,26 @@ import { uploadImageToFreeCloud } from '../lib/freeImageUploadService';
 import AdminServicesManager from '../components/admin/AdminServicesManager';
 import AdminProQuotesManager from '../components/admin/AdminProQuotesManager';
 import AdminWaitlistManager from '../components/admin/AdminWaitlistManager';
+import AdminEmailMarketingManager from '../components/admin/AdminEmailMarketingManager';
+import AdminContentSettingsManager from '../components/admin/AdminContentSettingsManager';
 
 interface AdminPageProps {
-  onBackToHome: () => void;
+  onBackToHome?: () => void;
   isWaitlistOpen: boolean;
   onWaitlistToggle: (isOpen: boolean) => void;
 }
 
-type AdminTab = 'appointments' | 'waitlist' | 'services' | 'quotes' | 'gallery' | 'settings';
+export type AdminTab = 
+  | 'appointments' 
+  | 'waitlist' 
+  | 'services' 
+  | 'quotes' 
+  | 'marketing' 
+  | 'content' 
+  | 'gallery' 
+  | 'settings';
 
 export default function AdminPage({
-  onBackToHome,
   isWaitlistOpen,
   onWaitlistToggle
 }: AdminPageProps) {
@@ -93,17 +108,35 @@ export default function AdminPage({
     return false;
   });
   const [signInError, setSignInError] = useState<string | null>(null);
-  const [unauthorizedDomain, setUnauthorizedDomain] = useState<string | null>(null);
   const [unauthorizedEmail, setUnauthorizedEmail] = useState<string | null>(null);
   const [isFirstAdminNotice, setIsFirstAdminNotice] = useState(false);
-  const [copiedDomain, setCopiedDomain] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
+
+  // Staff PIN Security Gate (Requires correct PIN like 92115 before revealing Google Login)
+  const [isPinUnlocked, setIsPinUnlocked] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('finalstop_admin_pin_unlocked') === 'true';
+    }
+    return false;
+  });
+  const [enteredPin, setEnteredPin] = useState('');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [isCheckingPin, setIsCheckingPin] = useState(false);
+
+  // Tabs scroll reference for PC and Mobile smooth navigation
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -240 : 240;
+      tabsContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Redirection URL Management State
   const [redirectConfig, setRedirectConfig] = useState<ShopRedirectConfig>({
     redirectUrl: 'https://finalstop.org',
     redirectEnabled: false,
-    redirectLabel: 'Avis Google & Réseaux Sociaux'
+    redirectLabel: 'Google Reviews & Official Links'
   });
   const [isSavingRedirect, setIsSavingRedirect] = useState(false);
 
@@ -314,7 +347,6 @@ export default function AdminPage({
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
     setSignInError(null);
-    setUnauthorizedDomain(null);
     setUnauthorizedEmail(null);
     try {
       const user = await loginWithGoogle();
@@ -324,19 +356,8 @@ export default function AdminPage({
         await loadAllData();
       }
     } catch (err: any) {
-      const isDomainError = 
-        err?.code === 'auth/unauthorized-domain' || 
-        err?.message?.includes('unauthorized-domain');
-
-      if (isDomainError) {
-        const domain = typeof window !== 'undefined' ? window.location.hostname : 'ce domaine';
-        setUnauthorizedDomain(domain);
-        setSignInError(
-          `Connexion Google : Le domaine ${domain} n'est pas encore autorisé dans Firebase Console (Authentication > Settings > Authorized Domains).`
-        );
-      } else {
-        setSignInError(err?.message || 'Erreur lors de la connexion Google. Veuillez réessayer.');
-      }
+      // Keep error message discreet and simple for end users
+      setSignInError('Impossible de finaliser la connexion. Veuillez réessayer.');
     } finally {
       setIsSigningIn(false);
     }
@@ -402,14 +423,6 @@ export default function AdminPage({
     }
   };
 
-  const copyDomainToClipboard = () => {
-    if (unauthorizedDomain && typeof navigator !== 'undefined') {
-      navigator.clipboard.writeText(unauthorizedDomain);
-      setCopiedDomain(true);
-      setTimeout(() => setCopiedDomain(false), 2000);
-    }
-  };
-
   const handleSeedFirestore = async () => {
     setIsSeeding(true);
     setStatusMessage(null);
@@ -421,14 +434,14 @@ export default function AdminPage({
       if (dbRes.success) {
         setStatusMessage({ 
           type: 'success', 
-          text: `Firestore synchronized! Populated reservations, queue, and ${galRes.count} gallery photos.` 
+          text: `Données centrales synchronisées avec succès (${galRes.count} réalisations chargées).` 
         });
         await loadAllData();
       } else {
-        setStatusMessage({ type: 'error', text: dbRes.message });
+        setStatusMessage({ type: 'error', text: 'Impossible de synchroniser les données.' });
       }
     } catch (err: any) {
-      setStatusMessage({ type: 'error', text: err?.message || 'Sync failed' });
+      setStatusMessage({ type: 'error', text: 'Erreur lors de la synchronisation.' });
     } finally {
       setIsSeeding(false);
     }
@@ -548,7 +561,7 @@ export default function AdminPage({
 
       setStatusMessage({ 
         type: 'success', 
-        text: `"${newTitle}" a été enregistrée avec succès dans la base de données Firebase!` 
+        text: `"${newTitle}" a été ajoutée avec succès au portfolio !` 
       });
 
       // Reset form
@@ -560,7 +573,7 @@ export default function AdminPage({
     } catch (err: any) {
       setStatusMessage({ 
         type: 'error', 
-        text: err?.message || 'Erreur lors de l\'enregistrement de la photo dans Firestore.' 
+        text: 'Erreur lors de l\'enregistrement de la photo. Veuillez vérifier l\'image et réessayer.' 
       });
     } finally {
       setIsSavingImage(false);
@@ -570,13 +583,13 @@ export default function AdminPage({
 
   const handleDeleteImage = async (id?: string) => {
     if (!id) return;
-    if (window.confirm('Delete this photo from the Firestore database?')) {
+    if (window.confirm('Supprimer définitivement cette photo du portfolio ?')) {
       try {
         await deleteGalleryItem(id);
-        setStatusMessage({ type: 'success', text: 'Photo deleted from Firestore database.' });
+        setStatusMessage({ type: 'success', text: 'Photo retirée du portfolio.' });
         await loadAllData();
       } catch (err: any) {
-        setStatusMessage({ type: 'error', text: err?.message || 'Deletion error' });
+        setStatusMessage({ type: 'error', text: 'Erreur lors de la suppression de la photo.' });
       }
     }
   };
@@ -616,29 +629,17 @@ export default function AdminPage({
         </header>
 
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
-          <div className="max-w-md w-full bg-[#111115] border border-red-500/30 p-6 sm:p-8 rounded-xs text-center space-y-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-red-500/60" />
-
-            <div className="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center mx-auto text-red-400">
-              <ShieldAlert className="w-8 h-8" />
+          <div className="max-w-md w-full bg-[#111115] border border-white/10 p-6 sm:p-8 rounded-xs text-center space-y-6 shadow-2xl relative overflow-hidden">
+            <div className="w-14 h-14 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center mx-auto text-red-400">
+              <ShieldAlert className="w-7 h-7" />
             </div>
 
             <div className="space-y-2">
               <h1 className="text-xl font-serif font-bold text-white tracking-wide">
-                Accès Administrateur Non Autorisé
+                Accès Restreint
               </h1>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Le compte Google <strong className="text-gold font-mono">{currentUser.email}</strong> n'est pas répertorié dans la liste des administrateurs du salon.
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 p-4 rounded-xs text-left text-xs text-gray-300 space-y-2.5">
-              <div className="flex items-center gap-1.5 text-gold font-bold font-mono text-[11px] uppercase tracking-wider">
-                <Users className="w-3.5 h-3.5" />
-                <span>Comment obtenir l'accès ?</span>
-              </div>
-              <p className="text-[11px] text-gray-400 leading-relaxed">
-                Demandez à l'administrateur principal de <span className="text-white font-semibold">Final Stop Barber Shop</span> d'ajouter votre adresse email (<code className="text-gold font-mono">{currentUser.email}</code>) dans la section <strong>"Équipe Admins"</strong> du tableau de bord.
+                Cet espace est strictement réservé au personnel de Final Stop Barber Shop.
               </p>
             </div>
 
@@ -649,14 +650,14 @@ export default function AdminPage({
                 className="w-full py-3 px-4 bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all rounded-xs border border-white/20 cursor-pointer flex items-center justify-center gap-2"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Se connecter avec un autre compte Google</span>
+                <span>Se déconnecter</span>
               </button>
               <button
                 type="button"
                 onClick={onBackToHome}
-                className="text-xs text-gray-500 hover:text-gray-300 py-1 cursor-pointer bg-transparent border-none"
+                className="text-xs text-gray-400 hover:text-white py-1 cursor-pointer bg-transparent border-none"
               >
-                Retour à l'accueil
+                Retour au site public
               </button>
             </div>
           </div>
@@ -665,7 +666,7 @@ export default function AdminPage({
     );
   }
 
-  // Security Gate: 2-step verification (Code boutique -> Google Login)
+  // Security Gate: Staff verification
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
@@ -681,7 +682,7 @@ export default function AdminPage({
             </button>
             <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-gold border border-gold/30 bg-gold/5 px-2.5 py-1 rounded-xs">
               <Lock className="w-3 h-3 text-gold" />
-              <span>Accès Restreint</span>
+              <span>Accès Personnel</span>
             </div>
           </div>
         </header>
@@ -696,39 +697,28 @@ export default function AdminPage({
                   <Shield className="w-7 h-7 text-gold" />
                 </div>
                 <h1 className="text-xl sm:text-2xl font-serif font-bold text-white tracking-wide mb-1.5">
-                  Console Administrateur
+                  Espace Gestion
                 </h1>
                 <p className="text-xs text-gray-400 leading-relaxed">
-                  Espace sécurisé réservé à l'équipe de <span className="text-gold font-semibold">Final Stop Barber Shop</span>.
+                  Connexion réservée au personnel de <span className="text-gold font-semibold">Final Stop Barber Shop</span>.
                 </p>
               </div>
 
               {/* Auto-logout notification */}
               {autoLogoutNotice && (
-                <div className="bg-amber-500/15 border border-amber-500/40 p-3.5 rounded-xs text-left flex items-start gap-2.5 text-xs text-amber-300">
-                  <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">{autoLogoutNotice}</span>
+                <div className="bg-amber-500/15 border border-amber-500/40 p-3.5 rounded-xs text-center text-xs text-amber-300">
+                  <Clock className="w-4 h-4 text-amber-400 inline-block mr-2 align-middle" />
+                  <span className="leading-relaxed align-middle">{autoLogoutNotice}</span>
                 </div>
               )}
 
               {/* Sign in error notice */}
               {signInError && (
-                <div className="bg-red-500/10 border border-red-500/30 p-3.5 rounded-xs text-left flex items-start gap-2.5 text-xs text-red-300">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <span className="leading-relaxed">{signInError}</span>
+                <div className="bg-red-500/10 border border-red-500/30 p-3.5 rounded-xs text-center text-xs text-red-300">
+                  <AlertCircle className="w-4 h-4 text-red-400 inline-block mr-2 align-middle" />
+                  <span className="leading-relaxed align-middle">{signInError}</span>
                 </div>
               )}
-
-              {/* Explanatory Info Card */}
-              <div className="bg-gold/5 border border-gold/20 p-4 rounded-xs text-xs text-gray-300 leading-relaxed text-left space-y-2">
-                <div className="flex items-center gap-2 text-gold font-semibold text-xs uppercase tracking-wider">
-                  <Shield className="w-3.5 h-3.5" />
-                  <span>Accès Direct par Compte Google</span>
-                </div>
-                <p className="text-[11px] text-gray-400">
-                  Connectez-vous directement avec votre compte Google. La <strong>première personne connectée</strong> est automatiquement enregistrée comme administrateur principal et pourra inviter les autres membres de l'équipe.
-                </p>
-              </div>
 
               {/* Direct Google Sign In Button */}
               <div className="space-y-3 pt-1">
@@ -742,7 +732,7 @@ export default function AdminPage({
                   {isSigningIn ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin text-gray-800" />
-                      <span>Connexion Google en cours...</span>
+                      <span>Connexion en cours...</span>
                     </>
                   ) : (
                     <>
@@ -756,32 +746,10 @@ export default function AdminPage({
                     </>
                   )}
                 </button>
-
-                {unauthorizedDomain && (
-                  <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-xs text-left text-xs space-y-2.5">
-                    <div className="flex items-center gap-2 text-amber-400 font-bold">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span>Autorisation Requise pour l'Accès</span>
-                    </div>
-                    <p className="text-[11px] text-gray-300 leading-relaxed">
-                      L'accès administrateur depuis le domaine <code className="bg-black/60 px-1.5 py-0.5 rounded text-gold font-mono">{unauthorizedDomain}</code> requiert une autorisation active pour finalstop.org.
-                    </p>
-                    <div className="flex items-center gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={copyDomainToClipboard}
-                        className="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xs text-[10px] font-mono flex items-center gap-1 cursor-pointer transition-colors"
-                      >
-                        {copiedDomain ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedDomain ? 'Copié !' : 'Copier le domaine'}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <p className="text-[10px] text-gray-500 font-mono text-center pt-2">
-                Authentification finalstop.org sécurisée &bull; Final Stop Barber Shop
+                Espace sécurisé &bull; Final Stop Barber Shop
               </p>
             </div>
           </div>
