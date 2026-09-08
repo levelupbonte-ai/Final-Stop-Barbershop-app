@@ -1,6 +1,6 @@
 {
   "name": "Barber Shop Elite",
-  "description": "Premier San Diego barber shop offering precision skin fades, beard sculpting, traditional hot lather shaves, and live waitlist tracking.",
+  "description": "Premier San Diego unisex barber shop and hair artistry lounge. Precision skin fades, beard sculpting, women's and girls' protective braids, locs, and youth cuts.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

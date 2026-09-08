@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Check, Clock, User, Scissors, Loader2, Phone, MapPin } from 'lucide-react';
 import { format, addDays, startOfToday } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { loginWithGoogle, db, auth } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const SERVICES = [
-  { id: 'fade', name: 'Skin Fade & Coupe Précision', duration: '35 min', price: '$35' },
-  { id: 'barbe', name: 'Sculpture Barbe & Rasage Chaud', duration: '30 min', price: '$25' },
-  { id: 'combo', name: 'Combo Master : Coupe + Barbe', duration: '60 min', price: '$55' },
-  { id: 'braids', name: 'Braids & Tresses Homme', duration: '60-90 min', price: '$65+' },
-  { id: 'dreads', name: 'Dreadlocks & Retwist Complet', duration: '90 min', price: '$75+' },
-  { id: 'premium', name: 'Soin VIP Complet (Visage & Cheveux)', duration: '90 min', price: '$90' },
+  { id: 'fade', name: 'Skin Fade & Precision Haircut', duration: '35 min', price: '$35' },
+  { id: 'barbe', name: 'Beard Sculpting & Hot Lather Shave', duration: '30 min', price: '$25' },
+  { id: 'combo', name: 'The Signature Combo: Cut + Beard', duration: '60 min', price: '$55' },
+  { id: 'braids', name: 'Custom Braids & Cornrows', duration: '60-90 min', price: '$65+' },
+  { id: 'dreads', name: 'Dreadlocks & Full Retwist', duration: '90 min', price: '$75+' },
+  { id: 'premium', name: 'VIP Prestige Experience (Full Grooming)', duration: '90 min', price: '$90' },
 ];
 
 const TIME_SLOTS = [
@@ -34,7 +34,7 @@ export default function ReservationForm() {
   }, []);
 
   const handleBooking = async () => {
-    if (!selectedTime) return alert("Veuillez sélectionner un horaire.");
+    if (!selectedTime) return alert("Please select a time slot.");
     
     let currentUser = user;
     if (!currentUser) {
@@ -49,7 +49,7 @@ export default function ReservationForm() {
     try {
       const serviceObj = SERVICES.find(s => s.id === selectedService);
       
-      // Save to Firestore
+      // Save reservation
       await addDoc(collection(db, 'reservations'), {
         userId: currentUser.uid,
         name: currentUser.displayName,
@@ -66,7 +66,7 @@ export default function ReservationForm() {
       setSelectedTime('');
     } catch (err) {
       console.error(err);
-      alert("Une erreur s'est produite lors de la réservation.");
+      alert("An error occurred while booking. Please try again or call the shop.");
     } finally {
       setIsSubmitting(false);
     }
@@ -87,14 +87,14 @@ export default function ReservationForm() {
           <div className="flex-1 lg:py-6 flex flex-col justify-between">
             <div>
               <span className="text-gold text-[11px] uppercase tracking-[0.25em] font-mono font-bold block mb-3">
-                Prenez Rendez-Vous
+                Reserve Your Chair
               </span>
               <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">
-                Votre Expérience Privée.
+                Your Private Experience.
               </h2>
               <div className="h-1 w-20 bg-gold rounded-full mb-8"></div>
               <p className="text-gray-400 mb-8 text-sm md:text-base leading-relaxed">
-                Profitez d'un moment privilégié entre les mains de nos barbiers experts. Précision du trait, confort absolu et soins d'exception pour un style impeccable.
+                Enjoy a privileged session in the hands of master barbers with over two decades of dedicated craft. Razor sharpness, absolute comfort, and elevated grooming products.
               </p>
 
               <div className="space-y-4 mb-8">
@@ -103,7 +103,7 @@ export default function ReservationForm() {
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs text-gray-500 block uppercase tracking-wider">Téléphone</span>
+                    <span className="text-xs text-gray-500 block uppercase tracking-wider">Phone</span>
                     <a href="tel:16198861267" className="font-mono text-white hover:text-gold transition-colors font-bold">
                       +1 (619) 886-1267
                     </a>
@@ -115,7 +115,7 @@ export default function ReservationForm() {
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs text-gray-500 block uppercase tracking-wider">Adresse</span>
+                    <span className="text-xs text-gray-500 block uppercase tracking-wider">Address</span>
                     <span className="text-white">5277 El Cajon Blvd, San Diego, CA 92115</span>
                   </div>
                 </div>
@@ -126,14 +126,14 @@ export default function ReservationForm() {
             <div className="border border-white/10 overflow-hidden relative group shadow-xl">
               <img 
                 src="https://i.ibb.co/HTWwwJNz/Chat-GPT-Image-Sep-6-2026-03-11-02-PM-1.png" 
-                alt="Intérieur du Salon Final Stop" 
+                alt="Final Stop Barber Shop Interior" 
                 className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-105"
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-4">
                 <div>
                   <span className="text-gold font-mono text-[9px] tracking-widest uppercase block mb-0.5">Final Stop Barber Shop</span>
-                  <p className="text-white text-xs font-serif">5277 El Cajon Blvd, San Diego, CA &bull; Lun - Sam : 10h - 18h</p>
+                  <p className="text-white text-xs font-serif">5277 El Cajon Blvd, San Diego, CA &bull; Mon - Sat: 10:00 AM - 6:00 PM</p>
                 </div>
               </div>
             </div>
@@ -148,25 +148,25 @@ export default function ReservationForm() {
                   <div className="w-16 h-16 bg-green-900/20 border border-green-500/30 flex items-center justify-center mb-4">
                     <Check className="w-8 h-8 text-green-400" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2 font-serif">Rendez-vous Confirmé !</h3>
+                  <h3 className="text-xl font-bold text-white mb-2 font-serif">Appointment Confirmed!</h3>
                   <p className="text-gray-400 text-xs mb-6 max-w-sm">
-                    Votre créneau a été enregistré. Nos barbiers vous attendent avec impatience au 5277 El Cajon Blvd.
+                    Your spot is secured. Our barbers look forward to welcoming you at 5277 El Cajon Blvd.
                   </p>
                   <button 
                     onClick={() => setSuccess(false)}
-                    className="bg-gold text-black font-bold uppercase text-[11px] tracking-widest px-6 py-2.5"
+                    className="bg-gold text-black font-bold uppercase text-[11px] tracking-widest px-6 py-2.5 cursor-pointer"
                   >
-                    Nouvelle réservation
+                    New Reservation
                   </button>
                 </div>
               )}
 
               <div className="space-y-6">
                 
-                {/* 1. Prestations */}
+                {/* 1. Services */}
                 <div>
                   <label className="block text-xs uppercase tracking-widest font-bold text-gray-300 mb-2.5">
-                    1. Sélectionnez la prestation
+                    1. Select Service
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {SERVICES.map(service => (
@@ -198,7 +198,7 @@ export default function ReservationForm() {
                 {/* 2. Date */}
                 <div>
                   <label className="block text-xs uppercase tracking-widest font-bold text-gray-300 mb-2.5">
-                    2. Date du rendez-vous
+                    2. Appointment Date
                   </label>
                   <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
                     {dates.map((date, i) => {
@@ -214,7 +214,7 @@ export default function ReservationForm() {
                               : 'border-white/10 bg-[#0A0A0B] text-gray-400 hover:border-white/20'
                           }`}
                         >
-                          <span className="text-[10px] font-medium uppercase mb-0.5">{format(date, 'EEE', { locale: fr })}</span>
+                          <span className="text-[10px] font-medium uppercase mb-0.5">{format(date, 'EEE', { locale: enUS })}</span>
                           <span className="text-base font-bold">{format(date, 'dd')}</span>
                         </button>
                       );
@@ -222,17 +222,17 @@ export default function ReservationForm() {
                   </div>
                 </div>
 
-                {/* 3. Heure */}
+                {/* 3. Time */}
                 <div>
                   <label className="block text-xs uppercase tracking-widest font-bold text-gray-300 mb-2.5">
-                    3. Heure
+                    3. Time Slot
                   </label>
                   <div className="grid grid-cols-4 gap-2">
                     {TIME_SLOTS.map((time) => (
                       <button
                         key={time}
                         onClick={() => setSelectedTime(time)}
-                        className={`py-2 border text-[11px] uppercase tracking-widest font-mono font-bold transition-all ${
+                        className={`py-2 border text-[11px] uppercase tracking-widest font-mono font-bold transition-all cursor-pointer ${
                           selectedTime === time
                             ? 'border-gold bg-gold text-black'
                             : 'border-white/10 bg-[#0A0A0B] text-gray-300 hover:border-white/20'
@@ -248,18 +248,18 @@ export default function ReservationForm() {
                 <button
                   onClick={handleBooking}
                   disabled={isSubmitting || !selectedTime}
-                  className="w-full bg-gold hover:bg-gold-light disabled:bg-white/10 disabled:text-gray-500 text-black text-xs font-bold uppercase tracking-widest py-3.5 flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95"
+                  className="w-full bg-gold hover:bg-gold-light disabled:bg-white/10 disabled:text-gray-500 text-black text-xs font-bold uppercase tracking-widest py-3.5 flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 cursor-pointer"
                 >
                   {isSubmitting ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Enregistrement...</>
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Saving Appointment...</>
                   ) : (
-                    <><CalendarIcon className="w-4 h-4" /> Valider mon rendez-vous</>
+                    <><CalendarIcon className="w-4 h-4" /> Confirm My Appointment</>
                   )}
                 </button>
                 
                 {!user && (
                   <p className="text-[10px] text-center text-gray-500">
-                    Validation rapide avec votre compte Google.
+                    Quick verification with your Google account.
                   </p>
                 )}
 

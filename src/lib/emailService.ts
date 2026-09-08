@@ -1,15 +1,31 @@
 /**
- * EmailJS Client-side Email Dispatcher
- * Sends appointment confirmation email to the client using EmailJS REST API.
+ * Service to dispatch confirmation emails via Resend
  */
+
+export interface EmailPayload {
+  to: string;
+  clientName: string;
+  type: 'booking' | 'waitlist';
+  details: {
+    barber?: string;
+    service?: string;
+    date?: string;
+    time?: string;
+    ticketId?: string;
+    estimatedWait?: string;
+    price?: number | string;
+    phone?: string;
+    notes?: string;
+  };
+}
 
 export interface BookingEmailParams {
   toName: string;
   toEmail: string;
   ticketId: string;
   serviceName: string;
-  duration: string;
-  price: string;
+  duration?: string;
+  price?: string | number;
   date: string;
   time: string;
   barberName: string;
@@ -17,37 +33,13 @@ export interface BookingEmailParams {
   notes?: string;
 }
 
-const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_e1k9uth';
-const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_zadraak';
-const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '7UQM4yu7KUSpooMy9';
+export async function sendConfirmationEmail(payload: EmailPayload): Promise<{ success: boolean; message?: string }> {
+  if (!payload.to || !payload.to.includes('@')) {
+    return { success: false, message: 'Invalid email address' };
+  }
 
-export async function sendBookingConfirmationEmail(params: BookingEmailParams): Promise<{ success: boolean; error?: string }> {
   try {
-    const payload = {
-      service_id: SERVICE_ID,
-      template_id: TEMPLATE_ID,
-      user_id: PUBLIC_KEY,
-      template_params: {
-        to_name: params.toName,
-        to_email: params.toEmail,
-        ticket_id: params.ticketId,
-        service_name: params.serviceName,
-        duration: params.duration,
-        service_price: params.price,
-        booking_date: params.date,
-        booking_time: params.time,
-        barber_name: params.barberName,
-        guest_phone: params.phone || 'N/A',
-        notes: params.notes || 'None',
-        shop_name: 'Final Stop Barber Shop',
-        shop_address: '5277 El Cajon Blvd, San Diego, CA 92115',
-        shop_phone_1: '+1 (619) 886-1267',
-        shop_phone_2: '+1 (619) 928-7084',
-        maps_link: 'https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9'
-      }
-    };
-
-    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -56,14 +48,54 @@ export async function sendBookingConfirmationEmail(params: BookingEmailParams): 
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.warn('EmailJS dispatch failed:', response.status, errorText);
-      return { success: false, error: errorText };
+      const errData = await response.json().catch(() => ({}));
+      console.warn('Email dispatch notification:', errData);
+      return { success: false, message: errData.message || 'Email service notice' };
     }
 
-    return { success: true };
+    const data = await response.json();
+    return { success: true, message: 'Email sent successfully via Resend' };
   } catch (err: any) {
-    console.warn('Error triggering confirmation email:', err);
-    return { success: false, error: err?.message || 'Network error' };
+    console.warn('Resend email fetch fallback:', err);
+    return { success: false, message: err?.message || 'Email network unavailable' };
   }
+}
+
+export async function sendBookingConfirmationEmail(params: BookingEmailParams): Promise<{ success: boolean; message?: string }> {
+  return sendConfirmationEmail({
+    to: params.toEmail,
+    clientName: params.toName,
+    type: 'booking',
+    details: {
+      barber: params.barberName,
+      service: params.serviceName,
+      date: params.date,
+      time: params.time,
+      ticketId: params.ticketId,
+      price: params.price,
+      phone: params.phone,
+      notes: params.notes,
+    }
+  });
+}
+
+export async function sendWaitlistConfirmationEmail(params: {
+  toEmail: string;
+  clientName: string;
+  ticketId: string;
+  barberName: string;
+  serviceName: string;
+  estimatedWait?: string;
+}): Promise<{ success: boolean; message?: string }> {
+  return sendConfirmationEmail({
+    to: params.toEmail,
+    clientName: params.clientName,
+    type: 'waitlist',
+    details: {
+      barber: params.barberName,
+      service: params.serviceName,
+      ticketId: params.ticketId,
+      estimatedWait: params.estimatedWait || '15-25 min',
+    }
+  });
 }

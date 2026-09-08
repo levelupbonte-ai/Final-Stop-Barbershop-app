@@ -9,18 +9,18 @@ import {
   Scissors, 
   Star, 
   ShieldCheck, 
-  Sparkles,
   ChevronRight,
-  UserCheck
+  ZoomIn
 } from 'lucide-react';
-import { MASTER_BARBERS, BarberProfile } from '../data/barbers';
+import { MASTER_BARBERS } from '../data/barbers';
 import CallShopModal from '../components/CallShopModal';
+import ImageLightboxModal, { LightboxImageItem } from '../components/ImageLightboxModal';
 
 interface BarberProfilePageProps {
   barberId: 'mika' | 'lusca';
   onBack?: () => void;
   onBackToHome?: () => void;
-  onNavigateToBooking: (barberId?: string) => void;
+  onNavigateToBooking: (barberId?: string, service?: string) => void;
   onOpenWaitlist: (barberId?: string) => void;
   onSelectBarber?: (barberId: 'mika' | 'lusca') => void;
   onSwitchBarber?: (barberId: 'mika' | 'lusca') => void;
@@ -36,6 +36,8 @@ export default function BarberProfilePage({
   onSwitchBarber
 }: BarberProfilePageProps) {
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<LightboxImageItem | null>(null);
+
   const barber = MASTER_BARBERS.find(b => b.id === barberId) || MASTER_BARBERS[0];
   const handleBack = onBackToHome || onBack || (() => {});
   const handleSelectBarber = onSwitchBarber || onSelectBarber || (() => {});
@@ -53,16 +55,16 @@ export default function BarberProfilePage({
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
-            <span>Retour aux Barbiers & Accueil</span>
+            <span>Back to Barbers & Home</span>
           </button>
 
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => onSelectBarber(otherBarber.id)}
-              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-sm"
+              onClick={() => handleSelectBarber(otherBarber.id)}
+              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-sm cursor-pointer bg-transparent"
             >
-              <span>Voir le profil de {otherBarber.name}</span>
+              <span>View {otherBarber.name}'s Profile</span>
               <ChevronRight className="w-3.5 h-3.5 text-gold" />
             </button>
 
@@ -103,7 +105,7 @@ export default function BarberProfilePage({
                 <div className="absolute -bottom-2 -right-2 bg-black border border-gold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
                   <Award className="w-3.5 h-3.5 text-gold" />
                   <span className="text-[10px] font-bold text-white font-mono uppercase tracking-wide">
-                    20+ Ans d'Expérience
+                    20+ Yrs Experience
                   </span>
                 </div>
               </div>
@@ -147,7 +149,7 @@ export default function BarberProfilePage({
                   className="bg-gold hover:bg-gold-light text-black text-xs sm:text-sm font-bold uppercase tracking-widest px-6 py-3.5 flex items-center gap-2.5 transition-all shadow-lg active:scale-95 cursor-pointer rounded-sm"
                 >
                   <Calendar className="w-4 h-4" />
-                  <span>Prendre RDV avec {barber.name}</span>
+                  <span>Book Appointment with {barber.name}</span>
                 </button>
 
                 <button
@@ -156,7 +158,7 @@ export default function BarberProfilePage({
                   className="bg-[#1C1C22] hover:bg-[#25252D] text-white border border-white/20 text-xs sm:text-sm font-semibold uppercase tracking-wider px-5 py-3.5 flex items-center gap-2 transition-all cursor-pointer rounded-sm"
                 >
                   <Clock className="w-4 h-4 text-gold" />
-                  <span>File d'attente directe</span>
+                  <span>Join Live Walk-In Queue</span>
                 </button>
 
                 <button
@@ -165,7 +167,7 @@ export default function BarberProfilePage({
                   className="bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 text-xs sm:text-sm font-semibold px-4 py-3.5 flex items-center gap-2 transition-all cursor-pointer rounded-sm"
                 >
                   <Phone className="w-4 h-4 text-gold" />
-                  <span>Appeler le salon</span>
+                  <span>Call Shop</span>
                 </button>
               </div>
             </div>
@@ -179,10 +181,10 @@ export default function BarberProfilePage({
           {/* Left: 20+ Years Points */}
           <div className="bg-[#121215] border border-white/10 p-6 sm:p-8">
             <span className="text-gold font-mono text-[11px] uppercase tracking-wider font-bold block mb-2">
-              Savoir-Faire & Exigence
+              Heritage & Craftsmanship
             </span>
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mb-6">
-              20+ Ans de Métier : Les Piliers d'Excellence
+              20+ Years of Mastery: Cornerstones of Excellence
             </h2>
 
             <div className="space-y-4">
@@ -198,7 +200,7 @@ export default function BarberProfilePage({
 
             <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap gap-2">
               {barber.tags.map((tag, i) => (
-                <span key={i} className="text-xs bg-white/5 text-gray-300 px-3 py-1.5 border border-white/10 rounded-sm font-medium">
+                <span key={i} className="text-xs bg-white/5 text-gray-300 px-3 py-1.5 border border-white/10 rounded-sm font-medium font-mono">
                   {tag}
                 </span>
               ))}
@@ -208,10 +210,10 @@ export default function BarberProfilePage({
           {/* Right: Signature Techniques */}
           <div className="bg-[#121215] border border-white/10 p-6 sm:p-8">
             <span className="text-gold font-mono text-[11px] uppercase tracking-wider font-bold block mb-2">
-              Spécialités Maître
+              Master Techniques
             </span>
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mb-6">
-              Techniques Signatures de {barber.name}
+              {barber.name}'s Signature Methods
             </h2>
 
             <div className="space-y-5">
@@ -231,31 +233,37 @@ export default function BarberProfilePage({
 
         </div>
 
-        {/* Portfolio Cuts by This Barber */}
+        {/* Portfolio Cuts by This Barber - Clickable with Modal */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6 pb-3 border-b border-white/10">
             <div>
               <span className="text-gold font-mono text-[11px] uppercase tracking-wider font-bold block">
-                Portfolio Réalisations
+                Signature Portfolio
               </span>
               <h2 className="text-2xl font-serif font-bold text-white">
-                Quelques Coupes Réalisées par {barber.name}
+                Featured Styles Handcrafted by {barber.name}
               </h2>
             </div>
-            <button
-              type="button"
-              onClick={() => onNavigateToBooking(barber.id)}
-              className="text-xs text-gold hover:text-gold-light font-bold uppercase tracking-wider hidden sm:flex items-center gap-1 cursor-pointer bg-transparent border-none"
-            >
-              <span>Réserver cette coupe</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <span className="text-xs text-gray-400 font-mono hidden sm:inline">
+              (Click image to inspect technique)
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {barber.portfolioCuts.map((cut, idx) => (
-              <div key={idx} className="group bg-[#151518] border border-white/10 overflow-hidden shadow-xl">
-                <div className="aspect-[4/3] overflow-hidden relative">
+              <div 
+                key={idx} 
+                onClick={() => setSelectedImage({
+                  src: cut.image,
+                  alt: cut.title,
+                  title: cut.title,
+                  category: cut.tag,
+                  barber: `${barber.name} (20+ Yrs Experience)`,
+                  description: cut.description,
+                })}
+                className="group bg-[#151518] border border-white/10 hover:border-gold/60 overflow-hidden shadow-xl cursor-pointer transition-all duration-300"
+              >
+                <div className="aspect-[4/3] overflow-hidden relative bg-black">
                   <img 
                     src={cut.image} 
                     alt={cut.title}
@@ -265,18 +273,18 @@ export default function BarberProfilePage({
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm border border-gold/40 text-gold text-[10px] font-mono px-2.5 py-1 font-bold uppercase tracking-wider">
                     {cut.tag}
                   </div>
+                  <div className="absolute bottom-3 right-3 bg-black/60 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity text-gold border border-white/10">
+                    <ZoomIn className="w-4 h-4" />
+                  </div>
                 </div>
                 <div className="p-4 flex items-center justify-between">
                   <h3 className="text-xs font-bold text-white group-hover:text-gold transition-colors">
                     {cut.title}
                   </h3>
-                  <button
-                    type="button"
-                    onClick={() => onNavigateToBooking(barber.id)}
-                    className="text-[11px] text-gray-400 hover:text-gold cursor-pointer bg-transparent border-none"
-                  >
-                    Choisir &rarr;
-                  </button>
+                  <span className="text-[11px] text-gold/90 group-hover:text-gold flex items-center gap-1 font-mono">
+                    <span>Inspect</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </span>
                 </div>
               </div>
             ))}
@@ -288,10 +296,10 @@ export default function BarberProfilePage({
           <div className="flex items-center justify-between mb-6 pb-3 border-b border-white/10">
             <div>
               <span className="text-gold font-mono text-[11px] uppercase tracking-wider font-bold block">
-                Avis Clients Vérifiés
+                Verified Client Feedback
               </span>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-white">
-                Ce Que Disent les Clients de {barber.name}
+                What Clients Say About {barber.name}
               </h2>
             </div>
             <div className="flex items-center gap-1 text-gold">
@@ -325,13 +333,13 @@ export default function BarberProfilePage({
         <div className="bg-gradient-to-r from-gold/20 via-[#1C1C22] to-gold/10 border border-gold/40 p-8 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
             <span className="text-gold font-mono text-xs uppercase tracking-widest font-bold block mb-1">
-              Garantie Fauteuil Privé
+              Guaranteed Private Chair
             </span>
             <h3 className="text-2xl font-serif font-bold text-white">
-              Prêt pour une coupe avec {barber.name} ?
+              Ready for your appointment with {barber.name}?
             </h3>
             <p className="text-xs sm:text-sm text-gray-300 mt-1 max-w-xl">
-              Choisissez votre créneau horaire en ligne ou rejoignez notre file d'attente dynamique en direct.
+              Reserve your exact time slot online or join our live walk-in waitlist queue.
             </p>
           </div>
 
@@ -341,19 +349,30 @@ export default function BarberProfilePage({
               onClick={() => onNavigateToBooking(barber.id)}
               className="bg-gold hover:bg-gold-light text-black text-xs sm:text-sm font-bold uppercase tracking-widest px-6 py-3.5 shadow-lg active:scale-95 cursor-pointer rounded-sm"
             >
-              Réserver Maintenant
+              Book Now
             </button>
             <button
               type="button"
               onClick={() => handleSelectBarber(otherBarber.id)}
               className="bg-[#151518] hover:bg-white/10 text-white border border-white/20 text-xs sm:text-sm font-semibold uppercase tracking-wider px-5 py-3.5 cursor-pointer rounded-sm"
             >
-              Découvrir {otherBarber.name} &rarr;
+              Explore {otherBarber.name}'s Profile &rarr;
             </button>
           </div>
         </div>
 
       </main>
+
+      {/* Lightbox Modal */}
+      <ImageLightboxModal
+        image={selectedImage}
+        isOpen={Boolean(selectedImage)}
+        onClose={() => setSelectedImage(null)}
+        onBookStyle={(style, bName) => {
+          setSelectedImage(null);
+          onNavigateToBooking(barber.id, style);
+        }}
+      />
 
       <CallShopModal 
         isOpen={isCallModalOpen} 

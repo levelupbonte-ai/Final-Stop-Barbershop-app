@@ -94,7 +94,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
           </span>
           <div style="margin-top: 6px;">
             <span style="display: inline-block; background: #C5A059; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; text-transform: uppercase;">
-              Ouvert 10h - 18h
+              Open 10 AM - 6 PM
             </span>
           </div>
         </div>

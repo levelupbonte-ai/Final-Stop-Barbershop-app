@@ -124,9 +124,9 @@ const TIME_SLOTS = [
 ];
 
 const BARBERS = [
-  { id: 'any', name: 'Premier Maître Barbier Disponible' },
-  { id: 'mika', name: 'Mika (20+ ans d’expérience &bull; Dégradés & Rasoir)' },
-  { id: 'lusca', name: 'Lusca (20+ ans d’expérience &bull; Barbe, Soins & Tresses)' }
+  { id: 'any', name: 'First Available Master Artist' },
+  { id: 'mika', name: 'Mika (20+ Years Exp • Women’s & Girls’ Braids & Locs)' },
+  { id: 'lusca', name: 'Lusca (20+ Years Exp • Precision Fades, Men’s & Boys’ Cuts)' }
 ];
 
 export default function BookingPage({ onBackToHome, initialBarber, initialService }: BookingPageProps) {
@@ -301,105 +301,74 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
           /* =========================================================================
              CONFIRMED TICKET SCREEN (REAL-TIME RESULT)
              ========================================================================= */
-          <div className="max-w-2xl mx-auto bg-[#141417] border border-gold/40 p-6 sm:p-10 shadow-2xl animate-fadeIn relative">
-            <div className="w-16 h-16 bg-gold/10 border border-gold rounded-full flex items-center justify-center mx-auto mb-4 text-gold">
+          <div className="max-w-xl mx-auto bg-[#141417] border border-gold/40 p-6 sm:p-10 shadow-2xl animate-fadeIn relative text-center rounded-sm">
+            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/50 rounded-full flex items-center justify-center mx-auto mb-5 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
               <Check className="w-8 h-8 stroke-[3]" />
             </div>
 
-            <div className="text-center mb-6">
-              <span className="text-emerald-400 font-mono text-xs uppercase tracking-widest font-bold block mb-1">
-                Appointment Confirmed
+            <div className="mb-6">
+              <span className="text-emerald-400 font-mono text-xs uppercase tracking-widest font-bold block mb-2">
+                Réservation Confirmée &bull; Appointment Confirmed
               </span>
-              <h1 className="text-2xl md:text-3xl font-serif font-bold text-white">
-                You're Scheduled, {confirmedData?.clientName}!
+              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white mb-3">
+                Votre réservation a été enregistrée avec succès !
               </h1>
-              <p className="text-gray-400 text-xs md:text-sm mt-1.5">
-                Your reservation is booked. Your ticket details are listed below.
+              <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-md mx-auto mb-4">
+                Merci <strong className="text-white">{confirmedData?.clientName}</strong>, votre créneau est validé. Un e-mail contenant tous les détails de votre ticket vous a été envoyé.
               </p>
-            </div>
-
-            {/* Ticket Card */}
-            <div className="bg-[#0A0A0B] border border-white/15 p-6 mb-6 font-mono text-xs space-y-3 relative shadow-inner">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <div className="flex items-center gap-2 text-gold font-bold text-xs uppercase">
-                  <Receipt className="w-4 h-4" />
-                  <span>Reservation Ticket</span>
-                </div>
-                <span className="text-gold font-bold bg-gold/10 border border-gold/30 px-2.5 py-1 text-xs">
-                  ID: {confirmedData?.ticketId}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2 border-b border-white/5">
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase">Guest Name</span>
-                  <span className="text-white font-bold text-sm">{confirmedData?.clientName}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase">Confirmation Email</span>
-                  <span className="text-gray-200">{confirmedData?.clientEmail}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2 border-b border-white/5">
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase">Selected Service</span>
-                  <span className="text-white font-bold">{confirmedData?.service}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase">Rate (Pay in shop)</span>
-                  <span className="text-gold font-bold text-sm">{confirmedData?.price}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2 border-b border-white/5">
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase">Date & Time</span>
-                  <span className="text-white font-bold">
-                    {confirmedData?.date} &bull; <span className="text-gold">{confirmedData?.time}</span>
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-400 block text-[10px] uppercase">Master Barber</span>
-                  <span className="text-gray-200">{confirmedData?.barber}</span>
-                </div>
-              </div>
-
-              <div className="pt-2 flex items-start justify-between text-gray-400 text-[11px]">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-gold shrink-0" />
-                  <span>5277 El Cajon Blvd, San Diego, CA 92115</span>
-                </div>
-                <span className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Active in Lounge Queue</span>
+              
+              <div className="bg-gold/10 border border-gold/40 p-3 rounded-xs inline-block max-w-md mx-auto text-left font-mono text-xs text-gold">
+                <p className="font-bold mb-1 flex items-center gap-1.5 text-white">
+                  <Mail className="w-4 h-4 text-gold" />
+                  <span>Vérifiez vos e-mails :</span>
+                </p>
+                <p className="text-gray-300 break-all">
+                  Un récapitulatif a été expédié à <strong className="text-gold">{confirmedData?.clientEmail || guestEmail}</strong>. (Pensez à regarder dans vos courriers indésirables/spams).
+                </p>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            {/* Compact Reference Pill */}
+            <div className="bg-[#0A0A0B] border border-white/10 p-3.5 mb-8 rounded-xs font-mono text-xs text-gray-400 flex flex-wrap items-center justify-center gap-3">
+              <span className="text-gold font-bold">Ticket #{confirmedData?.ticketId}</span>
+              <span className="text-white/20">&bull;</span>
+              <span className="text-white">{confirmedData?.date} à {confirmedData?.time}</span>
+              <span className="text-white/20">&bull;</span>
+              <span className="text-gray-300">{confirmedData?.service}</span>
+            </div>
+
+            {/* 3 Streamlined Buttons: Imprimer le Ticket / Retour Home / Réserver un autre rendez-vous */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto">
               <button
                 type="button"
                 onClick={handlePrintTicket}
-                className="w-full sm:w-auto bg-[#1E1E24] hover:bg-white/10 text-white border border-white/20 text-xs font-semibold uppercase tracking-wider px-5 py-3 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                className="w-full bg-[#1B1B20] hover:bg-white/10 text-white border border-white/20 hover:border-gold text-xs font-bold uppercase tracking-wider py-3.5 px-3 flex items-center justify-center gap-2 transition-all cursor-pointer rounded-xs"
               >
                 <Printer className="w-4 h-4 text-gold" />
-                <span>Print Ticket</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsCallModalOpen(true)}
-                className="w-full sm:w-auto bg-[#1E1E24] hover:bg-white/10 text-white border border-white/20 text-xs font-semibold uppercase tracking-wider px-5 py-3 flex items-center justify-center gap-2 transition-colors cursor-pointer"
-              >
-                <Phone className="w-4 h-4 text-gold" />
-                <span>Call Shop (2 Lines)</span>
+                <span>Imprimer Ticket</span>
               </button>
 
               <button
                 type="button"
                 onClick={onBackToHome}
-                className="w-full sm:w-auto bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-widest px-6 py-3 transition-all shadow-md active:scale-95 cursor-pointer"
+                className="w-full bg-gold hover:bg-gold-light text-black text-xs font-black uppercase tracking-wider py-3.5 px-3 flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 cursor-pointer rounded-xs"
               >
-                Return to Home
+                <span>Retour Accueil</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSuccess(false);
+                  setCurrentStep(1);
+                  setGuestName('');
+                  setGuestEmail('');
+                  setGuestPhone('');
+                }}
+                className="w-full bg-[#1B1B20] hover:bg-white/10 text-gray-300 hover:text-white border border-white/20 text-xs font-bold uppercase tracking-wider py-3.5 px-3 flex items-center justify-center gap-2 transition-all cursor-pointer rounded-xs"
+              >
+                <CalendarIcon className="w-4 h-4 text-gold" />
+                <span>Autre RDV</span>
               </button>
             </div>
           </div>

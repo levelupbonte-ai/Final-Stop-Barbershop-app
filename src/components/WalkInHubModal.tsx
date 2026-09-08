@@ -71,7 +71,7 @@ export default function WalkInHubModal({
         status: 'waiting' as const,
         position,
         estMinutes,
-        joinedAt: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        joinedAt: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
       };
 
       try {
@@ -150,8 +150,8 @@ export default function WalkInHubModal({
               <div className="flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <div className="text-xs text-gray-300 leading-relaxed font-sans">
-                  <span className="text-white font-mono font-bold block mb-0.5">Besoin d'une coupe aujourd'hui ?</span>
-                  Prenez rendez-vous directement avec Mika ou Lusca (plus de 20 ans d'expérience) pour garantir votre fauteuil.
+                  <span className="text-white font-mono font-bold block mb-0.5">Need a haircut today?</span>
+                  Book directly with Mika or Lusca (over 20 years experience each) to guarantee your chair.
                 </div>
               </div>
             </div>
@@ -287,9 +287,9 @@ export default function WalkInHubModal({
                     onChange={(e) => setSelectedBarber(e.target.value)}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
-                    <option value="First Available Barber">Premier Barbier Disponible (Le plus rapide)</option>
-                    <option value="Mika">Mika (20+ ans &bull; Dégradés & Rasoir)</option>
-                    <option value="Lusca">Lusca (20+ ans &bull; Barbe, Soins & Tresses)</option>
+                    <option value="First Available Barber">First Available Master Barber (Fastest)</option>
+                    <option value="Mika">Mika (20+ Yrs Exp &bull; Fades & Razor)</option>
+                    <option value="Lusca">Lusca (20+ Yrs Exp &bull; Beard, Braids & Locs)</option>
                   </select>
                 </div>
 

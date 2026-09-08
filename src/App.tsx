@@ -31,7 +31,9 @@ import ClientStatusHub from './components/ClientStatusHub';
 import OwnerWaitlistModal from './components/OwnerWaitlistModal';
 import WelcomePromoModal from './components/WelcomePromoModal';
 import CallShopModal from './components/CallShopModal';
+import ShopPoliciesModal from './components/ShopPoliciesModal';
 import { getIsWaitlistOpen } from './lib/waitlistService';
+import { updateDocumentSEO } from './lib/seo';
 
 export type ActiveView = 
   | 'home' 
@@ -46,25 +48,33 @@ export type ActiveView =
   | 'admin';
 
 export default function App() {
-  // Parse initial view from hash if present
+  // Parse initial view from pathname or hash if present
   const [currentView, setCurrentView] = useState<ActiveView>(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash.startsWith('barber-profile')) return 'barber-profile';
-    if (hash === 'barbers') return 'barbers';
-    if (hash === 'services') return 'services';
-    if (hash === 'waitlist') return 'waitlist';
-    if (hash === 'booking') return 'booking';
-    if (hash === 'route') return 'route';
-    if (hash === 'gallery') return 'gallery';
-    if (hash === 'reviews') return 'reviews';
-    if (hash === 'admin') return 'admin';
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      if (path === '/admin' || path === '/admin/' || path.startsWith('/admin')) {
+        return 'admin';
+      }
+      const hash = window.location.hash.replace('#', '');
+      if (hash.startsWith('barber-profile')) return 'barber-profile';
+      if (hash === 'barbers') return 'barbers';
+      if (hash === 'services') return 'services';
+      if (hash === 'waitlist') return 'waitlist';
+      if (hash === 'booking') return 'booking';
+      if (hash === 'route') return 'route';
+      if (hash === 'gallery') return 'gallery';
+      if (hash === 'reviews') return 'reviews';
+      if (hash === 'admin') return 'admin';
+    }
     return 'home';
   });
 
   // Selected barber for profile or booking
   const [selectedBarberId, setSelectedBarberId] = useState<'mika' | 'lusca'>(() => {
-    const hash = window.location.hash;
-    if (hash.includes('id=lusca')) return 'lusca';
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash.includes('id=lusca')) return 'lusca';
+    }
     return 'mika';
   });
 
@@ -77,14 +87,27 @@ export default function App() {
   const [hubMode, setHubMode] = useState<ModalMode>(null);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
 
   // Shop Owner-controlled waitlist state
   const [isWaitlistOpen, setIsWaitlistOpen] = useState<boolean>(getIsWaitlistOpen);
   const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
 
-  // Hash change listener for true browser navigation (Back / Forward buttons)
+  // Dynamic SEO Synchronization per page/view
   useEffect(() => {
-    const handleHashChange = () => {
+    updateDocumentSEO(currentView);
+  }, [currentView]);
+
+  // Pathname and Hash change listener for true browser navigation (Back / Forward buttons, /admin direct link)
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname.toLowerCase();
+      if (path === '/admin' || path === '/admin/' || path.startsWith('/admin')) {
+        setCurrentView('admin');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        return;
+      }
+
       const rawHash = window.location.hash.replace('#', '');
       const [viewName, queryStr] = rawHash.split('?');
 
@@ -112,8 +135,12 @@ export default function App() {
       window.scrollTo({ top: 0, behavior: 'instant' });
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('popstate', handleLocationChange);
+    return () => {
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('popstate', handleLocationChange);
+    };
   }, []);
 
   // Global call modal listener
@@ -154,8 +181,10 @@ export default function App() {
     if (view === 'barber-profile') {
       const bId = params?.barberId || selectedBarberId;
       window.location.hash = `#barber-profile?id=${bId}`;
+    } else if (view === 'admin') {
+      window.history.pushState(null, '', '/admin');
     } else if (view === 'home') {
-      window.history.pushState(null, '', window.location.pathname);
+      window.history.pushState(null, '', '/');
     } else {
       window.location.hash = `#${view}`;
     }
@@ -279,7 +308,6 @@ export default function App() {
         onOpenWaitlist={() => navigateTo('waitlist')}
         onOpenPromo={() => setIsPromoModalOpen(true)}
         onOpenCallModal={() => setIsCallModalOpen(true)}
-        onOpenAdmin={() => navigateTo('admin')}
         isWaitlistOpen={isWaitlistOpen}
       />
 
@@ -300,7 +328,6 @@ export default function App() {
           onOpenWaitlist={() => navigateTo('waitlist')}
           onOpenPromo={() => setIsPromoModalOpen(true)}
           isWaitlistOpen={isWaitlistOpen}
-          onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
           onNavigateToBooking={() => navigateTo('booking')}
         />
 
@@ -321,8 +348,13 @@ export default function App() {
       <Footer 
         onNavigateToBooking={() => navigateTo('booking')} 
         onNavigateToView={(view) => navigateTo(view as ActiveView)}
-        onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
-        onOpenAdmin={() => navigateTo('admin')}
+        onOpenPolicies={() => setIsPoliciesOpen(true)}
+      />
+
+      {/* Salon Policies & Safety Rules Modal */}
+      <ShopPoliciesModal 
+        isOpen={isPoliciesOpen}
+        onClose={() => setIsPoliciesOpen(false)}
       />
 
       {/* 1. Dedicated 'Check My Status' Modal */}

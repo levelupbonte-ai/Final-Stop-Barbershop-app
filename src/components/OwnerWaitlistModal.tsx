@@ -201,7 +201,7 @@ export default function OwnerWaitlistModal({
                 }}
                 className="w-full mb-3 bg-gold/15 hover:bg-gold text-gold hover:text-black border border-gold/40 py-2.5 px-4 text-xs font-bold font-mono uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Accéder à la Console Firestore & Réservations &rarr;</span>
+                <span>Access Schedule & Appointments &rarr;</span>
               </button>
             )}
 

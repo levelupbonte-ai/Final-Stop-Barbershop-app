@@ -11,7 +11,6 @@ interface NavbarProps {
   onOpenWaitlist?: () => void;
   onOpenPromo?: () => void;
   onOpenCallModal?: () => void;
-  onOpenAdmin?: () => void;
   isWaitlistOpen?: boolean;
 }
 
@@ -23,7 +22,6 @@ export default function Navbar({
   onOpenWaitlist,
   onOpenPromo,
   onOpenCallModal,
-  onOpenAdmin,
   isWaitlistOpen = false,
 }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -38,13 +36,13 @@ export default function Navbar({
   }, []);
 
   const navLinks: { name: string; view: NavView; badge?: string }[] = [
-    { name: 'Accueil', view: 'home' },
-    { name: 'Nos Barbiers (20+ ans)', view: 'barbers', badge: 'Mika & Lusca' },
-    { name: 'Tarifs & Services', view: 'services' },
-    { name: 'File en Direct', view: 'waitlist', badge: 'Walk-In' },
+    { name: 'Home', view: 'home' },
+    { name: 'Our Barbers', view: 'barbers', badge: '20+ Yrs Exp' },
+    { name: 'Services & Pricing', view: 'services' },
+    { name: 'Live Waitlist', view: 'waitlist', badge: 'Walk-In' },
     { name: 'Portfolio', view: 'gallery' },
-    { name: 'Avis Vérifiés', view: 'reviews' },
-    { name: 'Itinéraire & Plan', view: 'route' },
+    { name: 'Reviews', view: 'reviews' },
+    { name: 'Directions', view: 'route' },
   ];
 
   const handleLinkClick = (view: NavView) => {
@@ -60,11 +58,12 @@ export default function Navbar({
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
         
-        {/* Brand Logo */}
+        {/* Brand Logo Only */}
         <button 
           type="button"
           onClick={() => handleLinkClick('home')}
-          className="flex items-center gap-3 group bg-transparent border-none p-0 cursor-pointer text-left"
+          className="flex items-center group bg-transparent border-none p-0 cursor-pointer"
+          aria-label="Final Stop Barber Shop Home"
         >
           <img 
             src="https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png" 
@@ -72,14 +71,6 @@ export default function Navbar({
             className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             referrerPolicy="no-referrer"
           />
-          <div className="hidden sm:flex flex-col">
-            <span className="text-white font-serif font-bold text-sm tracking-wider">
-              FINAL STOP
-            </span>
-            <span className="text-gold font-mono text-[9px] uppercase tracking-[0.2em] font-bold">
-              Mika & Lusca &bull; 20+ Ans
-            </span>
-          </div>
         </button>
 
         {/* Desktop Menu Links */}
@@ -117,7 +108,7 @@ export default function Navbar({
             type="button"
             onClick={onOpenCallModal}
             className="text-xs font-medium text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5 px-2.5 py-2 cursor-pointer bg-transparent border-none font-mono"
-            title="Ligne directe du salon"
+            title="Shop direct line"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
             <span className="hidden xl:inline">(619) 886-1267</span>
@@ -129,7 +120,7 @@ export default function Navbar({
             className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 flex items-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer rounded-sm"
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Prendre RDV</span>
+            <span>Book Now</span>
           </button>
         </div>
 
@@ -140,7 +131,7 @@ export default function Navbar({
             onClick={() => onNavigateToBooking?.()}
             className="sm:hidden bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase px-3 py-1.5 cursor-pointer transition-colors rounded-sm"
           >
-            RDV
+            Book
           </button>
 
           <button 
@@ -183,7 +174,7 @@ export default function Navbar({
                 className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase py-3 flex items-center justify-center gap-2 font-mono cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
-                <span>Prendre Rendez-Vous (Garanti)</span>
+                <span>Book Appointment (Guaranteed)</span>
               </button>
 
               <button
@@ -195,7 +186,7 @@ export default function Navbar({
                 className="w-full bg-[#151517] hover:bg-[#202026] text-gold border border-gold/40 text-xs font-bold uppercase py-2.5 flex items-center justify-center gap-2 font-mono cursor-pointer"
               >
                 <Users className="w-3.5 h-3.5" />
-                <span>File d'Attente Walk-In en Direct</span>
+                <span>Live Walk-In Queue</span>
               </button>
 
               <button
@@ -207,7 +198,7 @@ export default function Navbar({
                 className="w-full bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-bold uppercase py-2.5 flex items-center justify-center gap-2 font-mono cursor-pointer border border-white/10"
               >
                 <Search className="w-3.5 h-3.5 text-gold" />
-                <span>Vérifier mon ticket / statut</span>
+                <span>Check Ticket / Status</span>
               </button>
 
               <button
@@ -219,7 +210,7 @@ export default function Navbar({
                 className="w-full text-center text-xs text-gray-400 hover:text-gold py-2 font-mono flex items-center justify-center gap-1.5 cursor-pointer bg-transparent border-none"
               >
                 <Phone className="w-3.5 h-3.5 text-gold" />
-                <span>Ligne directe : (619) 886-1267</span>
+                <span>Direct Line: (619) 886-1267</span>
               </button>
             </li>
           </ul>

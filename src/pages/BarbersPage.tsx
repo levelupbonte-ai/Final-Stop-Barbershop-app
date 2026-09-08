@@ -8,7 +8,6 @@ import {
   Scissors, 
   Star, 
   Clock, 
-  CheckCircle2, 
   Sparkles 
 } from 'lucide-react';
 import { MASTER_BARBERS } from '../data/barbers';
@@ -41,7 +40,7 @@ export default function BarbersPage({
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
-            <span>Retour à l'Accueil</span>
+            <span>Back to Home</span>
           </button>
 
           <div className="flex items-center gap-3">
@@ -51,7 +50,7 @@ export default function BarbersPage({
               className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
             >
               <Phone className="w-3.5 h-3.5 text-gold" />
-              <span className="hidden sm:inline">Ligne Directe: (619) 886-1267</span>
+              <span className="hidden sm:inline">Direct Line: (619) 886-1267</span>
             </button>
 
             <button
@@ -60,7 +59,7 @@ export default function BarbersPage({
               className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 flex items-center gap-1.5 cursor-pointer rounded-sm"
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Prendre RDV</span>
+              <span>Book Appointment</span>
             </button>
           </div>
         </div>
@@ -72,14 +71,14 @@ export default function BarbersPage({
         {/* Page Title */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <span className="text-gold font-mono text-xs uppercase tracking-[0.25em] font-bold block mb-2">
-            Maîtres Barbiers & Fondateurs
+            Master Barbers & Co-Founders
           </span>
           <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white mb-4">
-            Deux Artisans. Plus de 20 Ans d'Expérience Chacun.
+            Two Craftsmen. Over 20 Years of Mastery Each.
           </h1>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-            Chez Final Stop Barber Shop, chaque coup de ciseau et chaque tracé de lame s'appuie sur plus de deux décennies d'artisanat pur. Cliquez sur un barbier pour découvrir son univers, ses techniques et réserver votre fauteuil privé.
+            At Final Stop Barber Shop, every scissor pass and straight razor stroke is grounded in more than two decades of dedicated craft. Click on either master barber to explore their signature styles and book your chair.
           </p>
         </div>
 
@@ -88,7 +87,7 @@ export default function BarbersPage({
           {MASTER_BARBERS.map((barber) => (
             <div
               key={barber.id}
-              className="bg-[#141418] border border-white/10 hover:border-gold transition-all duration-300 p-6 sm:p-8 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer"
+              className="bg-[#141418] border border-white/10 hover:border-gold transition-all duration-300 p-6 sm:p-8 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer rounded-sm"
               onClick={() => onSelectBarber(barber.id)}
             >
               <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-gold/15 transition-colors pointer-events-none"></div>
@@ -112,7 +111,7 @@ export default function BarbersPage({
                     <div>
                       <div className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-gold uppercase tracking-wider bg-gold/10 px-2.5 py-0.5 mb-1">
                         <Award className="w-3 h-3" />
-                        <span>20+ Ans d'Expérience</span>
+                        <span>20+ Yrs Experience</span>
                       </div>
                       <h2 className="text-2xl font-serif font-bold text-white group-hover:text-gold transition-colors">
                         {barber.name}
@@ -128,7 +127,7 @@ export default function BarbersPage({
                       <Star className="w-3.5 h-3.5 fill-gold" />
                       <span className="text-xs font-bold text-white">5.0</span>
                     </div>
-                    <span className="text-[10px] text-gray-500 font-mono">350+ Avis Google</span>
+                    <span className="text-[10px] text-gray-500 font-mono">380+ Google Reviews</span>
                   </div>
                 </div>
 
@@ -139,7 +138,7 @@ export default function BarbersPage({
 
                 {/* Bio snippet */}
                 <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-6">
-                  {barber.bio.substring(0, 165)}...
+                  {barber.bio.substring(0, 180)}...
                 </p>
 
                 {/* Specialties tags */}
@@ -147,7 +146,7 @@ export default function BarbersPage({
                   {barber.tags.map((tag, i) => (
                     <span
                       key={i}
-                      className="text-[11px] font-medium tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm group-hover:border-gold/30 transition-colors"
+                      className="text-[11px] font-mono tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm group-hover:border-gold/30 transition-colors"
                     >
                       {tag}
                     </span>
@@ -158,7 +157,7 @@ export default function BarbersPage({
               {/* Card Footer with Click Action */}
               <div className="pt-4 border-t border-white/10 flex items-center justify-between">
                 <span className="text-xs font-bold text-gold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  <span>Voir le profil complet & techniques</span>
+                  <span>View Full Profile & Techniques</span>
                   <ChevronRight className="w-4 h-4" />
                 </span>
 
@@ -168,9 +167,9 @@ export default function BarbersPage({
                     e.stopPropagation();
                     onNavigateToBooking(barber.id);
                   }}
-                  className="bg-gold/10 hover:bg-gold text-gold hover:text-black border border-gold/40 text-xs font-bold px-3 py-1.5 uppercase tracking-wider transition-all"
+                  className="bg-gold/10 hover:bg-gold text-gold hover:text-black border border-gold/40 text-xs font-bold px-3 py-1.5 uppercase tracking-wider transition-all cursor-pointer rounded-xs"
                 >
-                  Réserver avec {barber.name}
+                  Book with {barber.name}
                 </button>
               </div>
             </div>
@@ -178,44 +177,44 @@ export default function BarbersPage({
         </div>
 
         {/* Why 20+ Years Matters Section */}
-        <div className="bg-[#121215] border border-white/10 p-6 sm:p-10 mb-12">
+        <div className="bg-[#121215] border border-white/10 p-6 sm:p-10 mb-12 rounded-sm">
           <div className="text-center max-w-2xl mx-auto mb-8">
             <span className="text-gold font-mono text-[11px] uppercase tracking-widest font-bold block mb-1">
-              L'Art de la Coupe
+              The Art of Barbering
             </span>
             <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-              Pourquoi l'expérience fait toute la différence
+              Why Two Decades of Experience Matters
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div className="p-5 bg-[#17171C] border border-white/5">
+            <div className="p-5 bg-[#17171C] border border-white/5 rounded-xs">
               <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-3">
                 <Scissors className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-bold text-white mb-2">Morphologie du Visage</h3>
+              <h3 className="text-sm font-bold text-white mb-2">Facial Bone Architecture</h3>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Après 20 ans de pratique, nous adaptons instantanément la hauteur du fondu et la taille de la barbe à la structure osseuse de votre tête.
+                With 20+ years behind the chair, we calculate fade gradients and beard symmetry precisely matched to your cranial structure.
               </p>
             </div>
 
-            <div className="p-5 bg-[#17171C] border border-white/5">
+            <div className="p-5 bg-[#17171C] border border-white/5 rounded-xs">
               <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-3">
                 <Clock className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-bold text-white mb-2">Régularité Irréprochable</h3>
+              <h3 className="text-sm font-bold text-white mb-2">Unwavering Consistency</h3>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Pas de mauvaise surprise. Que vous veniez aujourd'hui ou dans 6 mois, vous obtenez exactement le standard d'excellence demandé.
+                No bad days, no rushed appointments. You get the same elite caliber of finish on every single visit.
               </p>
             </div>
 
-            <div className="p-5 bg-[#17171C] border border-white/5">
+            <div className="p-5 bg-[#17171C] border border-white/5 rounded-xs">
               <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-3">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-bold text-white mb-2">Tous Types de Cheveux</h3>
+              <h3 className="text-sm font-bold text-white mb-2">All Hair Types & Textures</h3>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Lisses, ondulés, crépus, afros, locks ou tresses : plus de 20 ans permettent de maîtriser toutes les fibres sans abîmer le cuir chevelu.
+                Straight, wavy, coarse, curly, locs, or braids: complete mastery across all ethnic hair textures without scalp damage.
               </p>
             </div>
           </div>

@@ -11,51 +11,51 @@ interface ReviewsPageProps {
 const VERIFIED_REVIEWS = [
   {
     author: 'Marcus D.',
-    role: 'Client régulier depuis 3 ans',
-    barber: 'Mika (20+ ans)',
+    role: 'Regular Client (3 Years)',
+    barber: 'Mika (20+ Yrs)',
     rating: 5,
-    date: 'Il y a 2 jours',
-    text: 'Mika a plus de 20 ans d’expérience et cela se voit dès la première minute. Les dégradés sont d’une régularité incroyable, le salon est super propre et l’ambiance est au top.'
+    date: '2 days ago',
+    text: 'Mika has over 20 years behind the chair and it shows in every minute. His fade transitions are insanely clean, the shop is spotless, and the energy is top tier.'
   },
   {
     author: 'Darnell W.',
-    role: 'Client régulier',
-    barber: 'Lusca (20+ ans)',
+    role: 'Regular Client',
+    barber: 'Lusca (20+ Yrs)',
     rating: 5,
-    date: 'Il y a 5 jours',
-    text: 'Lusca est un véritable artisan de la barbe et des textures. 20 ans de métier qui se ressentent dans le calme, la précision et le rituel serviette chaude. Mes tresses et ma barbe n’ont jamais été aussi nettes.'
+    date: '5 days ago',
+    text: 'Lusca is a true master of beard sculpting and hair textures. 20 years of dedication reflected in calm precision and eucalyptus hot towel treatment. My braids and beard have never looked sharper.'
   },
   {
-    author: 'Julien B.',
-    role: 'Visiteur San Diego',
-    barber: 'Mika',
+    author: 'Julian B.',
+    role: 'San Diego Visitor',
+    barber: 'Mika (20+ Yrs)',
     rating: 5,
-    date: 'Il y a 1 semaine',
-    text: 'De passage à San Diego, j’ai testé Final Stop sur recommandation. Réservation en ligne fluide, accueil parfait, et coupe au rasoir coupe-chou millimétrée. 10/10.'
+    date: '1 week ago',
+    text: 'Visiting San Diego and stopped by Final Stop on a friend\'s recommendation. Smooth online booking, great greeting, and razor-sharp straight razor detailing. 10/10.'
   },
   {
-    author: 'Antoine V.',
-    role: 'Client fidèle',
-    barber: 'Lusca',
+    author: 'Anthony V.',
+    role: 'Loyal Client',
+    barber: 'Lusca (20+ Yrs)',
     rating: 5,
-    date: 'Il y a 2 semaines',
-    text: 'Le rituel de soin à l’eucalyptus de Lusca est le meilleur moment de détente de ma semaine. Vous ne trouverez pas de barbiers avec ce niveau d’expérience ailleurs en ville.'
+    date: '2 weeks ago',
+    text: 'Lusca\'s eucalyptus hot towel ritual is the most therapeutic part of my week. You simply will not find barbers with this level of tenure and craft anywhere else in SD.'
   },
   {
     author: 'Samir K.',
-    role: 'Client régulier',
-    barber: 'Mika',
+    role: 'Regular Client',
+    barber: 'Mika (20+ Yrs)',
     rating: 5,
-    date: 'Il y a 3 semaines',
-    text: 'Ponctualité, rigueur et précision. Mika ne rate jamais un trait. Rien à voir avec les chaînes de coiffure industrielles.'
+    date: '3 weeks ago',
+    text: 'Punctuality, precision, and consistency. Mika never misses a line. Night and day compared to industrial barber franchises.'
   },
   {
     author: 'Cedric M.',
-    role: 'Client locks & fade',
-    barber: 'Lusca',
+    role: 'Locs & Fade Client',
+    barber: 'Lusca (20+ Yrs)',
     rating: 5,
-    date: 'Il y a 1 mois',
-    text: 'Retwist de mes locks impeccable et contours parfaits. Lusca connaît parfaitement le cheveu afro et texturé.'
+    date: '1 month ago',
+    text: 'Impeccable loc retwist and hairline line-up. Lusca knows textured and afro hair inside and out.'
   }
 ];
 
@@ -76,23 +76,23 @@ export default function ReviewsPage({
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
-            <span>Retour à l'Accueil</span>
+            <span>Back to Home</span>
           </button>
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onNavigateToBarbers}
-              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-block"
+              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-block cursor-pointer bg-transparent border-none"
             >
-              Mika & Lusca (20+ ans)
+              Mika & Lusca (20+ Yrs)
             </button>
             <button
               type="button"
               onClick={() => onNavigateToBooking()}
-              className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-sm"
+              className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-sm cursor-pointer"
             >
-              Prendre RDV
+              Book Appointment
             </button>
           </div>
         </div>
@@ -106,21 +106,21 @@ export default function ReviewsPage({
             ))}
           </div>
           <span className="text-gold font-mono text-xs uppercase tracking-[0.25em] font-bold block mb-2">
-            5.0 Étoiles sur Google &bull; Plus de 450 Avis
+            5.0 Stars on Google &bull; Over 450 Reviews
           </span>
           <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white mb-3">
-            La Confiance de Nos Clients à San Diego
+            Client Testimonials & Community Trust
           </h1>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-            Découvrez pourquoi les résidents de San Diego confient leur style à Mika et Lusca depuis plus de 20 ans.
+            Discover why San Diego residents have trusted their grooming and signature styles to Mika and Lusca for over two decades.
           </p>
         </div>
 
         {/* Reviews Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {VERIFIED_REVIEWS.map((rev, i) => (
-            <div key={i} className="bg-[#141418] border border-white/10 p-6 flex flex-col justify-between shadow-xl">
+            <div key={i} className="bg-[#141418] border border-white/10 p-6 flex flex-col justify-between shadow-xl rounded-sm">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex text-gold">

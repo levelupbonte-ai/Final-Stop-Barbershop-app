@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Search, Users, Key, Calendar } from 'lucide-react';
+import { Search, Users, Calendar } from 'lucide-react';
 
 interface ClientStatusHubProps {
   onOpenCheckStatus: (initialQuery?: string) => void;
@@ -13,9 +13,7 @@ interface ClientStatusHubProps {
 export default function ClientStatusHub({ 
   onOpenCheckStatus, 
   onOpenWaitlist, 
-  onOpenPromo,
   isWaitlistOpen = false,
-  onOpenOwnerControls,
   onNavigateToBooking
 }: ClientStatusHubProps) {
   const [quickQuery, setQuickQuery] = useState('');
@@ -40,7 +38,7 @@ export default function ClientStatusHub({
               Client Service Center & Live Desk
             </h2>
             <p className="text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
-              Consultez le statut de votre fauteuil en direct ou réservez votre créneau garanti avec Mika & Lusca (plus de 20 ans d'expérience).
+              Check your chair status in real time or book a dedicated appointment with Mika & Lusca (each with over 20 years of mastery).
             </p>
           </div>
         </div>
@@ -49,7 +47,7 @@ export default function ClientStatusHub({
         <div className={`grid grid-cols-1 gap-6 ${isWaitlistOpen ? 'md:grid-cols-3' : 'md:grid-cols-2 max-w-4xl mx-auto'}`}>
           
           {/* Card 1: Check Turn / Queue Status */}
-          <div className="bg-[#151517] border border-white/10 hover:border-gold/40 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl relative group">
+          <div className="bg-[#151517] border border-white/10 hover:border-gold/40 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl relative group rounded-sm">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 rounded-full blur-xl pointer-events-none"></div>
             
             <div>
@@ -58,15 +56,15 @@ export default function ClientStatusHub({
                   <Search className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-2 py-0.5 font-bold">
-                  Temps Réel
+                  Real Time
                 </span>
               </div>
 
               <h3 className="text-lg font-serif font-bold text-white mb-2 group-hover:text-gold transition-colors">
-                Vérifier Mon Tour / Ticket
+                Check My Turn / Ticket
               </h3>
               <p className="text-xs text-gray-400 leading-relaxed mb-5">
-                Déjà inscrit ou avec un rendez-vous ? Saisissez votre nom ou numéro de ticket pour voir si votre barbier est prêt.
+                Already registered or have an active booking? Enter your name or ticket number to see if your chair is ready.
               </p>
 
               {/* Quick Input Search Form */}
@@ -76,16 +74,16 @@ export default function ClientStatusHub({
                     type="text"
                     value={quickQuery}
                     onChange={(e) => setQuickQuery(e.target.value)}
-                    placeholder="Votre nom ou N° de ticket..."
-                    className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3 py-2.5 text-xs text-white placeholder-gray-500 outline-none font-mono"
+                    placeholder="Your name or ticket number..."
+                    className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3 py-2.5 text-xs text-white placeholder-gray-500 outline-none font-mono rounded-xs"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 font-mono"
+                  className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 font-mono rounded-xs"
                 >
                   <Search className="w-3.5 h-3.5" />
-                  <span>Vérifier le statut</span>
+                  <span>Check Status</span>
                 </button>
               </form>
             </div>
@@ -93,7 +91,7 @@ export default function ClientStatusHub({
 
           {/* Card 2: Same-Day Walk-In Waitlist */}
           {isWaitlistOpen && (
-            <div className="bg-[#151517] border border-emerald-500/40 hover:border-gold/40 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl relative group">
+            <div className="bg-[#151517] border border-emerald-500/40 hover:border-gold/40 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl relative group rounded-sm">
               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
 
               <div>
@@ -102,25 +100,25 @@ export default function ClientStatusHub({
                     <Users className="w-5 h-5" />
                   </div>
                   <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 font-bold border text-emerald-400 bg-emerald-950/40 border-emerald-500/30">
-                    File Ouverte
+                    Queue Open
                   </span>
                 </div>
 
                 <h3 className="text-lg font-serif font-bold text-white mb-2 group-hover:text-gold transition-colors">
-                  File d'Attente Walk-In (Sans RDV)
+                  Walk-In Queue (No Booking)
                 </h3>
                 <p className="text-xs text-gray-400 leading-relaxed mb-6">
-                  Vous passez sans rendez-vous ? Rejoignez la file virtuelle en direct pour réduire votre attente au salon.
+                  Visiting without an appointment? Join our live queue remotely to minimize time spent waiting in the lounge.
                 </p>
 
-                <div className="bg-[#0A0A0B] p-3 border border-white/5 space-y-1.5 mb-6 text-[11px] font-mono text-gray-400">
+                <div className="bg-[#0A0A0B] p-3 border border-white/5 space-y-1.5 mb-6 text-[11px] font-mono text-gray-400 rounded-xs">
                   <div className="flex items-center justify-between">
-                    <span>Attente estimée :</span>
+                    <span>Estimated wait:</span>
                     <span className="text-white font-bold">~ 10-15 min</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>Barbiers actifs :</span>
-                    <span className="text-emerald-400 font-bold">Mika &bull; Lusca (20+ ans)</span>
+                    <span>Active barbers:</span>
+                    <span className="text-emerald-400 font-bold">Mika &bull; Lusca (20+ Yrs)</span>
                   </div>
                 </div>
               </div>
@@ -129,17 +127,17 @@ export default function ClientStatusHub({
                 <button
                   type="button"
                   onClick={onOpenWaitlist}
-                  className="w-full bg-[#1F1F24] hover:bg-gold hover:text-black text-gray-200 border border-white/15 hover:border-gold text-xs font-bold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 font-mono"
+                  className="w-full bg-[#1F1F24] hover:bg-gold hover:text-black text-gray-200 border border-white/15 hover:border-gold text-xs font-bold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 font-mono rounded-xs"
                 >
                   <Users className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Prendre un ticket Walk-In</span>
+                  <span>Join Live Walk-In Line</span>
                 </button>
               </div>
             </div>
           )}
 
           {/* Card: Schedule Advance Appointment */}
-          <div className="bg-[#151517] border border-white/10 hover:border-gold/40 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl relative group">
+          <div className="bg-[#151517] border border-white/10 hover:border-gold/40 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl relative group rounded-sm">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 rounded-full blur-xl pointer-events-none"></div>
 
             <div>
@@ -148,25 +146,25 @@ export default function ClientStatusHub({
                   <Calendar className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] font-mono uppercase tracking-widest text-gold bg-gold/10 border border-gold/30 px-2 py-0.5 font-bold">
-                  Recommandé
+                  Recommended
                 </span>
               </div>
 
               <h3 className="text-lg font-serif font-bold text-white mb-2 group-hover:text-gold transition-colors">
-                Réserver Mon Créneau Garanti
+                Book Guaranteed Appointment
               </h3>
               <p className="text-xs text-gray-400 leading-relaxed mb-6">
-                Zéro attente garantie : choisissez votre créneau avec Mika ou Lusca (plus de 20 ans d'expérience).
+                Guaranteed zero wait: pick your custom date and time slot with Mika or Lusca (over 20 years experience each).
               </p>
 
-              <div className="bg-[#0A0A0B] p-3 border border-white/5 space-y-1.5 mb-6 text-[11px] font-mono text-gray-400">
+              <div className="bg-[#0A0A0B] p-3 border border-white/5 space-y-1.5 mb-6 text-[11px] font-mono text-gray-400 rounded-xs">
                 <div className="flex items-center justify-between">
-                  <span>Acompte en ligne :</span>
-                  <span className="text-emerald-400 font-bold">$0 &bull; Paiement au salon</span>
+                  <span>Advance deposit:</span>
+                  <span className="text-emerald-400 font-bold">$0 &bull; Pay in person</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Confirmation:</span>
-                  <span className="text-white font-bold">Instant SMS & Ticket</span>
+                  <span className="text-white font-bold">Instant Ticket & Email</span>
                 </div>
               </div>
             </div>
@@ -175,7 +173,7 @@ export default function ClientStatusHub({
               <button
                 type="button"
                 onClick={onNavigateToBooking}
-                className="w-full bg-gold hover:bg-gold-light text-black text-xs font-semibold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95"
+                className="w-full bg-gold hover:bg-gold-light text-black text-xs font-semibold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 rounded-xs"
               >
                 <Calendar className="w-3.5 h-3.5" />
                 <span>Reserve Appointment</span>

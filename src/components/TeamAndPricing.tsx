@@ -8,27 +8,26 @@ interface TeamAndPricingProps {
   onNavigateToServices?: () => void;
 }
 
-// 2 Barbers only, with stylized avatars, both with 20+ years of experience
 const BARBERS = [
   {
     id: 'mika',
     name: 'Mika',
-    role: 'Lead Master Barber & Co-Founder',
-    experience: 'Plus de 20 ans d’expérience',
-    specialty: 'Spécialisé dans les dégradés américains chirurgicaux, contours au rasoir coupe-chou, textured crops et sculpture de barbe haute précision.',
+    role: 'Master Braider & Texture Specialist',
+    experience: 'Over 20 Years of Experience',
+    specialty: 'Specialized in girls’ & women’s braids: knotless box braids, designer swirl cornrows, goddess locs, and gentle protective styles.',
     initials: 'MK',
-    badge: 'Maître Dégradé & Rasoir (20+ Ans)',
-    tags: ['Skin Fade Chirurgical', 'Rasoir Coupe-Chou', 'Contours Ultra-Précis', '20+ Ans']
+    badge: 'Master of Women’s Braids & Locs (20+ Yrs)',
+    tags: ['Knotless Braids', 'Designer Cornrows', 'Goddess Locs', '20+ Yrs']
   },
   {
     id: 'lusca',
     name: 'Lusca',
-    role: 'Artisan Master Barber & Soins Traditionnels',
-    experience: 'Plus de 20 ans d’expérience',
-    specialty: 'Expert en sculpture de barbe millimétrée, rituel vapeur eucalyptus & serviettes chaudes, braids, cornrows et dreadlocks.',
+    role: 'Lead Master Barber & Men’s Specialist',
+    experience: 'Over 20 Years of Experience',
+    specialty: 'Specialized in boys’ & men’s precision haircuts: surgical zero skin fades, beard architecture, and straight razor contouring.',
     initials: 'LC',
-    badge: 'Maître Barbe, Soins & Textures (20+ Ans)',
-    tags: ['Sculpture Barbe', 'Serviettes Chaudes Eucalyptus', 'Braids & Dreads', '20+ Ans']
+    badge: 'Master of Men’s Cuts & Zero Fades (20+ Yrs)',
+    tags: ['Skin Fades', 'Men’s & Boys’ Cuts', 'Beard Sculpting', '20+ Yrs']
   }
 ];
 
@@ -71,7 +70,7 @@ const PRICING_LIST = [
   },
 ];
 
-export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, onNavigateToServices }: TeamAndPricingProps) {
+export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: TeamAndPricingProps) {
   const [isMobilePricingOpen, setIsMobilePricingOpen] = useState(false);
 
   return (
@@ -81,14 +80,14 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
         {/* Section Header */}
         <div className="text-center mb-16">
           <span className="text-gold text-[11px] uppercase tracking-[0.25em] font-mono font-bold block mb-3">
-            Maîtres Barbiers & Savoir-Faire
+            Master Barbers & Heritage
           </span>
           <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">
-            Nos Barbiers & Leurs Spécialités (20+ Ans d'Expérience)
+            Our Barbers & Specialties (20+ Years Experience)
           </h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            L'excellence chez Final Stop Barber Shop est incarnée par Mika et Lusca, deux maîtres artisans ayant chacun plus de 20 ans de métier. Cliquez sur leur profil pour découvrir leurs coupes et réserver directement.
+            Excellence at Final Stop Barber Shop is embodied by Mika and Lusca, two master artisans each with over 20 years of hands-on experience. Click their profiles to explore their work and book your chair directly.
           </p>
         </div>
 
@@ -98,8 +97,8 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
             <div 
               key={barber.id}
               onClick={() => onSelectBarber?.(barber.id as any)}
-              className="bg-[#151517] border border-white/10 hover:border-gold transition-all duration-300 p-7 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer active:scale-[0.99]"
-              title={`Cliquer pour ouvrir le profil complet de ${barber.name} (20+ ans d'expérience)`}
+              className="bg-[#151517] border border-white/10 hover:border-gold transition-all duration-300 p-7 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer active:scale-[0.99] rounded-sm"
+              title={`Click to view ${barber.name}'s profile and cuts (20+ years experience)`}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-gold/15 transition-colors pointer-events-none"></div>
 
@@ -144,7 +143,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
                   {barber.tags.map((tag, i) => (
                     <span 
                       key={i} 
-                      className="text-[11px] font-medium tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm group-hover:border-gold/30 transition-colors"
+                      className="text-[11px] font-medium tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm group-hover:border-gold/30 transition-colors font-mono"
                     >
                       {tag}
                     </span>
@@ -153,11 +152,11 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
 
                 <div className="flex items-center justify-between text-xs font-bold text-gold pt-2">
                   <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    <span>Voir profil complet, techniques & photos</span>
+                    <span>View full profile, cuts & techniques</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                   <span className="text-[10px] text-gray-400 font-mono hidden sm:inline">
-                    20+ Ans Métier
+                    20+ Yrs Craft
                   </span>
                 </div>
               </div>
@@ -166,7 +165,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
         </div>
 
         {/* Pricing & Services List */}
-        <div className="bg-[#151517] border border-white/10 p-6 md:p-10 shadow-2xl">
+        <div className="bg-[#151517] border border-white/10 p-6 md:p-10 shadow-2xl rounded-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 mb-6">
             <div>
               <span className="text-gold text-[10px] uppercase font-mono tracking-widest font-bold block mb-1">
@@ -177,7 +176,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
               </h3>
             </div>
             <div className="text-xs text-gray-400 font-mono bg-[#0A0A0B] px-3 py-1.5 border border-white/10 inline-block self-start sm:self-auto">
-              Pay in shop &bull; No advance fee
+              Pay in shop &bull; No advance booking fee
             </div>
           </div>
 
@@ -210,7 +209,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
             ))}
           </div>
 
-          {/* Mobile: Top Signature Previews + "Voir plus" Dedicated Interface Button */}
+          {/* Mobile: Top Signature Previews + Menu Expansion Button */}
           <div className="block md:hidden space-y-3">
             {PRICING_LIST.slice(0, 2).map((item, idx) => (
               <div 
@@ -237,7 +236,6 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber, on
               </div>
             ))}
 
-            {/* Professional English Menu Expansion Button */}
             <div className="pt-2">
               <button
                 type="button"

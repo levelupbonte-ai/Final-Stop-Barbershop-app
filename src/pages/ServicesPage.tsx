@@ -25,83 +25,83 @@ export const COMPLETE_SERVICES = [
     name: 'Skin Fade & Precision Haircut',
     price: '$35',
     duration: '35 min',
-    badge: 'Plus Demandé',
-    description: 'Dégradé à blanc millimétré sur mesure adapté à votre morphologie crânienne, avec finition au rasoir coupe-chou et talc protecteur.',
+    badge: 'Most Popular',
+    description: 'Customized millimeter zero fade tailored to your cranial architecture, finished with a straight razor line-up and soothing talc.',
     inclusions: [
-      'Consultation morphologique du visage',
-      'Dégradé à blanc américain (Low, Mid, High, Taper Fade)',
-      'Contours au rasoir droit et finitions au shaver',
-      'Coiffage avec texture ou cire mate haut de gamme'
+      'Facial morphology and head shape consultation',
+      'American skin fade (Low, Mid, High, or Taper Fade)',
+      'Straight razor contouring & foil shaver finish',
+      'Blow dry, matte clay or texture styling'
     ]
   },
   {
     id: 'barbe',
-    name: 'Sculpture Barbe & Rasage Chaud Traditionnel',
+    name: 'Beard Sculpting & Traditional Hot Shave',
     price: '$25',
     duration: '30 min',
-    badge: 'Artisanat Pur',
-    description: 'Taille architecturale de la barbe, rituel double serviette chaude imprégnée d’eucalyptus et rasage au coupe-chou avec mousse onctueuse.',
+    badge: 'Pure Craft',
+    description: 'Architectural beard shaping, dual eucalyptus steam hot towel treatment, and straight razor neck shave with rich warm lather.',
     inclusions: [
-      'Taille et désépaississement de la barbe aux ciseaux/tondeuse',
-      'Double rituel serviette chaude vapeur eucalyptus',
-      'Lignes de joues et cou taillées au rasoir traditionnel',
-      'Massage réparateur avec huile et baume nourrissants'
+      'Beard sculpting and scissor debulking',
+      'Dual eucalyptus steam hot towel ritual',
+      'Cheek and neck lines cut with traditional straight razor',
+      'Conditioning beard oil and rich moisturizing balm massage'
     ]
   },
   {
     id: 'combo',
-    name: 'The Signature Master Combo : Coupe + Barbe',
+    name: 'The Signature Master Combo: Cut + Beard',
     price: '$55',
     duration: '60 min',
-    badge: 'Meilleure Expérience',
-    description: 'L’expérience complète Final Stop. Votre coupe de précision accompagnée du rituel complet de sculpture de barbe par nos barbiers de 20 ans d’expérience.',
+    badge: 'Best Experience',
+    description: 'The complete Final Stop experience. Your precision haircut paired with a full beard sculpting ritual by our 20+ year master craftsmen.',
     inclusions: [
-      'Coupe sur mesure & Skin Fade complet',
-      'Sculpture de barbe et dégradé barbe/cheveux',
-      'Double rituel serviette chaude et vapeur',
-      'Finitions au rasoir, après-rasage rafraîchissant & coiffage'
+      'Tailored haircut & zero skin fade of choice',
+      'Complete beard sculpting & fade transition',
+      'Dual hot towel eucalyptus steam ritual',
+      'Straight razor detailing, cold toner splash & styling'
     ]
   },
   {
     id: 'braids',
-    name: 'Custom Braids & Cornrows (Tresses Homme)',
+    name: 'Custom Braids, Knotless & Cornrows',
     price: '$65+',
     duration: '60-90 min',
-    badge: 'Spécialité Lusca',
-    description: 'Création de motifs tressés géométriques ultra-nets, tension protectrice pour préserver les racines et soin hydratant du cuir chevelu.',
+    badge: 'Mika Specialty (20+ Yrs)',
+    description: 'Crisp geometric partings, knotless box braids, goddess locs, and protective styles designed to preserve hair health.',
     inclusions: [
-      'Séparation géométrique au peigne fin ultra-précis',
-      'Tressage régulier à tension contrôlée (sans douleur)',
-      'Application d’edge control organique pour une tenue prolongée',
-      'Mousse fixante et brumisation hydratante'
+      'Ultra-clean geometric parting with tail comb',
+      'Consistent, gentle scalp-safe tension braiding',
+      'Organic edge control application for long-lasting hold',
+      'Setting mousse and scalp hydration mist'
     ]
   },
   {
     id: 'dreads',
-    name: 'Dreadlocks & Full Retwist Complet',
+    name: 'Dreadlocks & Full Retwist',
     price: '$75+',
     duration: '90 min',
     badge: 'Texture & Locs',
-    description: 'Nettoyage en profondeur, reprise des repousses au palm-rolling avec gels botaniques et huiles fortifiantes pour des locks saines.',
+    description: 'Deep residue-free cleansing, neat palm-rolling retwist with botanical gels and restorative oils for healthy dreadlocks.',
     inclusions: [
-      'Shampoing purifiant spécial locks (élimination des résidus)',
-      'Retwist méticuleux racine par racine',
-      'Séchage sous casque tiède pour fixation optimale',
-      'Huile d’argan et ricin pour brillance naturelle'
+      'Purifying loc shampoo (removes buildup and debris)',
+      'Meticulous root-by-root palm-rolling retwist',
+      'Warm hooded dryer set for enduring lock structure',
+      'Pure argan and castor oil mist for natural shine'
     ]
   },
   {
     id: 'vip',
-    name: 'Expérience VIP Prestige : Soin Visage, Coupe & Barbe',
+    name: 'VIP Prestige Experience: Facial, Cut & Beard',
     price: '$90',
     duration: '90 min',
-    badge: 'Privilège Absolu',
-    description: 'Le soin total du gentleman. Masque purifiant visage, bain de vapeur, coupe haute couture, rituel barbe et massage crânien.',
+    badge: 'Ultimate Privilege',
+    description: 'The gentleman\'s total restoration. Purifying facial mask, steam bath, haute coiffure haircut, beard ritual, and tension-relief scalp massage.',
     inclusions: [
-      'Nettoyage visage & gommage purifiant sous vapeur',
-      'Masque détoxifiant et serviette glacée resserrante',
-      'Coupe complète précision & barbe au coupe-chou',
-      'Massage bien-être trapèzes et cuir chevelu'
+      'Facial cleanse & purifying steam exfoliation',
+      'Detox mask with pore-tightening cold towel wrap',
+      'Full precision haircut & hot lather straight razor shave',
+      'Relaxing neck, shoulder and scalp tension massage'
     ]
   }
 ];
@@ -125,16 +125,16 @@ export default function ServicesPage({
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
-            <span>Retour à l'Accueil</span>
+            <span>Back to Home</span>
           </button>
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onNavigateToBarbers}
-              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-sm"
+              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-sm cursor-pointer bg-transparent"
             >
-              <span>Voir Mika & Lusca (20+ ans)</span>
+              <span>View Mika & Lusca (20+ Yrs)</span>
               <ChevronRight className="w-3.5 h-3.5 text-gold" />
             </button>
 
@@ -144,7 +144,7 @@ export default function ServicesPage({
               className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 flex items-center gap-1.5 cursor-pointer rounded-sm"
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Prendre RDV</span>
+              <span>Book Appointment</span>
             </button>
           </div>
         </div>
@@ -156,14 +156,14 @@ export default function ServicesPage({
         {/* Page Title */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <span className="text-gold font-mono text-xs uppercase tracking-[0.25em] font-bold block mb-2">
-            Tarifs & Prestations Complètes
+            Transparent Pricing & Complete Services
           </span>
           <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white mb-4">
-            L'Excellence du Soin Masculin à San Diego
+            Master Haircuts, Fades & Protective Braids
           </h1>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-            Des tarifs transparents, sans frais cachés, pour des prestations exécutées par des barbiers cumulant plus de 20 ans de pratique. Paiement sur place au salon après votre prestation.
+            Honest rates with zero hidden fees. Master braider Mika (knotless braids & locs for women & girls) and master barber Lusca (precision fades & beard architecture for men & boys) with over two decades of craftsmanship.
           </p>
         </div>
 
@@ -172,7 +172,7 @@ export default function ServicesPage({
           {COMPLETE_SERVICES.map((service) => (
             <div
               key={service.id}
-              className="bg-[#141418] border border-white/10 hover:border-gold/60 transition-all p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative group"
+              className="bg-[#141418] border border-white/10 hover:border-gold/60 transition-all p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative group rounded-sm"
             >
               <div>
                 <div className="flex items-start justify-between gap-4 mb-4">
@@ -205,7 +205,7 @@ export default function ServicesPage({
                 {/* Inclusions List */}
                 <div className="space-y-2.5 mb-6 pt-4 border-t border-white/5">
                   <span className="text-[11px] font-mono uppercase tracking-wider text-gold font-bold block mb-2">
-                    Inclus dans la formule :
+                    Included in this service:
                   </span>
                   {service.inclusions.map((inc, i) => (
                     <div key={i} className="flex items-start gap-2.5 text-xs text-gray-300">
@@ -219,7 +219,7 @@ export default function ServicesPage({
               {/* Book CTA */}
               <div className="pt-4 border-t border-white/10 flex items-center justify-between">
                 <span className="text-[11px] text-gray-400 font-mono">
-                  Paiement sur place après prestation
+                  Pay at shop &bull; No advance fee
                 </span>
 
                 <button
@@ -227,7 +227,7 @@ export default function ServicesPage({
                   onClick={() => onNavigateToBooking(service.id)}
                   className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-5 py-2.5 transition-all shadow-md active:scale-95 cursor-pointer rounded-sm"
                 >
-                  Choisir cette formule &rarr;
+                  Select Service &rarr;
                 </button>
               </div>
             </div>

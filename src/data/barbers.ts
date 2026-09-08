@@ -18,6 +18,7 @@ export interface BarberProfile {
     title: string;
     tag: string;
     image: string;
+    description: string;
   }[];
   highlights: string[];
   clientReviews: {
@@ -32,128 +33,158 @@ export const MASTER_BARBERS: BarberProfile[] = [
   {
     id: 'mika',
     name: 'Mika',
-    role: 'Lead Master Barber & Co-Founder',
-    experience: 'Plus de 20 ans d’expérience',
+    role: 'Master Braider, Locs & Texture Artisan',
+    experience: 'Over 20 Years of Experience',
     experienceYears: 21,
     initials: 'MK',
-    badge: 'Maître Dégradé & Rasoir',
-    tagline: 'Précision chirurgicale, dégradés à blanc zéro millimètre & finitions au rasoir coupe-chou.',
-    bio: 'Avec plus de 20 années d’exercice ininterrompu au sommet de l’artisanat barbier, Mika a forgé sa réputation à San Diego par son souci obsessionnel du détail géométrique. Formé auprès des meilleurs maîtres barbiers internationaux, il a réalisé plus de 15 000 coupes sur mesure. Spécialiste incontesté des Skin Fades chirurgicaux, des contours au millimètre et des tailles de barbe structurées.',
-    specialty: 'Expertise suprême en dégradés américains (Skin Fade, Taper Fade, Burst Fade), alignements au rasoir droit traditionnel et coiffage texturé haute définition.',
-    tags: ['Skin Fade Chirurgical', 'Rasoir Coupe-Chou', 'Contours Ultra-Nets', '20+ Ans d\'Expérience'],
+    badge: 'Master of Women’s Braids, Cornrows & Locs',
+    tagline: 'Artisan braids, knotless protective styles, designer cornrows, and scalp-preserving tension.',
+    bio: 'With over 20 continuous years of dedicated artistry, Mika is renowned across San Diego as the master braider and protective styling specialist. Meticulous parting, gentle tension calibrated to protect sensitive hairlines, and breathtaking geometric designs define Mika\'s craft. Whether creating flowing knotless box braids, elaborate goddess locs, or sleek feed-in cornrows, clients leave with healthy scalps and enduring elegance.',
+    specialty: 'Mastery of women’s & girls’ braids: Knotless box braids, designer feed-in cornrows, goddess locs, braided updos, twist retwists, and organic scalp hydration rituals.',
+    tags: ['Knotless Braids', 'Designer Cornrows', 'Goddess Locs', '20+ Yrs Experience'],
     highlights: [
-      'Plus de 20 ans d’artisanat barbier haute précision',
-      'Plus de 15 000 clients satisfaits à San Diego',
-      'Maîtrise absolue du rasoir traditionnel et serviettes chaudes',
-      'Noté 5.0 étoiles sur Google avec plus de 380 avis'
+      'Over 20 years of specialized mastery in braids, cornrows & protective styling',
+      'Scalp-safe tension technique preventing breakage and edge damage',
+      'Signature organic botanical oils & restorative hydration treatments',
+      'Rated 5.0 stars with hundreds of loyal clients across Southern California'
     ],
     signatureTechniques: [
       {
-        title: 'Zero Gap Skin Fade',
-        description: 'Transition imperceptible du blanc absolu de la peau vers le volume supérieur, travaillée au clipper zéro et shaver foil.'
+        title: 'Featherlight Knotless Parting',
+        description: 'Zero-tension root construction that lays completely flat from day one without pulling on delicate baby hairs or scalp follicles.'
       },
       {
-        title: 'Straight Razor Lineup',
-        description: 'Finitions des tempes, pommettes et nuque au rasoir traditionnel à lame japonaise avec talc protecteur.'
+        title: 'Symmetrical Geometric Cornrows',
+        description: 'Laser-straight and swirl feed-in parting with tailored scalp geometry that holds crisp definition for weeks.'
       },
       {
-        title: 'Signature Beard Contour',
-        description: 'Sculpture des lignes de la barbe selon la morphologie maxillo-faciale pour un rendu net et viril.'
+        title: 'Boho Goddess Loc Sculpting',
+        description: 'Seamless blending of natural loc textures with organic curl accents and lightweight synthetic extensions.'
       }
     ],
     portfolioCuts: [
       {
-        title: 'Mid Skin Fade & Textured Crop',
-        tag: 'Skin Fade',
-        image: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&q=80&w=800'
+        title: 'Waist-Length Knotless Box Braids',
+        tag: 'Knotless Braids',
+        image: 'https://i.ibb.co/cXxD5MpB/Chat-GPT-Image-6-sept-2026-15-56-42.png',
+        description: 'Tension-free knotless box braids with polished, feather-light extensions for effortless, graceful movement.'
       },
       {
-        title: 'Low Drop Fade & Structured Beard',
-        tag: 'Beard + Fade',
-        image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=800'
+        title: 'Swirl Cornrows & Geometric Spiral Braids',
+        tag: 'Designer Cornrows',
+        image: 'https://i.ibb.co/xq8zMm2t/Chat-GPT-Image-6-sept-2026-15-55-41.png',
+        description: 'Intricate swirl pattern cornrows flowing symmetrically around the crown with zero frizz and clean edges.'
       },
       {
-        title: 'Taper Fade & Natural Wave Styling',
-        tag: 'Precision Cut',
-        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=800'
+        title: 'Sleek High Braided Ponytail & Cornrow Crown',
+        tag: 'Braided Updo',
+        image: 'https://i.ibb.co/d4N6qCDJ/Chat-GPT-Image-Sep-6-2026-03-39-13-PM-1.png',
+        description: 'High braided ponytail with symmetrical scalp feed-in cornrows and mirror glass-shine finish.'
+      },
+      {
+        title: 'Burgundy Goddess Locs & Edge Styling',
+        tag: 'Goddess Locs',
+        image: 'https://i.ibb.co/zhXtNXB4/Chat-GPT-Image-Sep-6-2026-03-38-30-PM-1.png',
+        description: 'Vibrant rich burgundy locs styled with curly accent ends and sculpted baby hair swoops.'
+      },
+      {
+        title: 'Bohemian Soft Curls & Feed-In Braids',
+        tag: 'Protective Style',
+        image: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&q=80&w=800',
+        description: 'Lush bohemian feed-in braids accented with cascading soft curls and nourishing scalp oil.'
       }
     ],
     clientReviews: [
       {
-        author: 'Antoine V.',
-        date: 'Il y a 3 jours',
+        author: 'Aaliyah M.',
+        date: '3 days ago',
         rating: 5,
-        comment: 'Mika a plus de 20 ans de métier et ça se sent dès le premier coup de tondeuse. Le skin fade est d’une propreté chirurgicale, les contours sont impeccables.'
+        comment: 'Mika has over 20 years of experience and you feel it immediately. My knotless braids had zero pain or tension, and the parts are mathematically perfect!'
       },
       {
-        author: 'Julian M.',
-        date: 'Il y a 1 semaine',
+        author: 'Keisha T.',
+        date: '1 week ago',
         rating: 5,
-        comment: 'Le meilleur barbier de San Diego, sans discussion possible. Jamais déçu depuis 4 ans que je viens chez Mika.'
+        comment: 'Best braider in San Diego! Mika did my goddess locs for my sister\'s wedding and I received compliments for weeks.'
       }
     ]
   },
   {
     id: 'lusca',
     name: 'Lusca',
-    role: 'Artisan Master Barber & Spécialiste Barbe & Textures',
-    experience: 'Plus de 20 ans d’expérience',
+    role: 'Lead Master Barber & Men’s Haircut Specialist',
+    experience: 'Over 20 Years of Experience',
     experienceYears: 20,
     initials: 'LC',
-    badge: 'Maître Barbe, Soins & Textures',
-    tagline: 'Sculpture traditionnelle de la barbe, rituel serviette chaude eucalyptus, braids & soins profonds.',
-    bio: 'Lusca cumule plus de deux décennies d’expertise consacrée à l’art du rasage classique, au soin de la barbe et à la maîtrise des cheveux texturés, tresses et dreadlocks. Véritable artisan du bien-être masculin, il allie rituels de vapeur à l’eucalyptus, huiles végétales pures et taille millimétrique pour transformer chaque passage au fauteuil en expérience VIP ressourçante.',
-    specialty: 'Sculpture de barbe millimétrée, rasage traditionnel au savon chaud, braids artistiques, retwist dreadlocks et soins réparateurs du cuir chevelu.',
-    tags: ['Sculpture de Barbe', 'Serviettes Chaudes Eucalyptus', 'Braids & Dreads', '20+ Ans d\'Expérience'],
+    badge: 'Master of Men’s Cuts, Zero Fades & Razor Work',
+    tagline: 'Surgical zero skin fades, precision men’s & boys’ haircuts, and traditional hot towel shaves.',
+    bio: 'With over two decades at the chair, Lusca is renowned across San Diego for millimeter-exact clipper work, flawless fade transitions, and classic straight razor shaves. Having performed tens of thousands of custom cuts for men and boys, Lusca pairs traditional Japanese steel blade contouring with warm eucalyptus hot towel therapy for the quintessential barber shop experience.',
+    specialty: 'Mastery of men\'s and boys\' haircuts: Skin Fades, Drop Fades, Taper Fades, Burst Fades, architectural beard sculpting, straight razor neck lineups, and textured shear crops.',
+    tags: ['Skin Fade', 'Men’s & Boys’ Cuts', 'Beard Architecture', '20+ Yrs Experience'],
     highlights: [
-      'Plus de 20 ans d’expérience en coiffure masculine et barbering traditionnel',
-      'Spécialiste agréé en cheveux afro, texturés, dreadlocks et tresses',
-      'Rituel de vapeur aromathérapie et soins botaniques organiques',
-      'Reconnu pour sa régularité et son accueil personnalisé'
+      'Over 20 years of master craftsmanship in precision haircuts and straight razor shaves',
+      'Specialist in boys’ haircuts, teen styles, and executive men’s grooming',
+      'Dual eucalyptus hot towel ritual with rich whipped warm lather',
+      'Over 15,000 satisfied clients throughout San Diego'
     ],
     signatureTechniques: [
       {
-        title: 'Rituel Rasage Chaud Eucalyptus',
-        description: 'Double passage de serviettes imprégnées d’eucalyptus vapeur, mousse tiède montée au blaireau et rasoir droit.'
+        title: 'Zero-Gap Skin Fade',
+        description: 'Seamless optical blur transitioning from genuine bare skin to rich crown volume using foil shavers and precision magnetic guards.'
       },
       {
-        title: 'Bespoke Beard Sculpting',
-        description: 'Taille sculptée aux ciseaux et tondeuse avec fondu de barbe et baume nourrissant aux beurres naturels.'
+        title: 'Architectural Beard Sculpting',
+        description: 'Freehand shear sculpting and clipper fading tailored to jawline morphology, completed with nourishing cedarwood oils.'
       },
       {
-        title: 'Braids & Cornrows Précision',
-        description: 'Tracés géométriques parfaits, tension équilibrée pour protéger le cuir chevelu et tenue longue durée.'
+        title: 'Straight Razor Hot Towel Shave',
+        description: 'Classic double eucalyptus hot steam towels, rich badger-hair lather, and single-pass Japanese steel razor contouring.'
       }
     ],
     portfolioCuts: [
       {
-        title: 'Sculpted Full Beard & Hot Lather Finish',
-        tag: 'Barbe & Soin',
-        image: 'https://images.unsplash.com/photo-1517832606589-7629c3397143?auto=format&fit=crop&q=80&w=800'
+        title: 'Mid Skin Fade & Textured Crop',
+        tag: 'Skin Fade',
+        image: 'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&q=80&w=800',
+        description: 'Seamless skin blur transitioning smoothly into a textured top with razor-sharp temple lines.'
       },
       {
-        title: 'Geometric Cornrows & Scalp Care',
-        tag: 'Braids',
-        image: 'https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&q=80&w=800'
+        title: 'Low Drop Fade & Structured Beard',
+        tag: 'Beard + Fade',
+        image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=800',
+        description: 'Low curved drop fade contouring the ear and blending cleanly into a sculpted beard gradient.'
       },
       {
-        title: 'Dreadlocks Retwist & Clean Taper',
-        tag: 'Locs & Taper',
-        image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800'
+        title: 'Twisted Locs with High Taper Fade & Beard Lineup',
+        tag: 'Taper Fade + Cut',
+        image: 'https://i.ibb.co/20Ns74Tz/Chat-GPT-Image-6-sept-2026-15-53-44.png',
+        description: 'High temple taper fade paired with sharp line work and sculpted beard definition.'
+      },
+      {
+        title: 'Executive Razor Cut & Clean Nape',
+        tag: 'Executive Cut',
+        image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
+        description: 'Classic executive shear work with hot lather razor perimeter and soothing talc finish.'
+      },
+      {
+        title: 'Taper Fade & Waves for Boys & Men',
+        tag: 'Taper Fade',
+        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=800',
+        description: 'Subtle temple and neck tapers preserving side density with high-definition wave polish.'
       }
     ],
     clientReviews: [
       {
-        author: 'Darnell W.',
-        date: 'Il y a 5 jours',
+        author: 'Marcus V.',
+        date: '5 days ago',
         rating: 5,
-        comment: 'Lusca est un véritable maître. 20 ans d’expérience qui se ressentent dans le calme, la précision et le rituel serviette chaude. Mes tresses et ma barbe n’ont jamais été aussi nettes.'
+        comment: 'Lusca has over 20 years cutting hair and you see it right away. The skin fade is like an optical illusion and the razor lines are laser straight.'
       },
       {
-        author: 'Kevin S.',
-        date: 'Il y a 2 semaines',
+        author: 'Terrence K.',
+        date: '2 weeks ago',
         rating: 5,
-        comment: 'Très pro, ponctuel et soucieux du détail. Lusca prend le temps d’écouter et le résultat est juste parfait.'
+        comment: 'Brought my son for his back-to-school taper and got my beard shaped. Lusca is patient, professional, and the best barber in San Diego.'
       }
     ]
   }
