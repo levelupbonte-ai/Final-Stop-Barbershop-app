@@ -24,6 +24,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { saveReservation } from '../lib/firestoreService';
 import CallShopModal from '../components/CallShopModal';
 import { sendBookingConfirmationEmail } from '../lib/emailService';
+import { OFFICIAL_SERVICES, ServiceItem } from '../data/services';
 
 interface BookingPageProps {
   onBackToHome: () => void;
@@ -31,93 +32,9 @@ interface BookingPageProps {
   initialService?: string;
 }
 
-export interface ServiceItem {
-  id: string;
-  name: string;
-  duration: string;
-  price: string;
-  numericPrice: number;
-  badge?: string;
-  inclusions: string[];
-}
+const SERVICES: ServiceItem[] = OFFICIAL_SERVICES;
 
-const SERVICES: ServiceItem[] = [
-  { 
-    id: 'fade', 
-    name: 'Skin Fade & Precision Haircut', 
-    duration: '35 min', 
-    price: '$35',
-    numericPrice: 35,
-    badge: 'Popular',
-    inclusions: [
-      'Tailored zero skin fade & razor taper',
-      'Crisp razor line-up & talc finish',
-      'Blow dry, texture styling & aftershave splash'
-    ]
-  },
-  { 
-    id: 'barbe', 
-    name: 'Beard Sculpting & Hot Lather Shave', 
-    duration: '30 min', 
-    price: '$25',
-    numericPrice: 25,
-    inclusions: [
-      'Precision razor edge detailing',
-      'Eucalyptus steam hot towel relaxation',
-      'Organic nourishing beard oil & butter massage'
-    ]
-  },
-  { 
-    id: 'combo', 
-    name: 'The Signature Master Combo: Cut + Beard', 
-    duration: '60 min', 
-    price: '$55',
-    numericPrice: 55,
-    badge: 'Signature',
-    inclusions: [
-      'Customized haircut & zero fade of choice',
-      'Full beard grooming, shaping & hot towel steam',
-      'Straight razor neck shave & premium styling'
-    ]
-  },
-  { 
-    id: 'braids', 
-    name: 'Custom Braids & Cornrows', 
-    duration: '60-90 min', 
-    price: '$65+',
-    numericPrice: 65,
-    inclusions: [
-      'Precision geometric partings & custom patterns',
-      'Long-lasting hold with organic edge control',
-      'Deep scalp hydration & tension-relief care'
-    ]
-  },
-  { 
-    id: 'dreads', 
-    name: 'Dreadlocks & Full Retwist', 
-    duration: '90 min', 
-    price: '$75+',
-    numericPrice: 75,
-    inclusions: [
-      'Thorough scalp cleanse & residue removal',
-      'Palm-roll retwist with natural botanical oils',
-      'Professional hood drying & lasting neat finish'
-    ]
-  },
-  { 
-    id: 'premium', 
-    name: 'VIP Prestige Grooming Experience', 
-    duration: '90 min', 
-    price: '$90',
-    numericPrice: 90,
-    badge: 'VIP Experience',
-    inclusions: [
-      'Signature haircut & complete hot lather razor shave',
-      'Facial steam, detox black mask & exfoliation scrub',
-      'Aromatherapy hot towels & tension-relief scalp massage'
-    ]
-  },
-];
+const CATEGORIES = ['All', 'Haircuts', 'Combos', 'Beard & Shave', 'Lineups & Detailing', 'Treatments'] as const;
 
 const TIME_SLOTS = [
   '10:00 AM', '10:45 AM', '11:30 AM', '12:15 PM', '1:00 PM', '1:45 PM', '2:30 PM', '3:15 PM', '4:00 PM', '4:45 PM', '5:30 PM'
@@ -125,13 +42,14 @@ const TIME_SLOTS = [
 
 const BARBERS = [
   { id: 'any', name: 'First Available Master Artist' },
-  { id: 'mika', name: 'Mika (20+ Years Exp • Women’s & Girls’ Braids & Locs)' },
-  { id: 'lusca', name: 'Lusca (20+ Years Exp • Precision Fades, Men’s & Boys’ Cuts)' }
+  { id: 'mika', name: 'Mika (Master Braider • Women’s & Girls’ Braids & Locs)' },
+  { id: 'lusca', name: 'Lusca (Master Barber • Precision Fades, Men’s & Boys’ Cuts)' }
 ];
 
 export default function BookingPage({ onBackToHome, initialBarber, initialService }: BookingPageProps) {
   // Step navigation: 1 = Plan, 2 = Date & Time, 3 = Guest Info (Name & Email), 4 = Confirm Reservation
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   // Form State
   const [selectedServiceId, setSelectedServiceId] = useState(
@@ -438,9 +356,36 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                   </span>
                 </div>
 
+                {/* Categories Tab Filter */}
+                <div className="flex items-center gap-2 flex-wrap mb-6">
+                  {CATEGORIES.map((cat) => {
+                    const count = cat === 'All' 
+                      ? SERVICES.length 
+                      : SERVICES.filter(s => s.category === cat).length;
+                    const isActive = selectedCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`text-xs font-mono px-3 py-1.5 rounded-sm transition-all cursor-pointer flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-gold text-black font-bold shadow'
+                            : 'bg-[#18181D] text-gray-400 border border-white/10 hover:text-white hover:border-white/30'
+                        }`}
+                      >
+                        <span>{cat}</span>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-gray-400'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
                 {/* Plans Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                  {SERVICES.map((service) => {
+                  {SERVICES.filter(service => selectedCategory === 'All' || service.category === selectedCategory).map((service) => {
                     const isSelected = selectedServiceId === service.id;
                     return (
                       <div

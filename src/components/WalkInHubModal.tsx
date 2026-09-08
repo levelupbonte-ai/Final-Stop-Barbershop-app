@@ -15,6 +15,7 @@ import {
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { saveWaitlistEntry } from '../lib/firestoreService';
+import { OFFICIAL_SERVICES } from '../data/services';
 
 export type ModalMode = 'waitlist' | 'promo' | null;
 
@@ -39,7 +40,7 @@ export default function WalkInHubModal({
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [selectedBarber, setSelectedBarber] = useState('First Available Barber');
-  const [selectedService, setSelectedService] = useState('Skin Fade & Precision Cut ($35)');
+  const [selectedService, setSelectedService] = useState(`${OFFICIAL_SERVICES[0].name} (${OFFICIAL_SERVICES[0].price})`);
   const [waitlistSuccess, setWaitlistSuccess] = useState<any>(null);
 
   // Promo form states
@@ -288,8 +289,8 @@ export default function WalkInHubModal({
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
                     <option value="First Available Barber">First Available Master Barber (Fastest)</option>
-                    <option value="Mika">Mika (20+ Yrs Exp &bull; Fades & Razor)</option>
-                    <option value="Lusca">Lusca (20+ Yrs Exp &bull; Beard, Braids & Locs)</option>
+                    <option value="Mika">Mika (Master Braider & Fades)</option>
+                    <option value="Lusca">Lusca (Master Barber & Styling)</option>
                   </select>
                 </div>
 
@@ -302,12 +303,11 @@ export default function WalkInHubModal({
                     onChange={(e) => setSelectedService(e.target.value)}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
-                    <option value="Skin Fade & Precision Cut ($35)">Skin Fade & Precision Cut ($35)</option>
-                    <option value="Beard Sculpting & Hot Lather Shave ($25)">Beard Sculpting & Hot Lather Shave ($25)</option>
-                    <option value="Signature Master Combo: Cut + Beard ($55)">Signature Master Combo: Cut + Beard ($55)</option>
-                    <option value="Custom Braids & Cornrows ($65+)">Custom Braids & Cornrows ($65+)</option>
-                    <option value="Dreadlocks & Full Retwist ($75+)">Dreadlocks & Full Retwist ($75+)</option>
-                    <option value="VIP Prestige Full Experience ($90)">VIP Prestige Full Experience ($90)</option>
+                    {OFFICIAL_SERVICES.map((s) => (
+                      <option key={s.id} value={`${s.name} (${s.price})`}>
+                        {s.name} ({s.price} - {s.duration})
+                      </option>
+                    ))}
                   </select>
                 </div>
 

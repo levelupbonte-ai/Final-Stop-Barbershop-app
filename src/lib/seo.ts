@@ -8,7 +8,7 @@ export interface PageSEO {
 export const SEO_DATA: Record<string, PageSEO> = {
   home: {
     title: 'Final Stop Barber Shop & Salon | Master Haircuts & Protective Braids | San Diego CA',
-    description: 'San Diego’s premier unisex barber shop and hair artistry lounge. Mika (20+ yrs in women’s & girls’ knotless braids, cornrows & locs) and Lusca (20+ yrs in precision fades, beard sculpting & boys’ cuts) at 5277 El Cajon Blvd.',
+    description: 'San Diego’s premier unisex barber shop and hair artistry lounge. Mika (master braider for women’s & girls’ knotless braids, cornrows & locs) and Lusca (master barber in precision fades, beard sculpting & boys’ cuts) at 5277 El Cajon Blvd.',
     canonicalPath: '/',
     keywords: 'final stop barber shop, barber shop san diego, unisex hair salon san diego, braids san diego, knotless braids el cajon blvd, dreadlocks retwist san diego, skin fade san diego, black barber shop san diego, finalstop.org'
   },
@@ -25,10 +25,10 @@ export const SEO_DATA: Record<string, PageSEO> = {
     keywords: 'barber prices san diego, braid prices san diego, haircut cost el cajon blvd, hair salon price list'
   },
   barbers: {
-    title: 'Master Barbers Mika & Lusca (20+ Yrs Exp) | Final Stop Barber Shop San Diego',
-    description: 'Meet Mika and Lusca, two master hair artists with over 20 years of hands-on experience in African-American hair craft, razor fading, protective braids, and locs.',
+    title: 'Master Barbers Mika & Lusca | Final Stop Barber Shop San Diego',
+    description: 'Meet Mika and Lusca, two master hair artists in African-American hair craft, razor fading, protective braids, and locs.',
     canonicalPath: '/#barbers',
-    keywords: 'best barbers in san diego, master braider san diego, mika braids, lusca barber, 20 years experience barber'
+    keywords: 'best barbers in san diego, master braider san diego, mika braids, lusca barber, barber san diego'
   },
   'barber-profile': {
     title: 'Barber Profile & Portfolio | Mika & Lusca | Final Stop Barber Shop',

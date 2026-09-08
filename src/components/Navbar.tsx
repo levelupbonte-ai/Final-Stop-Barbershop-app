@@ -37,7 +37,7 @@ export default function Navbar({
 
   const navLinks: { name: string; view: NavView; badge?: string }[] = [
     { name: 'Home', view: 'home' },
-    { name: 'Our Barbers', view: 'barbers', badge: '20+ Yrs Exp' },
+    { name: 'Our Barbers', view: 'barbers' },
     { name: 'Services & Pricing', view: 'services' },
     { name: 'Live Waitlist', view: 'waitlist', badge: 'Walk-In' },
     { name: 'Portfolio', view: 'gallery' },

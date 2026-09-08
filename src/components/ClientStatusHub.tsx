@@ -118,7 +118,7 @@ export default function ClientStatusHub({
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Active barbers:</span>
-                    <span className="text-emerald-400 font-bold">Mika &bull; Lusca (20+ Yrs)</span>
+                    <span className="text-emerald-400 font-bold">Mika &bull; Lusca</span>
                   </div>
                 </div>
               </div>

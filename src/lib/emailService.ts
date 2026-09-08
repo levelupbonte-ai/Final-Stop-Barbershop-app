@@ -5,7 +5,7 @@
 export interface EmailPayload {
   to: string;
   clientName: string;
-  type: 'booking' | 'waitlist';
+  type: 'booking' | 'waitlist' | 'vip_signup';
   details: {
     barber?: string;
     service?: string;

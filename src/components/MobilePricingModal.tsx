@@ -1,75 +1,16 @@
-import React from 'react';
-import { X, Clock, Scissors, Calendar, Sparkles, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Clock, Scissors, Calendar, Sparkles, Check, Search } from 'lucide-react';
+import { OFFICIAL_SERVICES, ServiceItem } from '../data/services';
 
-export interface ServiceItem {
-  name: string;
-  price: string;
-  duration: string;
-  desc: string;
-  category: string;
-  featured?: boolean;
-}
-
-export const ALL_SERVICES: ServiceItem[] = [
-  {
-    name: 'Skin Fade & Precision Haircut',
-    price: '$35',
-    duration: '35 min',
-    desc: 'Zero razor fade tailored to head shape, razor line-up, texture styling, and neck shave.',
-    category: 'Haircuts',
-    featured: true
-  },
-  {
-    name: 'Beard Sculpting & Hot Lather Shave',
-    price: '$25',
-    duration: '30 min',
-    desc: 'Millimeter beard trim, straight razor contouring, hot eucalyptus towel, and hydrating balm.',
-    category: 'Beard Care'
-  },
-  {
-    name: 'The Signature Master Combo: Cut + Beard',
-    price: '$55',
-    duration: '60 min',
-    desc: 'The complete grooming experience: customized haircut, complete beard sculpting, and dual hot towel service.',
-    category: 'Combos',
-    featured: true
-  },
-  {
-    name: 'Custom Braids & Cornrows',
-    price: '$65+',
-    duration: '60-90 min',
-    desc: 'Clean geometric patterns, ultra-crisp parting, durable lock hold, and scalp hydration treatment.',
-    category: 'Braids & Locs'
-  },
-  {
-    name: 'Dreadlocks & Full Retwist',
-    price: '$75+',
-    duration: '90 min',
-    desc: 'Deep scalp cleanse, organic loc retwist, root maintenance, and essential oil misting.',
-    category: 'Braids & Locs'
-  },
-  {
-    name: 'VIP Prestige Grooming Experience',
-    price: '$90',
-    duration: '90 min',
-    desc: 'Purifying face treatment, steam bath, premium haircut, complete beard care, and scalp massage.',
-    category: 'VIP Packages'
-  },
-  {
-    name: 'Kids & Teens Precision Cut (Under 16)',
-    price: '$28',
-    duration: '30 min',
-    desc: 'Patient and stylish haircut with clean edges and scissor or clipper work.',
-    category: 'Haircuts'
-  },
-  {
-    name: 'Lineup & Edge Restoration (Clipper & Razor)',
-    price: '$18',
-    duration: '15 min',
-    desc: 'Quick hairline sharp touch-up, forehead line-up, and neck taper clean.',
-    category: 'Haircuts'
-  }
-];
+export const ALL_SERVICES = OFFICIAL_SERVICES.map(s => ({
+  name: s.name,
+  price: s.price,
+  duration: s.duration,
+  desc: s.description,
+  category: s.category,
+  featured: s.featured,
+  id: s.id
+}));
 
 interface MobilePricingModalProps {
   isOpen: boolean;
@@ -77,14 +18,25 @@ interface MobilePricingModalProps {
   onNavigateToBooking?: (selectedServiceName?: string) => void;
 }
 
+const CATEGORIES = ['All', 'Haircuts', 'Combos', 'Beard & Shave', 'Lineups & Detailing', 'Treatments'] as const;
+
 export default function MobilePricingModal({
   isOpen,
   onClose,
   onNavigateToBooking
 }: MobilePricingModalProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
   if (!isOpen) return null;
 
-  const filteredServices = ALL_SERVICES;
+  const filteredServices = ALL_SERVICES.filter(item => {
+    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+    const matchesSearch = searchQuery.trim() === '' ||
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const handleSelectService = (serviceName: string) => {
     onClose();
@@ -99,27 +51,61 @@ export default function MobilePricingModal({
       <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#121215] shrink-0">
         <div>
           <span className="text-[10px] font-mono text-gold uppercase tracking-widest block font-bold">
-            Transparent Rates
+            Verified Shop Pricing
           </span>
           <h2 className="text-lg font-serif font-bold text-white">
-            Services & Pricing Menu
+            Services & Price Menu ({OFFICIAL_SERVICES.length})
           </h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="p-1 text-gray-400 hover:text-gold transition-colors bg-transparent border-none outline-none cursor-pointer"
+          className="p-1.5 text-gray-400 hover:text-gold transition-colors bg-transparent border-none outline-none cursor-pointer"
           aria-label="Close pricing"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
+      {/* Search & Category Filter Bar */}
+      <div className="p-3 bg-[#0E0E11] border-b border-white/10 space-y-2 shrink-0">
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Search service..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-[#18181D] border border-white/10 focus:border-gold pl-9 pr-3 py-1.5 text-xs text-white placeholder-gray-500 rounded-sm outline-none"
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {CATEGORIES.map((cat) => {
+            const isActive = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`text-[11px] font-mono px-2.5 py-1 rounded-sm whitespace-nowrap transition-colors cursor-pointer ${
+                  isActive
+                    ? 'bg-gold text-black font-bold'
+                    : 'bg-[#18181D] text-gray-400 border border-white/10'
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Services List (Scrollable) */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-24">
         <div className="text-[11px] text-gray-400 font-mono bg-[#16161A] p-3 border border-white/5 flex items-center justify-between mb-2">
-          <span>Pay in shop upon service completion</span>
-          <span className="text-gold font-bold">No booking fees</span>
+          <span>Pay at counter &bull; Cash, Card, Zelle</span>
+          <span className="text-gold font-bold">No deposit needed</span>
         </div>
 
         {filteredServices.map((item, idx) => (
@@ -128,16 +114,19 @@ export default function MobilePricingModal({
             className="bg-[#151517] border border-white/10 p-4 rounded-sm flex flex-col justify-between shadow-lg group hover:border-gold/30 transition-colors"
           >
             <div>
-              {/* Service Header Row with Badge and Price - never overlaps title */}
+              {/* Service Header Row with Badge and Price */}
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div>
                   {item.featured && (
-                    <span className="text-[10px] uppercase font-bold tracking-wider bg-gold/15 border border-gold/40 text-gold px-2 py-0.5 rounded-sm">
+                    <span className="text-[9px] uppercase font-bold tracking-wider bg-gold/15 border border-gold/40 text-gold px-2 py-0.5 rounded-sm">
                       Popular
                     </span>
                   )}
+                  <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block mt-0.5">
+                    {item.category}
+                  </span>
                 </div>
-                <span className="text-lg font-bold text-gold font-sans">
+                <span className="text-xl font-bold text-gold font-sans">
                   {item.price}
                 </span>
               </div>
@@ -160,11 +149,11 @@ export default function MobilePricingModal({
             <div className="pt-3 border-t border-white/5 flex items-center justify-end">
               <button
                 type="button"
-                onClick={() => handleSelectService(item.name)}
-                className="w-full bg-gold hover:bg-gold-light text-black text-xs font-semibold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer transition-all"
+                onClick={() => handleSelectService(item.id)}
+                className="w-full bg-gold hover:bg-gold-light text-black text-xs font-semibold uppercase tracking-wider py-2.5 px-4 flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer transition-all rounded-sm"
               >
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Book This Service</span>
+                <span>Book This Service &rarr;</span>
               </button>
             </div>
           </div>
@@ -179,7 +168,7 @@ export default function MobilePricingModal({
             onClose();
             if (onNavigateToBooking) onNavigateToBooking();
           }}
-          className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider py-3.5 flex items-center justify-center gap-2 font-mono shadow-xl cursor-pointer"
+          className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider py-3.5 flex items-center justify-center gap-2 font-mono shadow-xl cursor-pointer rounded-sm"
         >
           <Calendar className="w-4 h-4" />
           <span>Go to Booking Calendar</span>

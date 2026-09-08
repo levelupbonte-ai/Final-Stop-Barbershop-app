@@ -111,7 +111,7 @@ export default function BarbersPage({
                     <div>
                       <div className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-gold uppercase tracking-wider bg-gold/10 px-2.5 py-0.5 mb-1">
                         <Award className="w-3 h-3" />
-                        <span>20+ Yrs Experience</span>
+                        <span>Master Specialist</span>
                       </div>
                       <h2 className="text-2xl font-serif font-bold text-white group-hover:text-gold transition-colors">
                         {barber.name}
@@ -176,14 +176,14 @@ export default function BarbersPage({
           ))}
         </div>
 
-        {/* Why 20+ Years Matters Section */}
+        {/* Why Master Barbering Matters Section */}
         <div className="bg-[#121215] border border-white/10 p-6 sm:p-10 mb-12 rounded-sm">
           <div className="text-center max-w-2xl mx-auto mb-8">
             <span className="text-gold font-mono text-[11px] uppercase tracking-widest font-bold block mb-1">
               The Art of Barbering
             </span>
             <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-              Why Two Decades of Experience Matters
+              Why Master Craftsmanship Matters
             </h2>
           </div>
 
@@ -194,7 +194,7 @@ export default function BarbersPage({
               </div>
               <h3 className="text-sm font-bold text-white mb-2">Facial Bone Architecture</h3>
               <p className="text-xs text-gray-400 leading-relaxed">
-                With 20+ years behind the chair, we calculate fade gradients and beard symmetry precisely matched to your cranial structure.
+                Behind the chair, we calculate fade gradients and beard symmetry precisely matched to your cranial structure.
               </p>
             </div>
 

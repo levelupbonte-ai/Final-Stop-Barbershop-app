@@ -13,8 +13,9 @@ import {
   orderBy,
   limit 
 } from 'firebase/firestore';
-import { db, auth } from './firebase';
+import { db, auth, storage } from './firebase';
 import { signInAnonymously } from 'firebase/auth';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export interface FirestoreReservation {
   id?: string;
@@ -246,7 +247,7 @@ export async function seedFirestoreDatabase(): Promise<{ success: boolean; messa
       id: 'mika',
       name: 'Mika',
       role: 'Lead Master Barber & Co-Founder',
-      experience: '20+ Years Master Craft',
+      experience: 'Master Craft & Precision',
       specialty: 'Surgical Skin Fades, Straight Razor Lineups, Textured Crops & Master Beard Styling',
       rating: 5.0,
       reviewsCount: 380,
@@ -258,7 +259,7 @@ export async function seedFirestoreDatabase(): Promise<{ success: boolean; messa
       id: 'lusca',
       name: 'Lusca',
       role: 'Artisan Master Barber & Texture Specialist',
-      experience: '20+ Years Master Craft',
+      experience: 'Master Craft & Artistry',
       specialty: 'Bespoke Beard Sculpting, Eucalyptus Hot Towel Steam, Braids, Cornrows & Dreadlocks',
       rating: 5.0,
       reviewsCount: 340,
@@ -610,4 +611,62 @@ export async function seedFirestoreGallery(): Promise<{ success: boolean; count:
     return { success: false, count: 0 };
   }
 }
+
+/**
+ * Uploads a raw image File (from computer or mobile camera/gallery)
+ * to Firebase Storage, with seamless Base64 dataURL fallback if Storage rules are pending.
+ */
+export async function uploadGalleryImageFile(file: File): Promise<string> {
+  await ensureFirebaseAuth();
+  const fileExt = file.name.split('.').pop() || 'jpg';
+  const cleanName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+  const storageRef = ref(storage, `gallery/${cleanName}`);
+
+  try {
+    const snapshot = await uploadBytes(storageRef, file, {
+      contentType: file.type || 'image/jpeg',
+    });
+    const downloadUrl = await getDownloadURL(snapshot.ref);
+    return downloadUrl;
+  } catch (storageErr) {
+    console.warn('Firebase Storage upload failed or not enabled yet, compressing to Base64 image payload:', storageErr);
+    // Fallback: Read file as Data URL with canvas compression so it saves directly to Firestore
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1200;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(e.target?.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  }
+}
+
 

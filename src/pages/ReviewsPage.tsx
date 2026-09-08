@@ -12,23 +12,23 @@ const VERIFIED_REVIEWS = [
   {
     author: 'Marcus D.',
     role: 'Regular Client (3 Years)',
-    barber: 'Mika (20+ Yrs)',
+    barber: 'Mika',
     rating: 5,
     date: '2 days ago',
-    text: 'Mika has over 20 years behind the chair and it shows in every minute. His fade transitions are insanely clean, the shop is spotless, and the energy is top tier.'
+    text: 'Mika is a true artist behind the chair and it shows in every minute. His fade transitions are insanely clean, the shop is spotless, and the energy is top tier.'
   },
   {
     author: 'Darnell W.',
     role: 'Regular Client',
-    barber: 'Lusca (20+ Yrs)',
+    barber: 'Lusca',
     rating: 5,
     date: '5 days ago',
-    text: 'Lusca is a true master of beard sculpting and hair textures. 20 years of dedication reflected in calm precision and eucalyptus hot towel treatment. My braids and beard have never looked sharper.'
+    text: 'Lusca is a true master of beard sculpting and hair textures. Masterful dedication reflected in calm precision and eucalyptus hot towel treatment. My braids and beard have never looked sharper.'
   },
   {
     author: 'Julian B.',
     role: 'San Diego Visitor',
-    barber: 'Mika (20+ Yrs)',
+    barber: 'Mika',
     rating: 5,
     date: '1 week ago',
     text: 'Visiting San Diego and stopped by Final Stop on a friend\'s recommendation. Smooth online booking, great greeting, and razor-sharp straight razor detailing. 10/10.'
@@ -36,15 +36,15 @@ const VERIFIED_REVIEWS = [
   {
     author: 'Anthony V.',
     role: 'Loyal Client',
-    barber: 'Lusca (20+ Yrs)',
+    barber: 'Lusca',
     rating: 5,
     date: '2 weeks ago',
-    text: 'Lusca\'s eucalyptus hot towel ritual is the most therapeutic part of my week. You simply will not find barbers with this level of tenure and craft anywhere else in SD.'
+    text: 'Lusca\'s eucalyptus hot towel ritual is the most therapeutic part of my week. You simply will not find barbers with this level of craft and care anywhere else in SD.'
   },
   {
     author: 'Samir K.',
     role: 'Regular Client',
-    barber: 'Mika (20+ Yrs)',
+    barber: 'Mika',
     rating: 5,
     date: '3 weeks ago',
     text: 'Punctuality, precision, and consistency. Mika never misses a line. Night and day compared to industrial barber franchises.'
@@ -52,7 +52,7 @@ const VERIFIED_REVIEWS = [
   {
     author: 'Cedric M.',
     role: 'Locs & Fade Client',
-    barber: 'Lusca (20+ Yrs)',
+    barber: 'Lusca',
     rating: 5,
     date: '1 month ago',
     text: 'Impeccable loc retwist and hairline line-up. Lusca knows textured and afro hair inside and out.'
@@ -86,7 +86,7 @@ export default function ReviewsPage({
               onClick={onNavigateToBarbers}
               className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-block cursor-pointer bg-transparent border-none"
             >
-              Mika & Lusca (20+ Yrs)
+              Mika & Lusca (Barbers)
             </button>
             <button
               type="button"

@@ -65,7 +65,7 @@ export default function Footer({
                   onClick={() => onNavigateToView?.('barbers')} 
                   className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase text-left"
                 >
-                  Mika & Lusca (20+ Yrs)
+                  Mika & Lusca (Master Barbers)
                 </button>
               </li>
               <li>
@@ -175,6 +175,17 @@ export default function Footer({
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="/admin"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigateToView?.('admin');
+              }}
+              className="hover:text-gold text-gray-400 transition-colors cursor-pointer text-[11px] font-mono flex items-center gap-1"
+            >
+              <span>Portail Admin</span>
+            </a>
+            <span className="text-white/20">&bull;</span>
             <button
               type="button"
               onClick={onOpenPolicies}

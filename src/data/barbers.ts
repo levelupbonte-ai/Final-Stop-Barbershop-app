@@ -34,16 +34,16 @@ export const MASTER_BARBERS: BarberProfile[] = [
     id: 'mika',
     name: 'Mika',
     role: 'Master Braider, Locs & Texture Artisan',
-    experience: 'Over 20 Years of Experience',
-    experienceYears: 21,
+    experience: 'Master Artisan',
+    experienceYears: 10,
     initials: 'MK',
     badge: 'Master of Women’s Braids, Cornrows & Locs',
     tagline: 'Artisan braids, knotless protective styles, designer cornrows, and scalp-preserving tension.',
-    bio: 'With over 20 continuous years of dedicated artistry, Mika is renowned across San Diego as the master braider and protective styling specialist. Meticulous parting, gentle tension calibrated to protect sensitive hairlines, and breathtaking geometric designs define Mika\'s craft. Whether creating flowing knotless box braids, elaborate goddess locs, or sleek feed-in cornrows, clients leave with healthy scalps and enduring elegance.',
+    bio: 'With continuous years of dedicated artistry, Mika is renowned across San Diego as the master braider and protective styling specialist. Meticulous parting, gentle tension calibrated to protect sensitive hairlines, and breathtaking geometric designs define Mika\'s craft. Whether creating flowing knotless box braids, elaborate goddess locs, or sleek feed-in cornrows, clients leave with healthy scalps and enduring elegance.',
     specialty: 'Mastery of women’s & girls’ braids: Knotless box braids, designer feed-in cornrows, goddess locs, braided updos, twist retwists, and organic scalp hydration rituals.',
-    tags: ['Knotless Braids', 'Designer Cornrows', 'Goddess Locs', '20+ Yrs Experience'],
+    tags: ['Knotless Braids', 'Designer Cornrows', 'Goddess Locs', 'Protective Styling'],
     highlights: [
-      'Over 20 years of specialized mastery in braids, cornrows & protective styling',
+      'Specialized mastery in braids, cornrows & protective styling',
       'Scalp-safe tension technique preventing breakage and edge damage',
       'Signature organic botanical oils & restorative hydration treatments',
       'Rated 5.0 stars with hundreds of loyal clients across Southern California'
@@ -113,19 +113,19 @@ export const MASTER_BARBERS: BarberProfile[] = [
     id: 'lusca',
     name: 'Lusca',
     role: 'Lead Master Barber & Men’s Haircut Specialist',
-    experience: 'Over 20 Years of Experience',
-    experienceYears: 20,
+    experience: 'Master Barber',
+    experienceYears: 10,
     initials: 'LC',
     badge: 'Master of Men’s Cuts, Zero Fades & Razor Work',
     tagline: 'Surgical zero skin fades, precision men’s & boys’ haircuts, and traditional hot towel shaves.',
-    bio: 'With over two decades at the chair, Lusca is renowned across San Diego for millimeter-exact clipper work, flawless fade transitions, and classic straight razor shaves. Having performed tens of thousands of custom cuts for men and boys, Lusca pairs traditional Japanese steel blade contouring with warm eucalyptus hot towel therapy for the quintessential barber shop experience.',
+    bio: 'Renowned across San Diego for millimeter-exact clipper work, flawless fade transitions, and classic straight razor shaves. Having performed tens of thousands of custom cuts for men and boys, Lusca pairs traditional Japanese steel blade contouring with warm eucalyptus hot towel therapy for the quintessential barber shop experience.',
     specialty: 'Mastery of men\'s and boys\' haircuts: Skin Fades, Drop Fades, Taper Fades, Burst Fades, architectural beard sculpting, straight razor neck lineups, and textured shear crops.',
-    tags: ['Skin Fade', 'Men’s & Boys’ Cuts', 'Beard Architecture', '20+ Yrs Experience'],
+    tags: ['Skin Fade', 'Men’s & Boys’ Cuts', 'Beard Architecture', 'Straight Razor'],
     highlights: [
-      'Over 20 years of master craftsmanship in precision haircuts and straight razor shaves',
+      'Master craftsmanship in precision haircuts and straight razor shaves',
       'Specialist in boys’ haircuts, teen styles, and executive men’s grooming',
       'Dual eucalyptus hot towel ritual with rich whipped warm lather',
-      'Over 15,000 satisfied clients throughout San Diego'
+      'Thousands of satisfied clients throughout San Diego'
     ],
     signatureTechniques: [
       {

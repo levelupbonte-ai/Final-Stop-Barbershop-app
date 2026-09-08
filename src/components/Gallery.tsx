@@ -140,8 +140,8 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
             const barberDisplay = item.barber === 'Both' 
               ? 'Mika & Lusca (Founders)' 
               : item.barber === 'Mika' 
-                ? 'Mika (20+ Yrs &bull; Women’s & Girls’ Braids)' 
-                : 'Lusca (20+ Yrs &bull; Boys’ & Men’s Cuts)';
+                ? 'Mika (Master Braider & Locs)' 
+                : 'Lusca (Master Barber & Fades)';
 
             const lightboxItem: LightboxImageItem = {
               src: item.imageUrl,
@@ -196,8 +196,8 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
                   </p>
                   
                   <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[10px] font-mono text-gray-400">
-                    <span className="text-gold font-bold">Click for description</span>
-                    <span className="text-gray-500">20+ Yrs Exp &rarr;</span>
+                    <span className="text-gold font-bold">Click for details</span>
+                    <span className="text-gray-500">View Work &rarr;</span>
                   </div>
                 </div>
               </div>

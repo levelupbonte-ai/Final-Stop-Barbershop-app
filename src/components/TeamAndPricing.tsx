@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Scissors, Clock, Award, Receipt, ChevronRight } from 'lucide-react';
 import MobilePricingModal, { ALL_SERVICES } from './MobilePricingModal';
+import { OFFICIAL_SERVICES } from '../data/services';
 
 interface TeamAndPricingProps {
   onNavigateToBooking?: (serviceName?: string) => void;
@@ -13,62 +14,31 @@ const BARBERS = [
     id: 'mika',
     name: 'Mika',
     role: 'Master Braider & Texture Specialist',
-    experience: 'Over 20 Years of Experience',
+    experience: 'Master Specialist',
     specialty: 'Specialized in girls’ & women’s braids: knotless box braids, designer swirl cornrows, goddess locs, and gentle protective styles.',
     initials: 'MK',
-    badge: 'Master of Women’s Braids & Locs (20+ Yrs)',
-    tags: ['Knotless Braids', 'Designer Cornrows', 'Goddess Locs', '20+ Yrs']
+    badge: 'Master of Women’s Braids & Locs',
+    tags: ['Knotless Braids', 'Designer Cornrows', 'Goddess Locs', 'Protective Styling']
   },
   {
     id: 'lusca',
     name: 'Lusca',
     role: 'Lead Master Barber & Men’s Specialist',
-    experience: 'Over 20 Years of Experience',
+    experience: 'Master Barber',
     specialty: 'Specialized in boys’ & men’s precision haircuts: surgical zero skin fades, beard architecture, and straight razor contouring.',
     initials: 'LC',
-    badge: 'Master of Men’s Cuts & Zero Fades (20+ Yrs)',
-    tags: ['Skin Fades', 'Men’s & Boys’ Cuts', 'Beard Sculpting', '20+ Yrs']
+    badge: 'Master of Men’s Cuts & Zero Fades',
+    tags: ['Skin Fades', 'Men’s & Boys’ Cuts', 'Beard Sculpting', 'Razor Lineups']
   }
 ];
 
-const PRICING_LIST = [
-  {
-    name: 'Skin Fade & Precision Haircut',
-    price: '$35',
-    duration: '35 min',
-    desc: 'Zero razor fade tailored to head shape, razor line-up, texture styling, and neck shave.'
-  },
-  {
-    name: 'Beard Sculpting & Hot Lather Shave',
-    price: '$25',
-    duration: '30 min',
-    desc: 'Millimeter beard trim, straight razor contouring, hot eucalyptus towel, and hydrating balm.'
-  },
-  {
-    name: 'The Signature Master Combo: Cut + Beard',
-    price: '$55',
-    duration: '60 min',
-    desc: 'The complete grooming experience: customized haircut, complete beard sculpting, and dual hot towel service.'
-  },
-  {
-    name: 'Custom Braids & Cornrows',
-    price: '$65+',
-    duration: '60-90 min',
-    desc: 'Clean geometric patterns, ultra-crisp parting, durable lock hold, and scalp hydration treatment.'
-  },
-  {
-    name: 'Dreadlocks & Full Retwist',
-    price: '$75+',
-    duration: '90 min',
-    desc: 'Deep scalp cleanse, organic loc retwist, root maintenance, and essential oil misting.'
-  },
-  {
-    name: 'VIP Prestige Grooming Experience',
-    price: '$90',
-    duration: '90 min',
-    desc: 'Purifying face treatment, steam bath, premium haircut, complete beard care, and scalp massage.'
-  },
-];
+const PRICING_LIST = OFFICIAL_SERVICES.slice(0, 8).map(s => ({
+  id: s.id,
+  name: s.name,
+  price: s.price,
+  duration: s.duration,
+  desc: s.description
+}));
 
 export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: TeamAndPricingProps) {
   const [isMobilePricingOpen, setIsMobilePricingOpen] = useState(false);
@@ -83,11 +53,11 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
             Master Barbers & Heritage
           </span>
           <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">
-            Our Barbers & Specialties (20+ Years Experience)
+            Our Master Barbers & Specialties
           </h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Excellence at Final Stop Barber Shop is embodied by Mika and Lusca, two master artisans each with over 20 years of hands-on experience. Click their profiles to explore their work and book your chair directly.
+            Excellence at Final Stop Barber Shop is embodied by Mika and Lusca, our lead artisans. Click their profiles to explore their work and book your chair directly.
           </p>
         </div>
 
@@ -98,7 +68,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
               key={barber.id}
               onClick={() => onSelectBarber?.(barber.id as any)}
               className="bg-[#151517] border border-white/10 hover:border-gold transition-all duration-300 p-7 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer active:scale-[0.99] rounded-sm"
-              title={`Click to view ${barber.name}'s profile and cuts (20+ years experience)`}
+              title={`Click to view ${barber.name}'s profile and cuts`}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-gold/15 transition-colors pointer-events-none"></div>
 
@@ -156,7 +126,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                   <span className="text-[10px] text-gray-400 font-mono hidden sm:inline">
-                    20+ Yrs Craft
+                    Master Craft
                   </span>
                 </div>
               </div>

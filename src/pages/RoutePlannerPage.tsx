@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import CallShopModal from '../components/CallShopModal';
-import { getMapboxToken } from '../lib/mapboxConfig';
+import { getMapboxToken, getMapStyle, FALLBACK_DARK_MAP_STYLE } from '../lib/mapboxConfig';
 
 interface RoutePlannerPageProps {
   onBackToHome: () => void;
@@ -138,14 +138,28 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = getMapboxToken();
+    const token = getMapboxToken();
+    if (token) {
+      mapboxgl.accessToken = token;
+    }
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: getMapStyle(),
       center: [DESTINATION.lng, DESTINATION.lat],
       zoom: 13,
       pitch: 30,
+    });
+
+    map.on('error', (e: any) => {
+      // Gracefully switch to dark fallback raster tiles if any token authentication issue arises
+      if (e?.error?.status === 401 || (e?.error?.message && String(e.error.message).includes('token'))) {
+        try {
+          map.setStyle(FALLBACK_DARK_MAP_STYLE);
+        } catch {
+          // ignore
+        }
+      }
     });
 
     mapRef.current = map;

@@ -61,7 +61,7 @@ export default function GalleryPage({
               onClick={onNavigateToBarbers}
               className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-block"
             >
-              Mika & Lusca (20+ Yrs)
+              Mika & Lusca (Barbers)
             </button>
             <button
               type="button"
@@ -109,7 +109,7 @@ export default function GalleryPage({
                   : 'bg-[#151517] text-gray-300 border-white/10 hover:border-gold/40 hover:text-white'
               }`}
             >
-              Mika &bull; Girls’ Braids & Locs (20+ Yrs)
+              Mika &bull; Girls’ Braids & Locs
             </button>
             <button
               type="button"
@@ -120,7 +120,7 @@ export default function GalleryPage({
                   : 'bg-[#151517] text-gray-300 border-white/10 hover:border-gold/40 hover:text-white'
               }`}
             >
-              Lusca &bull; Boys’ Cuts & Fades (20+ Yrs)
+              Lusca &bull; Boys’ Cuts & Fades
             </button>
           </div>
         </div>
@@ -149,8 +149,8 @@ export default function GalleryPage({
             const barberDisplay = item.barber === 'Both' 
               ? 'Mika & Lusca (Founders)' 
               : item.barber === 'Mika' 
-                ? 'Mika (20+ Yrs &bull; Women’s & Girls’ Braids)' 
-                : 'Lusca (20+ Yrs &bull; Boys’ & Men’s Cuts)';
+                ? 'Mika (Master Braider & Locs)' 
+                : 'Lusca (Master Barber & Fades)';
 
             const lightboxItem: LightboxImageItem = {
               src: item.imageUrl,

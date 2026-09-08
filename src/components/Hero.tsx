@@ -30,7 +30,7 @@ export default function Hero({ onNavigateToBooking }: HeroProps) {
         </h1>
 
         <p className="text-sm md:text-base text-gray-300 mb-8 max-w-xl mx-auto leading-relaxed">
-          San Diego’s premier unisex destination for precision haircuts, beard sculpting, and master protective braids. Powered by Mika (20+ yrs in women’s & girls’ knotless braids & locs) and Lusca (20+ yrs in skin fades, men’s & boys’ styling).
+          San Diego’s premier unisex destination for precision haircuts, beard sculpting, and master protective braids. Powered by Mika (specializing in women’s & girls’ knotless braids & locs) and Lusca (specializing in skin fades, men’s & boys’ styling).
         </p>
         
         {/* Centered Actions: Book Appointment placed right next to Explore Our Work */}

@@ -105,7 +105,7 @@ export default function BarberProfilePage({
                 <div className="absolute -bottom-2 -right-2 bg-black border border-gold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
                   <Award className="w-3.5 h-3.5 text-gold" />
                   <span className="text-[10px] font-bold text-white font-mono uppercase tracking-wide">
-                    20+ Yrs Experience
+                    Master Artist
                   </span>
                 </div>
               </div>
@@ -175,16 +175,16 @@ export default function BarberProfilePage({
           </div>
         </div>
 
-        {/* Highlights & Master Expertise (20+ Years) */}
+        {/* Highlights & Master Expertise */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           
-          {/* Left: 20+ Years Points */}
+          {/* Left: Master Craft Points */}
           <div className="bg-[#121215] border border-white/10 p-6 sm:p-8">
             <span className="text-gold font-mono text-[11px] uppercase tracking-wider font-bold block mb-2">
               Heritage & Craftsmanship
             </span>
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mb-6">
-              20+ Years of Mastery: Cornerstones of Excellence
+              Cornerstones of Excellence
             </h2>
 
             <div className="space-y-4">
@@ -258,7 +258,7 @@ export default function BarberProfilePage({
                   alt: cut.title,
                   title: cut.title,
                   category: cut.tag,
-                  barber: `${barber.name} (20+ Yrs Experience)`,
+                  barber: `${barber.name} (Master Barber)`,
                   description: cut.description,
                 })}
                 className="group bg-[#151518] border border-white/10 hover:border-gold/60 overflow-hidden shadow-xl cursor-pointer transition-all duration-300"

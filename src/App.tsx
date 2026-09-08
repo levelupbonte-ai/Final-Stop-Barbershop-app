@@ -211,7 +211,7 @@ export default function App() {
     );
   }
 
-  // 2. PAGE: All Barbers Overview (Mika & Lusca - 20+ years of experience)
+  // 2. PAGE: All Barbers Overview (Mika & Lusca)
   if (currentView === 'barbers') {
     return (
       <BarbersPage
@@ -315,7 +315,7 @@ export default function App() {
       <Hero onNavigateToBooking={() => navigateTo('booking')} />
 
       <main>
-        {/* Clickable Barbers Section (Mika & Lusca, 20+ years) */}
+        {/* Clickable Barbers Section (Mika & Lusca) */}
         <TeamAndPricing 
           onNavigateToBooking={() => navigateTo('booking')}
           onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}

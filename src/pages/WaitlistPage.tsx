@@ -19,6 +19,7 @@ import {
 } from '../lib/firestoreService';
 import CallShopModal from '../components/CallShopModal';
 import { sendWaitlistConfirmationEmail } from '../lib/emailService';
+import { OFFICIAL_SERVICES } from '../data/services';
 
 interface WaitlistPageProps {
   onBackToHome: () => void;
@@ -45,7 +46,7 @@ export default function WaitlistPage({
   const [selectedBarber, setSelectedBarber] = useState(
     initialBarber === 'lusca' ? 'Lusca' : initialBarber === 'mika' ? 'Mika' : 'First Available'
   );
-  const [selectedService, setSelectedService] = useState('Skin Fade & Precision Haircut ($35)');
+  const [selectedService, setSelectedService] = useState(`${OFFICIAL_SERVICES[0].name} (${OFFICIAL_SERVICES[0].price})`);
   const [activeTicket, setActiveTicket] = useState<FirestoreWaitlistEntry | null>(null);
 
   // Load queue
@@ -342,8 +343,8 @@ export default function WaitlistPage({
                     className="w-full bg-[#0A0A0B] border border-white/15 px-3 py-2.5 text-white focus:border-gold focus:outline-none rounded-xs"
                   >
                     <option value="First Available">First Available Master Barber (Fastest)</option>
-                    <option value="Mika">Mika (20+ Yrs &bull; Fades & Razor Lineups)</option>
-                    <option value="Lusca">Lusca (20+ Yrs &bull; Beard, Braids & Locs)</option>
+                    <option value="Mika">Mika (Master Braider & Haircuts)</option>
+                    <option value="Lusca">Lusca (Master Barber & Styling)</option>
                   </select>
                 </div>
 
@@ -354,12 +355,11 @@ export default function WaitlistPage({
                     onChange={(e) => setSelectedService(e.target.value)}
                     className="w-full bg-[#0A0A0B] border border-white/15 px-3 py-2.5 text-white focus:border-gold focus:outline-none rounded-xs"
                   >
-                    <option value="Skin Fade & Precision Haircut ($35)">Skin Fade & Precision Haircut ($35)</option>
-                    <option value="Beard Sculpting & Hot Lather Shave ($25)">Beard Sculpting & Hot Lather Shave ($25)</option>
-                    <option value="The Signature Master Combo: Cut + Beard ($55)">The Signature Master Combo ($55)</option>
-                    <option value="Custom Braids & Cornrows ($65+)">Custom Braids & Cornrows ($65+)</option>
-                    <option value="Dreadlocks & Full Retwist ($75+)">Dreadlocks Retwist ($75+)</option>
-                    <option value="VIP Prestige Grooming ($90)">VIP Prestige Grooming ($90)</option>
+                    {OFFICIAL_SERVICES.map((s) => (
+                      <option key={s.id} value={`${s.name} (${s.price})`}>
+                        {s.name} ({s.price} - {s.duration})
+                      </option>
+                    ))}
                   </select>
                 </div>
 

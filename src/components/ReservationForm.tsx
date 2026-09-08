@@ -4,22 +4,21 @@ import { format, addDays, startOfToday } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { loginWithGoogle, db, auth } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { OFFICIAL_SERVICES } from '../data/services';
 
-const SERVICES = [
-  { id: 'fade', name: 'Skin Fade & Precision Haircut', duration: '35 min', price: '$35' },
-  { id: 'barbe', name: 'Beard Sculpting & Hot Lather Shave', duration: '30 min', price: '$25' },
-  { id: 'combo', name: 'The Signature Combo: Cut + Beard', duration: '60 min', price: '$55' },
-  { id: 'braids', name: 'Custom Braids & Cornrows', duration: '60-90 min', price: '$65+' },
-  { id: 'dreads', name: 'Dreadlocks & Full Retwist', duration: '90 min', price: '$75+' },
-  { id: 'premium', name: 'VIP Prestige Experience (Full Grooming)', duration: '90 min', price: '$90' },
-];
+const SERVICES = OFFICIAL_SERVICES.map(s => ({
+  id: s.id,
+  name: `${s.name} (${s.price})`,
+  duration: s.duration,
+  price: s.price
+}));
 
 const TIME_SLOTS = [
   '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'
 ];
 
 export default function ReservationForm() {
-  const [selectedService, setSelectedService] = useState(SERVICES[2].id);
+  const [selectedService, setSelectedService] = useState(SERVICES[0].id);
   const [selectedDate, setSelectedDate] = useState(format(startOfToday(), 'yyyy-MM-dd'));
   const [selectedTime, setSelectedTime] = useState('');
   const [user, setUser] = useState<any>(null);

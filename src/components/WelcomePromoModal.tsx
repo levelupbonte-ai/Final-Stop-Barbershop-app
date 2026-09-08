@@ -1,7 +1,8 @@
-import React, { useState, useEffect, FormEvent } from 'react';
-import { X, Sparkles, Check, Copy, Gift, ArrowRight } from 'lucide-react';
+import { useState, FormEvent } from 'react';
+import { X, Sparkles, Check, Gift, ArrowRight } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { sendConfirmationEmail } from '../lib/emailService';
 
 interface WelcomePromoModalProps {
   isOpen: boolean;
@@ -17,7 +18,6 @@ export default function WelcomePromoModal({
   const [contact, setContact] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
 
@@ -28,16 +28,25 @@ export default function WelcomePromoModal({
     setIsSubmitting(true);
     try {
       if (db) {
-        await addDoc(collection(db, 'promos'), {
+        await addDoc(collection(db, 'vip_signups'), {
           contact: contact.trim(),
-          promoCode: 'FINALSTOP15',
-          discount: '15%',
-          claimedAt: serverTimestamp(),
-          source: 'welcome_popup'
+          source: 'welcome_modal',
+          status: 'active',
+          registeredAt: serverTimestamp()
         });
       }
+
+      // If user provided an email address, send the VIP welcome notification via Resend
+      if (contact.includes('@')) {
+        sendConfirmationEmail({
+          to: contact.trim(),
+          clientName: 'VIP Member',
+          type: 'vip_signup' as any,
+          details: {}
+        }).catch(err => console.warn('VIP email notice:', err));
+      }
     } catch (err) {
-      console.warn('Could not record promo in Firebase, continuing locally:', err);
+      console.warn('VIP registry recorded locally:', err);
     } finally {
       setIsSubmitting(false);
       setIsSuccess(true);
@@ -47,12 +56,6 @@ export default function WelcomePromoModal({
         // ignore storage error
       }
     }
-  };
-
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText('FINALSTOP15');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
   };
 
   const handleDismiss = () => {
@@ -93,17 +96,17 @@ export default function WelcomePromoModal({
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/30 mb-4">
                 <Sparkles className="w-3.5 h-3.5 text-gold animate-pulse" />
                 <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-gold">
-                  Limited Welcome Offer
+                  Exclusive Guest Privileges
                 </span>
               </div>
 
               {/* Big Headline */}
-              <h2 className="text-2xl sm:text-4xl font-serif font-black text-white uppercase tracking-tight leading-none mb-3">
-                Unlock <span className="text-gold">15% Off</span> Your Next Cut
+              <h2 className="text-2xl sm:text-4xl font-serif font-black text-white uppercase tracking-tight leading-tight mb-3">
+                Join the <span className="text-gold">VIP Guest List</span>
               </h2>
 
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-6">
-                Join our VIP client list today. Get an instant 15% discount on your next chair visit, plus secret flash deals and priority queue updates.
+                Register your email or phone number to receive private promotional coupons, seasonal holiday discounts, and priority queue notifications when released by our master barbers.
               </p>
 
               {/* Form */}
@@ -114,7 +117,7 @@ export default function WelcomePromoModal({
                     required
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    placeholder="Enter phone number or email..."
+                    placeholder="Enter your email or phone number..."
                     className="w-full bg-[#0A0A0B] border border-white/20 focus:border-gold px-4 py-3.5 text-sm text-white placeholder-gray-500 outline-none font-mono transition-colors"
                   />
                 </div>
@@ -125,7 +128,7 @@ export default function WelcomePromoModal({
                   className="w-full bg-gold hover:bg-gold-light text-black font-bold uppercase tracking-wider text-xs sm:text-sm py-3.5 flex items-center justify-center gap-2 font-mono transition-all shadow-xl active:scale-98 cursor-pointer"
                 >
                   <Gift className="w-4 h-4 text-black" />
-                  <span>{isSubmitting ? 'Securing your 15%...' : 'Get My 15% Off Code'}</span>
+                  <span>{isSubmitting ? 'Registering...' : 'Join Private VIP Club'}</span>
                 </button>
               </form>
 
@@ -136,7 +139,7 @@ export default function WelcomePromoModal({
                   onClick={handleDismiss}
                   className="text-[11px] font-mono text-gray-500 hover:text-gray-300 underline transition-colors cursor-pointer"
                 >
-                  No thanks, I'll pay full price
+                  No thanks, continue without privileges
                 </button>
               </div>
             </div>
@@ -149,38 +152,25 @@ export default function WelcomePromoModal({
 
               <div>
                 <span className="text-gold font-mono text-xs uppercase tracking-widest font-bold block mb-1">
-                  Offer Unlocked!
+                  Registration Confirmed
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-                  Here is Your 15% Voucher
+                  Welcome to the VIP Club
                 </h3>
-                <p className="text-xs text-gray-400 mt-2 max-w-sm mx-auto">
-                  Show this code at the shop counter or mention it during your next chair appointment.
+                <p className="text-xs text-gray-300 mt-2 max-w-sm mx-auto leading-relaxed">
+                  You are officially on our private list. Promotional coupons and member-only specials will be delivered straight to your inbox and SMS when issued.
                 </p>
               </div>
 
-              {/* Promo Code Box */}
-              <div className="bg-[#0A0A0B] border-2 border-dashed border-gold/60 p-4 max-w-xs mx-auto flex items-center justify-between gap-3">
-                <span className="text-gold font-mono font-black text-xl tracking-widest">
-                  FINALSTOP15
-                </span>
-                <button
-                  type="button"
-                  onClick={handleCopyCode}
-                  className="px-3 py-1.5 bg-gold/10 hover:bg-gold text-gold hover:text-black text-xs font-mono font-bold uppercase border border-gold/40 transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3 h-3" />
-                      <span>Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3 h-3" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
+              {/* Status Note */}
+              <div className="bg-[#0A0A0B] border border-gold/40 p-4 max-w-sm mx-auto text-left">
+                <p className="text-xs text-gold font-mono uppercase tracking-wider font-bold mb-1 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-gold animate-ping inline-block"></span>
+                  VIP Member Active
+                </p>
+                <p className="text-[11px] text-gray-400 font-sans">
+                  Keep an eye on your messages for upcoming private chair specials and holiday promos.
+                </p>
               </div>
 
               {/* Actions */}
@@ -194,7 +184,7 @@ export default function WelcomePromoModal({
                     }}
                     className="w-full bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider py-3 px-4 font-mono flex items-center justify-center gap-2 cursor-pointer shadow-md"
                   >
-                    <span>Book Appointment Now</span>
+                    <span>Book Appointment</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -204,7 +194,7 @@ export default function WelcomePromoModal({
                   onClick={handleDismiss}
                   className="w-full bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-mono uppercase tracking-wider py-3 px-4 border border-white/10 cursor-pointer"
                 >
-                  Continue Browsing
+                  Close Window
                 </button>
               </div>
             </div>

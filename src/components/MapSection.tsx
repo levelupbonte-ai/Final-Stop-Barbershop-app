@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { MapPin, Navigation, Phone, ExternalLink, Clock } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
-import { getMapboxToken } from '../lib/mapboxConfig';
+import { getMapboxToken, getMapStyle, FALLBACK_DARK_MAP_STYLE } from '../lib/mapboxConfig';
 
 const SHOP_LOCATION = {
   lat: 32.7572493,
@@ -27,43 +27,27 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
     if (mapRef.current) return;
 
     const token = getMapboxToken();
-    mapboxgl.accessToken = token;
-
-    // Modern Dark Mapbox Style with fallback if token is not configured
-    const darkStyle: any = token
-      ? 'mapbox://styles/mapbox/dark-v11'
-      : {
-          version: 8,
-          sources: {
-            'carto-dark': {
-              type: 'raster',
-              tiles: [
-                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
-              ],
-              tileSize: 256,
-              attribution: '© Mapbox © OpenStreetMap'
-            }
-          },
-          layers: [
-            {
-              id: 'carto-dark-layer',
-              type: 'raster',
-              source: 'carto-dark',
-              minzoom: 0,
-              maxzoom: 22
-            }
-          ]
-        };
+    if (token) {
+      mapboxgl.accessToken = token;
+    }
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: darkStyle,
+      style: getMapStyle(),
       center: [SHOP_LOCATION.lng, SHOP_LOCATION.lat],
       zoom: 15.2,
       attributionControl: true
+    });
+
+    map.on('error', (e: any) => {
+      // Gracefully switch to dark fallback raster tiles if any token authentication issue arises
+      if (e?.error?.status === 401 || (e?.error?.message && String(e.error.message).includes('token'))) {
+        try {
+          map.setStyle(FALLBACK_DARK_MAP_STYLE);
+        } catch {
+          // ignore
+        }
+      }
     });
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'bottom-right');

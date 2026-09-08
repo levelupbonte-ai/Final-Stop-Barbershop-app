@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react';
 import { 
   ArrowLeft, 
   RefreshCw, 
@@ -14,7 +14,10 @@ import {
   Image as ImageIcon,
   ExternalLink,
   Upload,
-  AlertCircle
+  AlertCircle,
+  Camera,
+  FolderOpen,
+  X
 } from 'lucide-react';
 import { 
   getReservations, 
@@ -30,6 +33,7 @@ import {
   FirestoreWaitlistEntry,
   FirestoreGalleryItem
 } from '../lib/firestoreService';
+import { uploadImageToFreeCloud } from '../lib/freeImageUploadService';
 
 interface AdminPageProps {
   onBackToHome: () => void;
@@ -59,6 +63,10 @@ export default function AdminPage({
   const [newCategory, setNewCategory] = useState('Braids & Cornrows');
   const [newAudience, setNewAudience] = useState<'Women & Girls (Braids)' | 'Men & Boys (Haircuts)' | 'Shop'>('Women & Girls (Braids)');
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [newDescription, setNewDescription] = useState('');
   const [isSavingImage, setIsSavingImage] = useState(false);
 
@@ -119,38 +127,89 @@ export default function AdminPage({
     await loadAllData();
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setStatusMessage({ type: 'error', text: 'Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).' });
+      return;
+    }
+
+    // Limit to 15MB
+    if (file.size > 15 * 1024 * 1024) {
+      setStatusMessage({ type: 'error', text: 'L\'image dépasse 15 Mo. Veuillez choisir une photo plus petite.' });
+      return;
+    }
+
+    setSelectedFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setFilePreview(objectUrl);
+    setNewImageUrl(''); // Clear text URL if direct file chosen
+  };
+
+  const handleClearSelectedFile = () => {
+    setSelectedFile(null);
+    if (filePreview) {
+      URL.revokeObjectURL(filePreview);
+      setFilePreview(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleAddGalleryItem = async (e: FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim() || !newImageUrl.trim() || !newDescription.trim()) return;
+    if (!newTitle.trim() || (!newImageUrl.trim() && !selectedFile) || !newDescription.trim()) {
+      setStatusMessage({ type: 'error', text: 'Veuillez remplir le titre, la description et sélectionner une photo.' });
+      return;
+    }
 
     setIsSavingImage(true);
     try {
+      let finalImageUrl = newImageUrl.trim();
+
+      // If user picked a local file from device / camera
+      if (selectedFile) {
+        setIsUploadingFile(true);
+        setStatusMessage({ type: 'success', text: 'Téléversement gratuit de votre photo en cours...' });
+        finalImageUrl = await uploadImageToFreeCloud(selectedFile);
+        setIsUploadingFile(false);
+      }
+
+      if (!finalImageUrl) {
+        throw new Error('Impossible d\'obtenir l\'adresse de l\'image.');
+      }
+
       await saveGalleryItem({
         title: newTitle.trim(),
         barber: newBarber,
         category: newCategory,
         targetAudience: newAudience,
-        imageUrl: newImageUrl.trim(),
+        imageUrl: finalImageUrl,
         description: newDescription.trim()
       });
 
       setStatusMessage({ 
         type: 'success', 
-        text: `"${newTitle}" was added to the Firestore gallery database successfully!` 
+        text: `"${newTitle}" a été enregistrée avec succès dans la base de données Firebase!` 
       });
 
       // Reset form
       setNewTitle('');
       setNewImageUrl('');
       setNewDescription('');
+      handleClearSelectedFile();
       await loadAllData();
     } catch (err: any) {
       setStatusMessage({ 
         type: 'error', 
-        text: err?.message || 'Failed to save image to Firestore' 
+        text: err?.message || 'Erreur lors de l\'enregistrement de la photo dans Firestore.' 
       });
     } finally {
       setIsSavingImage(false);
+      setIsUploadingFile(false);
     }
   };
 
@@ -550,8 +609,8 @@ export default function AdminPage({
                     }}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white outline-none"
                   >
-                    <option value="Mika">Mika (20+ Yrs &bull; Girls’ Braids & Locs)</option>
-                    <option value="Lusca">Lusca (20+ Yrs &bull; Boys’ & Men’s Cuts)</option>
+                    <option value="Mika">Mika (Master Braider &bull; Girls’ Braids & Locs)</option>
+                    <option value="Lusca">Lusca (Master Barber &bull; Boys’ & Men’s Cuts)</option>
                     <option value="Both">Both (Mika & Lusca &bull; Barbershop Lounge)</option>
                   </select>
                 </div>
@@ -590,47 +649,103 @@ export default function AdminPage({
                   </select>
                 </div>
 
-                {/* Image URL & Host Helper */}
-                <div className="md:col-span-2 space-y-2">
+                {/* Direct Image File Upload & Camera Selector */}
+                <div className="md:col-span-2 space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] uppercase font-mono text-gray-300 block">
-                      Image Direct URL * (ImgBB, Cloudflare, etc.)
+                    <label className="text-[11px] uppercase font-mono text-gold font-bold block flex items-center gap-2">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Importer la Photo Directement (Fichier ou Appareil Photo) *</span>
                     </label>
-                    <div className="flex items-center gap-2 text-[10px] font-mono text-gold">
-                      <a 
-                        href="https://imgbb.com/upload" 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="hover:underline flex items-center gap-1 bg-gold/10 px-2 py-0.5 rounded-xs border border-gold/30"
-                      >
-                        <span>Ouvrir ImgBB gratuit (1-clic) ↗</span>
-                      </a>
-                    </div>
+                    <span className="text-[10px] font-mono text-gray-400">PNG, JPG, WEBP jusqu'à 15 Mo</span>
                   </div>
+
+                  {/* Hidden native input */}
                   <input
-                    type="url"
-                    required
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    placeholder="https://i.ibb.co/... ou lien direct Cloudflare / CDN"
-                    className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none"
+                    type="file"
+                    ref={fileInputRef}
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="admin-photo-file-input"
                   />
-                  <p className="text-[10px] text-gray-400 font-mono">
-                    💡 Astuce ImgBB : Après upload sur ImgBB, sélectionnez <strong className="text-gold">"Liens directs"</strong> et collez le lien finissant par <code className="text-white">.jpg</code> ou <code className="text-white">.png</code> (ex: <code className="text-gold">https://i.ibb.co/...</code>).
-                  </p>
-                  {newImageUrl && (
-                    <div className="mt-2 flex items-center gap-3 p-2 bg-black border border-white/10 rounded-xs">
-                      <img 
-                        src={newImageUrl} 
-                        alt="Preview" 
-                        className="w-12 h-12 object-cover border border-gold/40"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = 'none';
-                        }}
-                      />
-                      <span className="text-[11px] font-mono text-gray-400">Aperçu en direct de l'image</span>
+
+                  {/* Dropzone & Button */}
+                  {!filePreview ? (
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-gold/40 hover:border-gold bg-[#0A0A0B] p-6 text-center cursor-pointer transition-all duration-200 group rounded-xs hover:bg-gold/5 flex flex-col items-center justify-center gap-2"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
+                        <FolderOpen className="w-6 h-6" />
+                      </div>
+                      <p className="text-xs font-semibold text-white">
+                        Cliquez pour choisir une photo depuis votre téléphone ou ordinateur
+                      </p>
+                      <p className="text-[11px] text-gray-400">
+                        Prenez une photo en direct ou sélectionnez depuis votre galerie
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative p-3 bg-black border border-gold/60 rounded-xs flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={filePreview} 
+                          alt="Selected preview" 
+                          className="w-16 h-16 object-cover border border-gold/50 rounded-xs"
+                        />
+                        <div>
+                          <p className="text-xs font-bold text-white truncate max-w-xs sm:max-w-md">
+                            {selectedFile?.name}
+                          </p>
+                          <p className="text-[10px] font-mono text-gold mt-0.5">
+                            {(selectedFile?.size ? (selectedFile.size / 1024 / 1024).toFixed(2) : 0)} Mo &bull; Prête pour le téléversement
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleClearSelectedFile}
+                        className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                        title="Supprimer la photo sélectionnée"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
                   )}
+
+                  {/* Alternative URL Link (Optional fallback) */}
+                  <div className="pt-2 border-t border-white/10">
+                    <details className="group">
+                      <summary className="text-[11px] font-mono text-gray-400 cursor-pointer hover:text-gold flex items-center gap-1">
+                        <span>Ou coller une URL d'image existante (Optionnel)</span>
+                      </summary>
+                      <div className="mt-2 space-y-2 pl-2">
+                        <input
+                          type="url"
+                          value={newImageUrl}
+                          onChange={(e) => {
+                            setNewImageUrl(e.target.value);
+                            if (e.target.value) handleClearSelectedFile();
+                          }}
+                          placeholder="https://i.ibb.co/... ou lien Cloudflare / CDN"
+                          className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3 py-2 text-xs text-white placeholder-gray-500 outline-none"
+                        />
+                        {newImageUrl && (
+                          <div className="flex items-center gap-2 p-1.5 bg-black border border-white/10 rounded-xs">
+                            <img 
+                              src={newImageUrl} 
+                              alt="Preview URL" 
+                              className="w-10 h-10 object-cover border border-gold/40"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                            <span className="text-[10px] font-mono text-gray-400">Aperçu via URL</span>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  </div>
                 </div>
 
                 {/* Description */}
@@ -652,11 +767,17 @@ export default function AdminPage({
                 <div className="md:col-span-2 pt-2">
                   <button
                     type="submit"
-                    disabled={isSavingImage}
-                    className="bg-gold hover:bg-gold-light text-black font-bold uppercase tracking-wider text-xs px-6 py-3 transition-all flex items-center gap-2 cursor-pointer shadow-md active:scale-95"
+                    disabled={isSavingImage || isUploadingFile}
+                    className="bg-gold hover:bg-gold-light text-black font-bold uppercase tracking-wider text-xs px-6 py-3 transition-all flex items-center gap-2 cursor-pointer shadow-md active:scale-95 disabled:opacity-60"
                   >
-                    <Upload className="w-4 h-4" />
-                    <span>{isSavingImage ? 'Saving to Database...' : 'Save Photo to Database'}</span>
+                    <Upload className={`w-4 h-4 ${(isSavingImage || isUploadingFile) ? 'animate-bounce' : ''}`} />
+                    <span>
+                      {isUploadingFile 
+                        ? 'Téléversement de la photo...' 
+                        : isSavingImage 
+                        ? 'Enregistrement dans Firebase...' 
+                        : 'Enregistrer la photo dans la galerie'}
+                    </span>
                   </button>
                 </div>
               </form>

@@ -1,0 +1,16 @@
+{
+  "name": "Final Stop Barber Shop & Salon",
+  "short_name": "Final Stop",
+  "description": "Premier unisex barbershop and protective hair lounge in San Diego, CA. Master haircuts, skin fades, and protective braids by Mika and Lusca.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0B0D",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
