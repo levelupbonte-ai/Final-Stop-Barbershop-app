@@ -127,7 +127,7 @@ export default function ImageLightboxModal({
               <span>Book This Style</span>
             </button>
             <p className="text-center text-[10px] text-gray-400 mt-2 font-mono">
-              Appointments & Walk-Ins Welcome • 5277 El Cajon Blvd
+              Appointments & Walk-Ins Welcome • 4748 University Ave
             </p>
           </div>
         </div>

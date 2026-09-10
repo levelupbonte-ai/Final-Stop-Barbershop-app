@@ -31,9 +31,9 @@ interface AddressSuggestion {
 
 const DESTINATION = {
   name: "Final Stop Barber Shop",
-  address: "5277 El Cajon Blvd, San Diego, CA 92115",
-  lat: 32.7572493,
-  lng: -117.0820005,
+  address: "4748 University Ave, San Diego, CA 92105",
+  lat: 32.7497911,
+  lng: -117.0924401,
 };
 
 const POPULAR_POINTS = [
@@ -174,8 +174,8 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
     const destPopup = new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
       <div style="background:#151517;color:#fff;padding:10px;font-family:sans-serif;font-size:12px;border:1px solid #C5A059;">
         <strong style="color:#C5A059;font-size:13px;display:block;margin-bottom:4px;">${DESTINATION.name}</strong>
-        <span>5277 El Cajon Blvd</span><br/>
-        <span style="color:#888;font-size:10px;">San Diego, CA 92115</span>
+        <span>4748 University Ave</span><br/>
+        <span style="color:#888;font-size:10px;">San Diego, CA 92105</span>
       </div>
     `);
 
@@ -404,11 +404,12 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
           <button
             type="button"
             onClick={() => setIsCallModalOpen(true)}
-            className="text-xs font-mono text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
-            title="Call Shop (2 Numbers Available)"
+            className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border border-white/10 px-2.5 py-1.5 rounded-sm"
+            title="Call Mika or Lusca direct lines"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
-            <span className="hidden sm:inline">+1 (619) 886-1267</span>
+            <span className="hidden sm:inline">Call Barbers Direct</span>
+            <span className="sm:hidden">Call</span>
           </button>
         </div>
       </header>
@@ -614,7 +615,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
                     ))}
                     <li className="flex items-center gap-2 text-gold font-bold">
                       <span>🏁</span>
-                      <span>Arrive: Final Stop Barber Shop (5277 El Cajon Blvd)</span>
+                      <span>Arrive: Final Stop Barber Shop (4748 University Ave)</span>
                     </li>
                   </ul>
                 </div>
@@ -640,7 +641,14 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
                 </h3>
                 <p className="text-xs text-gray-300 mb-4 leading-relaxed flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                  <span>{DESTINATION.address}</span>
+                  <a 
+                    href="https://maps.app.goo.gl/tUej1WdvZRudfqVX6"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-gold transition-colors underline-offset-2 hover:underline"
+                  >
+                    {DESTINATION.address}
+                  </a>
                 </p>
 
                 <div className="p-3 bg-[#0A0A0B] border border-white/5 space-y-1 text-xs text-gray-400 font-mono">
@@ -649,7 +657,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
                     <span>Open Monday - Saturday &bull; 10:00 AM - 6:00 PM</span>
                   </div>
                   <p className="text-[11px] text-gray-500 pt-1 border-t border-white/5">
-                    Parking available along El Cajon Boulevard and in the rear lot.
+                    Parking available along University Avenue and nearby street spaces.
                   </p>
                 </div>
               </div>
@@ -701,7 +709,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-6 px-6 bg-[#0A0A0B] text-center text-xs text-gray-500 w-full mt-10">
-        <p>&copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115</p>
+        <p>&copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105</p>
       </footer>
 
       {/* Direct Phone Assistance Modal with 2 Lines */}

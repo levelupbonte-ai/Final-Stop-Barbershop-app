@@ -8,21 +8,21 @@ export interface PageSEO {
 export const SEO_DATA: Record<string, PageSEO> = {
   home: {
     title: 'Final Stop Barber Shop & Salon | Master Haircuts & Protective Braids | San Diego CA',
-    description: 'San Diego’s premier unisex barber shop and hair artistry lounge. Mika (master braider for women’s & girls’ knotless braids, cornrows & locs) and Lusca (master barber in precision fades, beard sculpting & boys’ cuts) at 5277 El Cajon Blvd.',
+    description: 'San Diego’s premier unisex barber shop and hair artistry lounge. Mika (master braider for women’s & girls’ knotless braids, cornrows & locs) and Lusca (master barber in precision fades, beard sculpting & boys’ cuts) at 4748 University Ave.',
     canonicalPath: '/',
-    keywords: 'final stop barber shop, barber shop san diego, unisex hair salon san diego, braids san diego, knotless braids el cajon blvd, dreadlocks retwist san diego, skin fade san diego, black barber shop san diego, finalstop.org'
+    keywords: 'final stop barber shop, barber shop san diego, unisex hair salon san diego, braids san diego, knotless braids university ave, dreadlocks retwist san diego, skin fade san diego, black barber shop san diego, finalstop.org'
   },
   booking: {
     title: 'Book an Appointment Online | Final Stop Barber Shop & Salon | finalstop.org',
     description: 'Book your chair online with master barber Mika or Lusca. Choose precision skin fades, beard sculpting, loc maintenance, or custom braids at Final Stop in San Diego.',
     canonicalPath: '/#booking',
-    keywords: 'book barber san diego, barber appointment el cajon blvd, braid booking san diego, final stop booking'
+    keywords: 'book barber san diego, barber appointment university ave, braid booking san diego, final stop booking'
   },
   services: {
     title: 'Services & Pricing Menu | Fades, Braids, Locs & Beards | Final Stop Barber Shop',
     description: 'View full haircut, shave, and hair pricing in San Diego: zero skin fades, hot lather razor shaves, women’s & girls’ knotless braids, dreadlocks, and youth cuts.',
     canonicalPath: '/#services',
-    keywords: 'barber prices san diego, braid prices san diego, haircut cost el cajon blvd, hair salon price list'
+    keywords: 'barber prices san diego, braid prices san diego, haircut cost university ave, hair salon price list'
   },
   barbers: {
     title: 'Master Barbers Mika & Lusca | Final Stop Barber Shop San Diego',
@@ -38,7 +38,7 @@ export const SEO_DATA: Record<string, PageSEO> = {
   },
   waitlist: {
     title: 'Live Walk-In Queue & Real-Time Wait Times | Final Stop Barber Shop',
-    description: 'Check into our live digital walk-in queue or track your position in real-time before walking into our San Diego barber shop on El Cajon Blvd.',
+    description: 'Check into our live digital walk-in queue or track your position in real-time before walking into our San Diego barber shop on University Ave.',
     canonicalPath: '/#waitlist',
     keywords: 'walk in barber san diego, barber waitlist online, no appointment barber san diego'
   },
@@ -55,10 +55,10 @@ export const SEO_DATA: Record<string, PageSEO> = {
     keywords: 'final stop barber shop reviews, best reviewed barber san diego, customer ratings'
   },
   route: {
-    title: 'Directions, Map & Parking | 5277 El Cajon Blvd | Final Stop Barber Shop',
-    description: 'Get turn-by-turn directions, bus routes, and parking details for Final Stop Barber Shop located at 5277 El Cajon Blvd, San Diego, CA 92115.',
+    title: 'Directions, Map & Parking | 4748 University Ave | Final Stop Barber Shop',
+    description: 'Get turn-by-turn directions, bus routes, and parking details for Final Stop Barber Shop located at 4748 University Ave, San Diego, CA 92105.',
     canonicalPath: '/#route',
-    keywords: 'final stop barber shop location, el cajon blvd barber shop directions, parking near 5277 el cajon blvd'
+    keywords: 'final stop barber shop location, university ave barber shop directions, parking near 4748 university ave'
   },
   admin: {
     title: 'Staff & Owner Management Portal | Final Stop Barber Shop',

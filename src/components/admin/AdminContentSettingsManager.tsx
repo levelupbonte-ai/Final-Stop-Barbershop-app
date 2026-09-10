@@ -21,6 +21,19 @@ import {
 } from 'lucide-react';
 import { getShopConfig, updateShopConfig, ShopConfig, DEFAULT_SHOP_CONFIG } from '../../lib/firestoreService';
 
+function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg 
+      viewBox="0 0 24 24" 
+      fill="currentColor" 
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.92-1.02 4.86 4.86 0 0 1-1.12-3.5z" />
+    </svg>
+  );
+}
+
 export default function AdminContentSettingsManager() {
   const [config, setConfig] = useState<ShopConfig>(DEFAULT_SHOP_CONFIG);
   const [isLoading, setIsLoading] = useState(true);
@@ -150,27 +163,27 @@ export default function AdminContentSettingsManager() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="text-xs font-mono uppercase text-gray-400 block mb-1.5">
-                Primary Phone Number (Mika)
+                Mika Phone Number (Braids & Locs)
               </label>
               <input
                 type="text"
                 value={phone1}
                 onChange={(e) => setPhone1(e.target.value)}
-                placeholder="(619) 886-1267"
-                className="w-full bg-black/40 border border-white/15 rounded-xs px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold"
+                placeholder="(619) 928-7084"
+                className="w-full bg-black/40 border border-white/15 rounded-xs px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold font-mono"
               />
             </div>
 
             <div>
               <label className="text-xs font-mono uppercase text-gray-400 block mb-1.5">
-                Secondary Phone Number (Lusca)
+                Lusca Phone Number (Haircuts & Fades)
               </label>
               <input
                 type="text"
                 value={phone2}
                 onChange={(e) => setPhone2(e.target.value)}
-                placeholder="(619) 928-7084"
-                className="w-full bg-black/40 border border-white/15 rounded-xs px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold"
+                placeholder="(619) 886-1267"
+                className="w-full bg-black/40 border border-white/15 rounded-xs px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold font-mono"
               />
             </div>
 
@@ -182,7 +195,7 @@ export default function AdminContentSettingsManager() {
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="5277 El Cajon Blvd, San Diego, CA 92115"
+                placeholder="4748 University Ave, San Diego, CA 92105"
                 className="w-full bg-black/40 border border-white/15 rounded-xs px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-gold"
               />
             </div>
@@ -314,32 +327,32 @@ export default function AdminContentSettingsManager() {
             </div>
           </div>
 
-          {/* Social Links Live Preview */}
+          {/* Social Links Live Preview (Without bubbles) */}
           <div className="pt-3 border-t border-white/10 flex items-center gap-4">
             <span className="text-xs font-mono uppercase text-gray-400">Live Footer Icon Preview:</span>
             <div className="flex items-center gap-3">
               {instagram && (
-                <a href={instagram} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 hover:bg-white/10 rounded border border-white/10 text-pink-400 transition-colors">
+                <a href={instagram} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:text-pink-300 transition-colors p-1" title="Instagram">
                   <Instagram className="w-4 h-4" />
                 </a>
               )}
               {tiktok && (
-                <a href={tiktok} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 hover:bg-white/10 rounded border border-white/10 text-cyan-400 transition-colors font-bold text-xs">
-                  TT
+                <a href={tiktok} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 transition-colors p-1" title="TikTok">
+                  <TikTokIcon className="w-4 h-4" />
                 </a>
               )}
               {youtube && (
-                <a href={youtube} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 hover:bg-white/10 rounded border border-white/10 text-red-500 transition-colors">
+                <a href={youtube} target="_blank" rel="noopener noreferrer" className="text-red-500 hover:text-red-400 transition-colors p-1" title="YouTube">
                   <Youtube className="w-4 h-4" />
                 </a>
               )}
               {facebook && (
-                <a href={facebook} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 hover:bg-white/10 rounded border border-white/10 text-blue-500 transition-colors">
+                <a href={facebook} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400 transition-colors p-1" title="Facebook">
                   <Facebook className="w-4 h-4" />
                 </a>
               )}
               {twitter && (
-                <a href={twitter} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/5 hover:bg-white/10 rounded border border-white/10 text-sky-400 transition-colors">
+                <a href={twitter} target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:text-sky-300 transition-colors p-1" title="X / Twitter">
                   <Twitter className="w-4 h-4" />
                 </a>
               )}

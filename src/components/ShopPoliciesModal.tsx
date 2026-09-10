@@ -29,7 +29,7 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
                 Salon Safety & House Policies
               </h2>
               <p className="text-[11px] font-mono text-gold uppercase tracking-wider">
-                Final Stop Barber Shop &bull; 5277 El Cajon Blvd
+                Final Stop Barber Shop &bull; 4748 University Ave
               </p>
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Free Cancellation:</strong> Please give us at least 2 hours notice via phone ((619) 886-1267) if you need to reschedule.</span>
+                <span><strong>Free Cancellation:</strong> Please give us at least 2 hours notice via phone (Mika: (619) 928-7084 / Lusca: (619) 886-1267) if you need to reschedule.</span>
               </li>
             </ul>
           </div>
@@ -168,9 +168,9 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-[#121215] border-t border-white/10 p-4 flex items-center justify-between">
+        <div className="sticky bottom-0 bg-[#121215] border-t border-white/10 p-4 flex flex-wrap items-center justify-between gap-3">
           <span className="text-[11px] font-mono text-gray-400">
-            Questions? Call <a href="tel:16198861267" className="text-gold font-bold hover:underline">(619) 886-1267</a>
+            Questions? Call Mika <a href="tel:16199287084" className="text-gold font-bold hover:underline">(619) 928-7084</a> or Lusca <a href="tel:16198861267" className="text-gold font-bold hover:underline">(619) 886-1267</a>
           </span>
           <button
             type="button"

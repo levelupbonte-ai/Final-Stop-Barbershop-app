@@ -289,8 +289,8 @@ export default function WalkInHubModal({
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
                     <option value="First Available Barber">First Available Master Barber (Fastest)</option>
-                    <option value="Mika">Mika (Master Braider & Fades)</option>
-                    <option value="Lusca">Lusca (Master Barber & Styling)</option>
+                    <option value="Mika">Mika (Master Braider & Locs • 619-928-7084)</option>
+                    <option value="Lusca">Lusca (Master Barber & Fades • 619-886-1267)</option>
                   </select>
                 </div>
 

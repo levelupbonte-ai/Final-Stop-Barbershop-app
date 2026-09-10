@@ -68,14 +68,15 @@ export default function BarberProfilePage({
               <ChevronRight className="w-3.5 h-3.5 text-gold" />
             </button>
 
-            <button
-              type="button"
-              onClick={() => setIsCallModalOpen(true)}
-              className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
+            <a
+              href={`tel:${barber.phoneRaw || (barber.id === 'mika' ? '16199287084' : '16198861267')}`}
+              className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border border-white/10 px-2.5 py-1.5 rounded-sm"
+              title={`Direct line to ${barber.name}`}
             >
               <Phone className="w-3.5 h-3.5 text-gold" />
-              <span className="hidden md:inline">(619) 886-1267</span>
-            </button>
+              <span className="hidden md:inline">Call {barber.name}: {barber.phone || (barber.id === 'mika' ? '(619) 928-7084' : '(619) 886-1267')}</span>
+              <span className="md:hidden">Call</span>
+            </a>
           </div>
         </div>
       </header>
@@ -161,13 +162,22 @@ export default function BarberProfilePage({
                   <span>Join Live Walk-In Queue</span>
                 </button>
 
+                <a
+                  href={`tel:${barber.phoneRaw || (barber.id === 'mika' ? '16199287084' : '16198861267')}`}
+                  className="bg-white/5 hover:bg-gold hover:text-black text-gray-200 border border-white/20 hover:border-gold text-xs sm:text-sm font-semibold px-4 py-3.5 flex items-center gap-2 transition-all cursor-pointer rounded-sm font-mono"
+                  title={`Call ${barber.name} directly`}
+                >
+                  <Phone className="w-4 h-4 text-gold" />
+                  <span>Call {barber.name}: {barber.phone || (barber.id === 'mika' ? '(619) 928-7084' : '(619) 886-1267')}</span>
+                </a>
+
                 <button
                   type="button"
                   onClick={() => setIsCallModalOpen(true)}
-                  className="bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 text-xs sm:text-sm font-semibold px-4 py-3.5 flex items-center gap-2 transition-all cursor-pointer rounded-sm"
+                  className="text-gray-400 hover:text-gold text-xs sm:text-sm px-3 py-3.5 flex items-center gap-1.5 transition-colors cursor-pointer bg-transparent border-none"
+                  title="View all shop contact lines"
                 >
-                  <Phone className="w-4 h-4 text-gold" />
-                  <span>Call Shop</span>
+                  <span>All Phone Lines</span>
                 </button>
               </div>
             </div>

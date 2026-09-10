@@ -41,9 +41,9 @@ const TIME_SLOTS = [
 ];
 
 const BARBERS = [
-  { id: 'any', name: 'First Available Master Artist' },
-  { id: 'mika', name: 'Mika (Master Braider • Women’s & Girls’ Braids & Locs)' },
-  { id: 'lusca', name: 'Lusca (Master Barber • Precision Fades, Men’s & Boys’ Cuts)' }
+  { id: 'any', name: 'First Available Master Artist', phone: '' },
+  { id: 'mika', name: 'Mika (Master Braider • Women’s & Girls’ Braids & Locs)', phone: '(619) 928-7084' },
+  { id: 'lusca', name: 'Lusca (Master Barber • Precision Fades, Men’s & Boys’ Cuts)', phone: '(619) 886-1267' }
 ];
 
 export default function BookingPage({ onBackToHome, initialBarber, initialService }: BookingPageProps) {
@@ -203,11 +203,12 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
           <button
             type="button"
             onClick={() => setIsCallModalOpen(true)}
-            className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
-            title="Call Final Stop (2 numbers available)"
+            className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border border-white/15 px-2.5 py-1.5 rounded-sm"
+            title="Call Mika or Lusca direct lines"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
-            <span className="hidden sm:inline">Call Shop: (619) 886-1267</span>
+            <span className="hidden sm:inline">Call Barbers Direct</span>
+            <span className="sm:hidden">Call</span>
           </button>
         </div>
       </header>
@@ -586,7 +587,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                   <span className="text-xs font-bold uppercase tracking-wider text-gray-300 font-mono block mb-2">
                     3. Preferred Master Barber (Optional)
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     {BARBERS.map((barber) => (
                       <button
                         key={barber.id}
@@ -594,11 +595,17 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                         onClick={() => setSelectedBarber(barber.id)}
                         className={`p-3 text-left border text-xs font-mono transition-all cursor-pointer ${
                           selectedBarber === barber.id
-                            ? 'bg-gold/15 border-gold text-gold font-bold'
+                            ? 'bg-gold/15 border-gold text-gold font-bold ring-1 ring-gold'
                             : 'bg-[#151518] border-white/10 text-gray-300 hover:border-white/20'
                         }`}
                       >
-                        {barber.name}
+                        <div className="text-white font-bold mb-1">{barber.name}</div>
+                        {barber.phone && (
+                          <div className="text-[11px] text-gold font-mono flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-gold shrink-0" />
+                            <span>Direct: {barber.phone}</span>
+                          </div>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -842,7 +849,14 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
 
                   <div className="flex items-center gap-2 text-gray-400 text-[11px] pt-1">
                     <MapPin className="w-4 h-4 text-gold shrink-0" />
-                    <span>Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115</span>
+                    <a
+                      href="https://maps.app.goo.gl/tUej1WdvZRudfqVX6"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-gold transition-colors underline-offset-2 hover:underline"
+                    >
+                      Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105
+                    </a>
                   </div>
                 </div>
 
@@ -896,7 +910,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
 
       {/* Booking Page Footer */}
       <footer className="border-t border-white/10 py-6 px-6 bg-[#0A0A0B] text-center text-xs text-gray-500 w-full">
-        <p>&copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115</p>
+        <p>&copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105</p>
       </footer>
 
       {/* Direct Phone Assistance Modal with 2 Lines */}

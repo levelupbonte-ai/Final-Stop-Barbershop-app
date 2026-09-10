@@ -3,6 +3,19 @@ import { Instagram, Facebook, Twitter, Youtube, MapPin, Phone, Mail, ExternalLin
 import { NavView } from './Navbar';
 import { getShopRedirectConfig, ShopRedirectConfig, getShopConfig, ShopConfig, DEFAULT_SHOP_CONFIG } from '../lib/firestoreService';
 
+function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg 
+      viewBox="0 0 24 24" 
+      fill="currentColor" 
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-2.92-1.02 4.86 4.86 0 0 1-1.12-3.5z" />
+    </svg>
+  );
+}
+
 interface FooterProps {
   onNavigateToBooking?: () => void;
   onNavigateToView?: (view: NavView) => void;
@@ -63,17 +76,17 @@ export default function Footer({
             <p className="text-xs text-gray-300 leading-relaxed mb-4">
               San Diego's premier unisex destination for precision haircutting, razor fading, and master protective braids. Over 20 years of hands-on mastery by Mika and Lusca in a relaxed vintage lounge.
             </p>
-            {/* Dynamic Social Icons */}
-            <div className="flex items-center gap-2 mb-6">
+            {/* Dynamic Social Icons (Clean, sleek icons without bubbles) */}
+            <div className="flex items-center gap-3.5 mb-6 text-gray-400">
               {social.instagram && (
                 <a 
                   href={social.instagram} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-white/5 hover:bg-gold/20 hover:text-gold border border-white/10 hover:border-gold/40 rounded transition-colors text-gray-300"
+                  className="hover:text-gold transition-colors p-1"
                   title="Instagram"
                 >
-                  <Instagram className="w-3.5 h-3.5" />
+                  <Instagram className="w-4 h-4" />
                 </a>
               )}
               {social.tiktok && (
@@ -81,10 +94,10 @@ export default function Footer({
                   href={social.tiktok} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-white/5 hover:bg-gold/20 hover:text-gold border border-white/10 hover:border-gold/40 rounded transition-colors text-gray-300"
+                  className="hover:text-gold transition-colors p-1"
                   title="TikTok"
                 >
-                  <span className="w-3.5 h-3.5 flex items-center justify-center font-mono text-[10px] font-bold">TT</span>
+                  <TikTokIcon className="w-4 h-4" />
                 </a>
               )}
               {social.youtube && (
@@ -92,10 +105,10 @@ export default function Footer({
                   href={social.youtube} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-white/5 hover:bg-gold/20 hover:text-gold border border-white/10 hover:border-gold/40 rounded transition-colors text-gray-300"
+                  className="hover:text-gold transition-colors p-1"
                   title="YouTube"
                 >
-                  <Youtube className="w-3.5 h-3.5" />
+                  <Youtube className="w-4 h-4" />
                 </a>
               )}
               {social.facebook && (
@@ -103,10 +116,10 @@ export default function Footer({
                   href={social.facebook} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-white/5 hover:bg-gold/20 hover:text-gold border border-white/10 hover:border-gold/40 rounded transition-colors text-gray-300"
+                  className="hover:text-gold transition-colors p-1"
                   title="Facebook"
                 >
-                  <Facebook className="w-3.5 h-3.5" />
+                  <Facebook className="w-4 h-4" />
                 </a>
               )}
               {social.twitter && (
@@ -114,10 +127,10 @@ export default function Footer({
                   href={social.twitter} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="p-2 bg-white/5 hover:bg-gold/20 hover:text-gold border border-white/10 hover:border-gold/40 rounded transition-colors text-gray-300"
+                  className="hover:text-gold transition-colors p-1"
                   title="X / Twitter"
                 >
-                  <Twitter className="w-3.5 h-3.5" />
+                  <Twitter className="w-4 h-4" />
                 </a>
               )}
             </div>
@@ -235,25 +248,29 @@ export default function Footer({
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-gold shrink-0 mt-0.5" />
                 <a 
-                  href="https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9" 
+                  href="https://maps.app.goo.gl/tUej1WdvZRudfqVX6" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:text-gold transition-colors"
                 >
-                  {shopConfig.address || '5277 El Cajon Blvd, San Diego, CA 92115'}
+                  {shopConfig.address || '4748 University Ave, San Diego, CA 92105'}
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <a href={`tel:${(shopConfig.phone1 || '6198861267').replace(/\D/g, '')}`} className="text-white hover:text-gold transition-colors font-mono font-bold block">
-                    {shopConfig.phone1 || '+1 (619) 886-1267'}
-                  </a>
-                  {shopConfig.phone2 && (
-                    <a href={`tel:${shopConfig.phone2.replace(/\D/g, '')}`} className="text-gray-300 hover:text-gold transition-colors font-mono font-bold block text-xs">
-                      {shopConfig.phone2}
+                <div className="space-y-1.5">
+                  <div>
+                    <span className="text-[10px] text-gray-400 font-sans block">Mika (Braids & Locs):</span>
+                    <a href={`tel:${(shopConfig.phone1 || '6199287084').replace(/\D/g, '')}`} className="text-white hover:text-gold transition-colors font-mono font-bold block">
+                      {shopConfig.phone1 || '+1 (619) 928-7084'}
                     </a>
-                  )}
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-gray-400 font-sans block">Lusca (Haircuts & Fades):</span>
+                    <a href={`tel:${(shopConfig.phone2 || '6198861267').replace(/\D/g, '')}`} className="text-gray-300 hover:text-gold transition-colors font-mono font-bold block">
+                      {shopConfig.phone2 || '+1 (619) 886-1267'}
+                    </a>
+                  </div>
                 </div>
               </li>
               <li className="flex items-start gap-3 min-w-0 pt-1">

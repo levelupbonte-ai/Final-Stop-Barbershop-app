@@ -775,7 +775,7 @@ export default function AdminPage({
                 FINAL STOP BARBER SHOP
               </span>
               <span className="text-[10px] font-mono text-gold uppercase tracking-wider block">
-                Staff Management Portal &bull; 5277 El Cajon Blvd
+                Staff Management Portal &bull; 4748 University Ave
               </span>
             </div>
           </div>

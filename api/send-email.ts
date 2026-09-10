@@ -32,7 +32,7 @@ export default async function handler(req: any, res: any) {
     const bookingTime = details?.time || 'Confirmed Time';
     const duration = details?.duration || '35-45 min';
     const servicePrice = details?.price ? (String(details.price).startsWith('$') ? details.price : `$${details.price}`) : '$35';
-    const mapsLink = 'https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9';
+    const mapsLink = 'https://maps.app.goo.gl/tUej1WdvZRudfqVX6';
     const bookingUrl = 'https://finalstop.org/#booking';
 
     let subject = customSubject || `Final Stop Barber Shop Notification`;
@@ -101,7 +101,7 @@ export default async function handler(req: any, res: any) {
                 <tr>
                   <td style="font-size: 12px; color: #9CA3AF; line-height: 1.6;">
                     <strong style="color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; display: block; margin-bottom: 4px;">San Diego Lounge</strong>
-                    5277 El Cajon Blvd, San Diego, CA 92115
+                    4748 University Ave, San Diego, CA 92105
                   </td>
                   <td style="text-align: right; font-size: 12px; color: #9CA3AF; line-height: 1.6;">
                     <strong style="color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; display: block; margin-bottom: 4px;">Direct Phone</strong>
@@ -113,7 +113,7 @@ export default async function handler(req: any, res: any) {
           </tr>
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.6;">
-              Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115<br>
+              Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105<br>
               <span style="color: #4B5563; font-size: 10px;">Powered By Levelup ecosystem</span>
             </td>
           </tr>
@@ -175,7 +175,7 @@ export default async function handler(req: any, res: any) {
           </tr>
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.6;">
-              5277 El Cajon Blvd, San Diego, CA 92115 &bull; (619) 886-1267<br>
+              4748 University Ave, San Diego, CA 92105 &bull; (619) 886-1267<br>
               &copy; Final Stop Barber Shop &bull; <span style="color: #4B5563; font-size: 10px;">Powered By Levelup ecosystem</span>
             </td>
           </tr>
@@ -229,7 +229,7 @@ export default async function handler(req: any, res: any) {
           </tr>
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.6;">
-              5277 El Cajon Blvd, San Diego, CA 92115 &bull; (619) 886-1267<br>
+              4748 University Ave, San Diego, CA 92105 &bull; (619) 886-1267<br>
               &copy; Final Stop Barber Shop &bull; <span style="color: #4B5563; font-size: 10px;">Powered By Levelup ecosystem</span>
             </td>
           </tr>
@@ -343,7 +343,7 @@ export default async function handler(req: any, res: any) {
                 <tr>
                   <td style="font-size: 12px; color: #9CA3AF; line-height: 1.6;">
                     <strong style="color: #FFFFFF; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; display: block; margin-bottom: 4px;">Shop Location</strong>
-                    5277 El Cajon Blvd, San Diego, CA 92115<br>
+                    4748 University Ave, San Diego, CA 92105<br>
                     <span style="color: #6B7280; font-size: 11px;">(Free parking available)</span>
                   </td>
                   <td style="text-align: right; font-size: 12px; color: #9CA3AF; line-height: 1.6;">
@@ -369,7 +369,7 @@ export default async function handler(req: any, res: any) {
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.5;">
               Need to reschedule or cancel? Simply give us a call or text prior to your appointment.<br>
-              &copy; Final Stop Barber Shop &bull; 5277 El Cajon Blvd, San Diego, CA 92115
+              &copy; Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105
             </td>
           </tr>
 
@@ -426,7 +426,7 @@ export default async function handler(req: any, res: any) {
           </tr>
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.5;">
-              5277 El Cajon Blvd, San Diego, CA 92115 &bull; (619) 886-1267<br>
+              4748 University Ave, San Diego, CA 92105 &bull; (619) 886-1267<br>
               &copy; Final Stop Barber Shop &bull; finalstop.org
             </td>
           </tr>
@@ -478,7 +478,7 @@ export default async function handler(req: any, res: any) {
           </tr>
           <tr>
             <td align="center" style="background-color: #0A0A0C; padding: 20px; border-top: 1px solid #27272A; font-size: 11px; color: #6B7280; line-height: 1.5;">
-              5277 El Cajon Blvd, San Diego, CA 92115 &bull; (619) 886-1267<br>
+              4748 University Ave, San Diego, CA 92105 &bull; (619) 886-1267<br>
               &copy; Final Stop Barber Shop &bull; finalstop.org
             </td>
           </tr>

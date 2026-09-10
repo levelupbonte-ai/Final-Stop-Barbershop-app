@@ -103,15 +103,26 @@ export default function ReservationForm() {
               </p>
 
               <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-4 text-sm text-gray-300">
-                  <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold shrink-0">
+                <div className="flex items-start gap-4 text-sm text-gray-300">
+                  <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold shrink-0 mt-0.5">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs text-gray-500 block uppercase tracking-wider">Phone</span>
-                    <a href="tel:16198861267" className="font-mono text-white hover:text-gold transition-colors font-bold">
-                      +1 (619) 886-1267
-                    </a>
+                    <span className="text-xs text-gray-500 block uppercase tracking-wider mb-1">Direct Lines</span>
+                    <div className="space-y-1">
+                      <div>
+                        <span className="text-[11px] text-gray-400 block font-sans">Mika (Braids & Locs):</span>
+                        <a href="tel:16199287084" className="font-mono text-white hover:text-gold transition-colors font-bold block">
+                          +1 (619) 928-7084
+                        </a>
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-gray-400 block font-sans">Lusca (Haircuts & Fades):</span>
+                        <a href="tel:16198861267" className="font-mono text-white hover:text-gold transition-colors font-bold block">
+                          +1 (619) 886-1267
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -121,7 +132,14 @@ export default function ReservationForm() {
                   </div>
                   <div>
                     <span className="text-xs text-gray-500 block uppercase tracking-wider">Address</span>
-                    <span className="text-white">5277 El Cajon Blvd, San Diego, CA 92115</span>
+                    <a 
+                      href="https://maps.app.goo.gl/tUej1WdvZRudfqVX6"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white hover:text-gold transition-colors"
+                    >
+                      4748 University Ave, San Diego, CA 92105
+                    </a>
                   </div>
                 </div>
               </div>
@@ -138,7 +156,7 @@ export default function ReservationForm() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex items-end p-4">
                 <div>
                   <span className="text-gold font-mono text-[9px] tracking-widest uppercase block mb-0.5">Final Stop Barber Shop</span>
-                  <p className="text-white text-xs font-serif">5277 El Cajon Blvd, San Diego, CA &bull; Mon - Sat: 10:00 AM - 6:00 PM</p>
+                  <p className="text-white text-xs font-serif">4748 University Ave, San Diego, CA &bull; Mon - Sat: 10:00 AM - 6:00 PM</p>
                 </div>
               </div>
             </div>
@@ -155,7 +173,7 @@ export default function ReservationForm() {
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2 font-serif">Appointment Confirmed!</h3>
                   <p className="text-gray-400 text-xs mb-6 max-w-sm">
-                    Your spot is secured. Our barbers look forward to welcoming you at 5277 El Cajon Blvd.
+                    Your spot is secured. Our barbers look forward to welcoming you at 4748 University Ave.
                   </p>
                   <button 
                     onClick={() => setSuccess(false)}

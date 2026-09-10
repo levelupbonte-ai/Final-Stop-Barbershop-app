@@ -532,12 +532,12 @@ export const DEFAULT_SHOP_CONFIG: ShopConfig = {
   waitlistOpen: true,
   promoPopupEnabled: true,
   announcement: '',
-  phone1: '(619) 886-1267',
-  phone2: '(619) 928-7084',
-  address: '5277 El Cajon Blvd, San Diego, CA 92115',
+  phone1: '(619) 928-7084', // Mika (Braids & Locs)
+  phone2: '(619) 886-1267', // Lusca (Haircuts & Fades)
+  address: '4748 University Ave, San Diego, CA 92105',
   hoursWeekday: 'Monday - Saturday: 10:00 AM - 6:00 PM',
   hoursSunday: 'Sunday: Closed',
-  adminAccessCode: '92115',
+  adminAccessCode: '92105',
   socialLinks: {
     instagram: 'https://instagram.com/finalstopbarbershop',
     tiktok: 'https://tiktok.com/@finalstopbarbershop',
@@ -708,7 +708,7 @@ export async function verifyAdminAccessCode(enteredCode: string): Promise<{ vali
   } catch (err: any) {
     console.error('Error verifying admin access code in Firestore:', err);
     // Graceful fallback to default master code if offline
-    if (cleanEntered === '92115') {
+    if (cleanEntered === '92105' || cleanEntered === '92115') {
       return { valid: true };
     }
     return { valid: false, message: 'Verification error. Please check database connection.' };
@@ -958,11 +958,11 @@ export async function seedFirestoreDatabase(): Promise<{ success: boolean; messa
     await setDoc(doc(db, 'shop_config', 'status'), {
       waitlistOpen: true,
       shopName: 'Final Stop Barber Shop',
-      phone1: '(619) 886-1267',
-      phone2: '(619) 977-9878',
-      address: '5277 El Cajon Blvd, San Diego, CA 92115',
-      hoursWeekday: 'Mon - Sat: 9:00 AM - 8:00 PM',
-      hoursSunday: 'Sunday: 10:00 AM - 6:00 PM',
+      phone1: '(619) 928-7084', // Mika
+      phone2: '(619) 886-1267', // Lusca
+      address: '4748 University Ave, San Diego, CA 92105',
+      hoursWeekday: 'Monday - Saturday: 10:00 AM - 6:00 PM',
+      hoursSunday: 'Sunday: Closed',
       updatedAt: serverTimestamp()
     }, { merge: true });
 
@@ -1226,7 +1226,7 @@ export const DEFAULT_GALLERY_ITEMS: FirestoreGalleryItem[] = [
     barber: 'Both',
     targetAudience: 'Shop',
     imageUrl: 'https://i.ibb.co/HTWwwJNz/Chat-GPT-Image-Sep-6-2026-03-11-02-PM-1.png',
-    description: 'Our modern grooming lounge located at 5277 El Cajon Blvd, San Diego. Equipped with luxury hydraulic chairs and warm hospitality.'
+    description: 'Our modern grooming lounge located at 4748 University Ave, San Diego. Equipped with luxury hydraulic chairs and warm hospitality.'
   }
 ];
 

@@ -160,11 +160,12 @@ export default function Navbar({
           <button
             type="button"
             onClick={onOpenCallModal}
-            className="text-xs font-semibold text-gray-200 hover:text-gold transition-colors flex items-center gap-1.5 px-2.5 py-2 cursor-pointer bg-transparent border-none font-mono"
-            title="Shop direct line"
+            className="text-xs font-semibold text-gray-200 hover:text-gold transition-colors flex items-center gap-1.5 px-2.5 py-2 cursor-pointer bg-transparent border border-white/10 rounded-xs font-mono"
+            title="Call Mika or Lusca direct lines"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
-            <span className="hidden xl:inline">(619) 886-1267</span>
+            <span className="hidden xl:inline">Call Barbers</span>
+            <span className="xl:hidden">Call</span>
           </button>
 
           <button
@@ -264,7 +265,7 @@ export default function Navbar({
                 className="w-full text-center text-xs text-gray-400 hover:text-gold py-2 font-mono flex items-center justify-center gap-1.5 cursor-pointer bg-transparent border-none"
               >
                 <Phone className="w-3.5 h-3.5 text-gold" />
-                <span>Direct Line: (619) 886-1267</span>
+                <span>Call Barbers: Mika & Lusca</span>
               </button>
             </li>
 

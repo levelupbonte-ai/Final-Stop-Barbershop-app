@@ -705,7 +705,7 @@ export default function AdminEmailMarketingManager() {
                   </div>
 
                   <div className="text-[10px] font-mono text-gray-500 pt-3 border-t border-white/10">
-                    5277 El Cajon Blvd, San Diego, CA 92115 &bull; (619) 886-1267<br />
+                    4748 University Ave, San Diego, CA 92105 &bull; (619) 886-1267<br />
                     Powered By Levelup ecosystem
                   </div>
                 </div>

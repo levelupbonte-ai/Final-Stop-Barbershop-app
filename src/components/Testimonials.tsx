@@ -1,28 +1,41 @@
-import { Star, ExternalLink, MessageSquarePlus } from 'lucide-react';
+import { Star, ExternalLink, MessageSquarePlus, Award, Scissors, DollarSign } from 'lucide-react';
 
-const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9";
+const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/tUej1WdvZRudfqVX6";
 
 export default function Testimonials() {
   const reviews = [
     {
-      name: "Malik R.",
-      date: "2 weeks ago",
-      content: "Hands down one of the top barbershops in San Diego! The fade is razor sharp and the beard work is surgical precision. Great vibe, clean shop, and top hospitality.",
+      name: "Trevorn Kitt",
+      subtitle: "2 reviews",
+      date: "1 year ago",
+      content: "Even when it was near closing time, he still took me in without hesitation and gave me a full transformation. The attention to detail and professionalism were top-tier. He didn’t rush the cut at all — every line was clean and the fade was flawless. You can tell he takes real pride in his work. Highly recommend if you’re looking for a barber who delivers quality every time!",
       rating: 5,
+      price: "$30–40",
+      service: "Haircuts / Coupes de cheveux",
+      isLocalGuide: false,
       avatarColor: "bg-[#1E3A8A]"
     },
     {
-      name: "Derrick K.",
-      date: "1 month ago",
-      content: "Flawless service every single visit. The barber takes the time to listen and tailor the cut to perfection. Clean shop, great music, and on-time appointments. 100% recommended.",
+      name: "Ivan Guevara",
+      subtitle: "Local Guide · 72 reviews · 6 photos",
+      date: "1 year ago",
+      content: "Anthony really took his time to give me a fresh cut, dude is dedicated to his craft and it shows!!!",
       rating: 5,
+      price: "$30–40",
+      service: "Mid drop fade • All fades, tapers & braiding",
+      barberMention: "Anthony",
+      isLocalGuide: true,
       avatarColor: "bg-[#B45309]"
     },
     {
-      name: "Anthony M.",
-      date: "1 month ago",
-      content: "Old-school barbershop hospitality with modern high-precision craft. The hot eucalyptus towel and straight razor neck shave are unbeatable. My regular go-to spot.",
+      name: "Allen SamuelsClarence",
+      subtitle: "Local Guide · 20 reviews · 12 photos",
+      date: "1 year ago",
+      content: "REGULAR BARBER 🔥 I’ve been looking for one for the past 2 years and finally found one … clean friendly ! Highly recommend",
       rating: 5,
+      price: "$20–30",
+      service: "Regular Precision Cut",
+      isLocalGuide: true,
       avatarColor: "bg-[#065F46]"
     }
   ];
@@ -36,7 +49,13 @@ export default function Testimonials() {
         {/* Section Header & Google Badge */}
         <div className="flex flex-col items-center text-center mb-16">
           {/* Google Official Badge */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-[#151517] border border-white/10 mb-4 shadow-lg">
+          <a
+            href={GOOGLE_MAPS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-4 py-2 bg-[#151517] hover:bg-[#1c1c20] border border-white/10 hover:border-gold/50 mb-4 shadow-lg transition-all group"
+            title="View live reviews on Google Maps"
+          >
             {/* Google G Multi-Color Icon */}
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
@@ -44,7 +63,7 @@ export default function Testimonials() {
               <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.23 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
-            <span className="text-white text-xs font-bold tracking-wider uppercase">Google Maps Reviews</span>
+            <span className="text-white text-xs font-bold tracking-wider uppercase group-hover:text-gold transition-colors">Google Maps Reviews</span>
             <span className="text-white/20">|</span>
             <div className="flex items-center gap-1">
               <span className="text-gold font-bold text-xs">5.0</span>
@@ -54,14 +73,15 @@ export default function Testimonials() {
                 ))}
               </div>
             </div>
-          </div>
+            <ExternalLink className="w-3.5 h-3.5 text-gray-400 group-hover:text-gold transition-colors ml-1" />
+          </a>
 
           <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">
             Client Testimonials
           </h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 max-w-xl mx-auto text-sm">
-            Authentic feedback from our community, published directly on our official Google Business profile.
+            Authentic customer reviews pulled directly from our verified Google Maps business listing.
           </p>
         </div>
 
@@ -70,47 +90,82 @@ export default function Testimonials() {
           {reviews.map((review, i) => (
             <div 
               key={i} 
-              className="bg-[#151517] p-8 border border-white/5 relative group hover:border-gold/30 transition-all flex flex-col justify-between"
+              className="bg-[#151517] p-7 border border-white/10 hover:border-gold/40 transition-all flex flex-col justify-between rounded-xs shadow-xl relative group"
             >
-              {/* Header inside card: Stars & Google Badge */}
+              {/* Header inside card: Stars, Date, Local Guide badge */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-1">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex gap-0.5">
                     {[...Array(review.rating)].map((_, j) => (
                       <Star key={j} className="w-4 h-4 fill-gold text-gold" />
                     ))}
                   </div>
-                  <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">
+                  <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
                     {review.date}
                   </span>
                 </div>
+
+                {review.isLocalGuide && (
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-medium rounded-xs mb-3">
+                    <Award className="w-3 h-3 text-amber-400" />
+                    <span>Local Guide</span>
+                  </div>
+                )}
                 
-                <p className="text-gray-300 mb-8 italic font-serif text-base leading-relaxed">
+                <p className="text-gray-200 mb-6 italic font-serif text-sm sm:text-base leading-relaxed">
                   "{review.content}"
                 </p>
+
+                {/* Service Details Tags */}
+                <div className="flex flex-wrap items-center gap-2 mb-6 pt-3 border-t border-white/5 text-[11px] font-mono">
+                  {review.price && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 text-gray-300 rounded-xs">
+                      <DollarSign className="w-3 h-3 text-gold" />
+                      <span>{review.price}</span>
+                    </span>
+                  )}
+                  {review.service && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 text-gray-300 rounded-xs">
+                      <Scissors className="w-3 h-3 text-gold" />
+                      <span>{review.service}</span>
+                    </span>
+                  )}
+                  {review.barberMention && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gold/10 border border-gold/30 text-gold rounded-xs">
+                      <span>Pro: {review.barberMention}</span>
+                    </span>
+                  )}
+                </div>
               </div>
               
               {/* Reviewer info */}
-              <div className="flex items-center justify-between border-t border-white/5 pt-4">
+              <div className="flex items-center justify-between border-t border-white/10 pt-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 ${review.avatarColor} text-white font-bold flex items-center justify-center text-sm shadow-md`}>
+                  <div className={`w-10 h-10 ${review.avatarColor} text-white font-bold flex items-center justify-center text-sm shadow-md rounded-full`}>
                     {review.name.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-bold text-white text-sm">{review.name}</h4>
-                    <span className="text-[10px] text-gray-500 flex items-center gap-1">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      Verified Google Review
+                    <h4 className="font-bold text-white text-sm leading-snug">{review.name}</h4>
+                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                      {review.subtitle}
                     </span>
                   </div>
                 </div>
                 
-                <svg className="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.23 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                </svg>
+                <a
+                  href={GOOGLE_MAPS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="View on Google Maps"
+                  className="opacity-60 group-hover:opacity-100 hover:scale-110 transition-all p-1"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.23 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                </a>
               </div>
             </div>
           ))}
@@ -124,7 +179,7 @@ export default function Testimonials() {
             rel="noopener noreferrer"
             className="w-full sm:w-auto bg-[#151517] hover:bg-white/10 text-white border border-white/20 hover:border-gold px-6 py-3.5 text-xs uppercase tracking-widest font-bold flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-95"
           >
-            <span>View All Google Reviews</span>
+            <span>View All Reviews on Google Maps</span>
             <ExternalLink className="w-3.5 h-3.5 text-gold" />
           </a>
           <a
@@ -134,7 +189,7 @@ export default function Testimonials() {
             className="w-full sm:w-auto bg-gold hover:bg-gold-light text-black px-6 py-3.5 text-xs uppercase tracking-widest font-extrabold flex items-center justify-center gap-2.5 transition-all shadow-[0_4px_20px_rgba(197,160,89,0.3)] active:scale-95"
           >
             <MessageSquarePlus className="w-4 h-4 text-black" />
-            <span>Write a Google Review</span>
+            <span>Leave a Google Review</span>
           </a>
         </div>
 

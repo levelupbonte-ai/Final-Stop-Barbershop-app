@@ -4,15 +4,15 @@ import mapboxgl from 'mapbox-gl';
 import { getMapboxToken, getMapStyle, FALLBACK_DARK_MAP_STYLE } from '../lib/mapboxConfig';
 
 const SHOP_LOCATION = {
-  lat: 32.7572493,
-  lng: -117.0820005,
+  lat: 32.7497911,
+  lng: -117.0924401,
   name: "Final Stop Barber Shop",
-  address: "5277 El Cajon Blvd, San Diego, CA 92115",
+  address: "4748 University Ave, San Diego, CA 92105",
   phone: "+1 (619) 886-1267"
 };
 
-const GOOGLE_MAPS_LINK = "https://maps.app.goo.gl/nVdA7FUH9LyMvCCu9";
-const DIRECTIONS_URL = "https://www.google.com/maps/dir/?api=1&destination=5277+El+Cajon+Blvd,+San+Diego,+CA+92115";
+const GOOGLE_MAPS_LINK = "https://maps.app.goo.gl/tUej1WdvZRudfqVX6";
+const DIRECTIONS_URL = "https://www.google.com/maps/dir/?api=1&destination=4748+University+Ave,+San+Diego,+CA+92105";
 
 interface MapSectionProps {
   onNavigateToRoutePlanner?: () => void;
@@ -74,7 +74,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
             FINAL STOP BARBER SHOP
           </strong>
           <span style="font-size: 11px; color: #666; display: block;">
-            5277 El Cajon Blvd, San Diego
+            4748 University Ave, San Diego
           </span>
           <div style="margin-top: 6px;">
             <span style="display: inline-block; background: #C5A059; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; text-transform: uppercase;">
@@ -114,7 +114,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
           </h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-6"></div>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Conveniently situated on <strong className="text-white">El Cajon Boulevard</strong> in the College Area, our shop offers easy parking, central transit access, and a premium climate-controlled lounge.
+            Conveniently situated on <strong className="text-white">University Avenue</strong> in San Diego, our shop offers easy parking, central transit access, and a premium climate-controlled lounge.
           </p>
         </div>
 
@@ -125,25 +125,37 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
               <MapPin className="w-5 h-5" />
             </div>
             <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-2">Our Address</h4>
-            <p className="text-gray-400 text-xs leading-relaxed">
-              5277 El Cajon Blvd<br />San Diego, CA 92115
-            </p>
+            <a 
+              href={GOOGLE_MAPS_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-300 hover:text-gold text-xs leading-relaxed transition-colors flex items-center gap-1 group"
+              title="Open Google Maps location"
+            >
+              <span>4748 University Ave<br />San Diego, CA 92105</span>
+            </a>
+            <span className="text-[10px] text-gold/80 font-mono mt-2 flex items-center gap-1">
+              <span>Click for Google Maps</span>
+              <ExternalLink className="w-3 h-3" />
+            </span>
           </div>
 
           <div className="bg-[#151517] p-6 border border-white/5 flex flex-col items-center text-center">
             <div className="w-12 h-12 bg-black border border-white/10 flex items-center justify-center mb-4 text-gold">
               <Phone className="w-5 h-5" />
             </div>
-            <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-2">Phone Lines (2 Direct)</h4>
-            <div className="text-xs text-gray-300 font-mono space-y-1">
-              <div>
-                <a href="tel:16198861267" className="text-gold hover:underline font-bold block">+1 (619) 886-1267</a>
-              </div>
-              <div>
+            <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-2">Barber Direct Lines</h4>
+            <div className="text-xs text-gray-300 font-mono space-y-2 w-full">
+              <div className="bg-black/40 p-2 border border-white/5 rounded-xs">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-sans font-bold">Mika (Braids & Locs)</span>
                 <a href="tel:16199287084" className="text-gold hover:underline font-bold block">+1 (619) 928-7084</a>
               </div>
+              <div className="bg-black/40 p-2 border border-white/5 rounded-xs">
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-sans font-bold">Lusca (Haircuts & Fades)</span>
+                <a href="tel:16198861267" className="text-gold hover:underline font-bold block">+1 (619) 886-1267</a>
+              </div>
             </div>
-            <span className="text-[11px] text-gray-500 mt-1">Direct Call / Text</span>
+            <span className="text-[11px] text-gray-500 mt-2">Direct Call or Text</span>
           </div>
 
           <div className="bg-[#151517] p-6 border border-white/5 flex flex-col items-center text-center">
@@ -165,7 +177,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
               <span className="text-xs font-mono text-gray-300 font-bold">
-                5277 El Cajon Blvd, San Diego, CA
+                4748 University Ave, San Diego, CA
               </span>
             </div>
 

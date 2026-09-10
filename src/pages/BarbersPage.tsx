@@ -48,9 +48,10 @@ export default function BarbersPage({
               type="button"
               onClick={() => setIsCallModalOpen(true)}
               className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
+              title="Call Mika or Lusca direct lines"
             >
               <Phone className="w-3.5 h-3.5 text-gold" />
-              <span className="hidden sm:inline">Direct Line: (619) 886-1267</span>
+              <span className="hidden sm:inline">Call Barbers Direct</span>
             </button>
 
             <button
@@ -142,7 +143,7 @@ export default function BarbersPage({
                 </p>
 
                 {/* Specialties tags */}
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {barber.tags.map((tag, i) => (
                     <span
                       key={i}
@@ -151,6 +152,19 @@ export default function BarbersPage({
                       {tag}
                     </span>
                   ))}
+                </div>
+
+                {/* Direct Line Badge */}
+                <div className="mb-4">
+                  <a
+                    href={`tel:${barber.phoneRaw || (barber.id === 'mika' ? '16199287084' : '16198861267')}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1.5 bg-black/50 hover:bg-gold hover:text-black text-gold border border-gold/40 px-3 py-1.5 text-xs font-mono transition-all rounded-xs font-bold"
+                    title={`Call ${barber.name} directly`}
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Direct Call: {barber.phone || (barber.id === 'mika' ? '+1 (619) 928-7084' : '+1 (619) 886-1267')}</span>
+                  </a>
                 </div>
               </div>
 

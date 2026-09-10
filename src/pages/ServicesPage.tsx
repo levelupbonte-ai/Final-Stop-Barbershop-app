@@ -89,7 +89,7 @@ export default function ServicesPage({
           </h1>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-            Exact prices from our shop terminal with zero hidden fees. Pay upon service completion at 5277 El Cajon Blvd.
+            Exact prices from our shop terminal with zero hidden fees. Pay upon service completion at 4748 University Ave.
           </p>
         </div>
 

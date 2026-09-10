@@ -58,7 +58,7 @@ export default function PoliciesPage({ onBackToHome, onNavigateToBooking }: Poli
         <div className="max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/40 text-gold text-xs font-mono uppercase tracking-widest rounded-xs mb-4">
             <Shield className="w-4 h-4" />
-            <span>Salon Code of Practice &bull; 5277 El Cajon Blvd</span>
+            <span>Salon Code of Practice &bull; 4748 University Ave</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white mb-4 tracking-tight">
@@ -205,7 +205,7 @@ export default function PoliciesPage({ onBackToHome, onNavigateToBooking }: Poli
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <span><strong>Free Cancellation & Rescheduling :</strong> We understand emergencies happen. We ask for a simple 2-hour notice by calling <a href="tel:16198861267" className="text-gold underline font-bold">(619) 886-1267</a> so we can open the chair to another guest.</span>
+                <span><strong>Free Cancellation & Rescheduling :</strong> We understand emergencies happen. We ask for a simple 2-hour notice by calling Mika at <a href="tel:16199287084" className="text-gold underline font-bold">(619) 928-7084</a> or Lusca at <a href="tel:16198861267" className="text-gold underline font-bold">(619) 886-1267</a> so we can open the chair to another guest.</span>
               </li>
             </ul>
           </div>
@@ -287,18 +287,34 @@ export default function PoliciesPage({ onBackToHome, onNavigateToBooking }: Poli
           <h3 className="text-lg font-serif font-bold text-white mb-1">
             Final Stop Barber Shop & Salon
           </h3>
-          <p className="text-xs font-mono text-gray-400 mb-4 flex items-center justify-center gap-2">
+          <div className="text-xs font-mono text-gray-400 mb-5 flex items-center justify-center gap-2">
             <MapPin className="w-3.5 h-3.5 text-gold shrink-0" />
-            <span>5277 El Cajon Blvd, San Diego, CA 92115 &bull; Mon–Sat 10:00 AM – 6:00 PM</span>
-          </p>
+            <a
+              href="https://maps.app.goo.gl/tUej1WdvZRudfqVX6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-gold transition-colors underline-offset-2 hover:underline"
+            >
+              4748 University Ave, San Diego, CA 92105
+            </a>
+            <span>&bull; Mon–Sat 10:00 AM – 6:00 PM</span>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href="tel:16198861267"
-              className="w-full sm:w-auto bg-[#202026] hover:bg-white/10 text-white border border-white/20 px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xs transition-colors flex items-center justify-center gap-2"
+              href="tel:16199287084"
+              className="w-full sm:w-auto bg-[#202026] hover:bg-gold hover:text-black text-white border border-white/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xs transition-colors flex items-center justify-center gap-2 font-mono"
             >
               <Phone className="w-3.5 h-3.5 text-gold" />
-              <span>Call Shop: (619) 886-1267</span>
+              <span>Call Mika: (619) 928-7084</span>
+            </a>
+
+            <a
+              href="tel:16198861267"
+              className="w-full sm:w-auto bg-[#202026] hover:bg-gold hover:text-black text-white border border-white/20 px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xs transition-colors flex items-center justify-center gap-2 font-mono"
+            >
+              <Phone className="w-3.5 h-3.5 text-gold" />
+              <span>Call Lusca: (619) 886-1267</span>
             </a>
 
             <button
@@ -307,7 +323,7 @@ export default function PoliciesPage({ onBackToHome, onNavigateToBooking }: Poli
               className="w-full sm:w-auto bg-gold hover:bg-gold-light text-black px-6 py-2.5 text-xs font-bold uppercase tracking-widest rounded-xs shadow transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <Calendar className="w-3.5 h-3.5" />
-              <span>Book an Appointment</span>
+              <span>Book Appointment</span>
             </button>
           </div>
         </div>

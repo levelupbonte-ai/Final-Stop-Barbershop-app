@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Scissors, Clock, Award, Receipt, ChevronRight } from 'lucide-react';
+import { Scissors, Clock, Award, Receipt, ChevronRight, Phone } from 'lucide-react';
 import MobilePricingModal, { ALL_SERVICES } from './MobilePricingModal';
 import { OFFICIAL_SERVICES } from '../data/services';
 
@@ -14,6 +14,8 @@ const BARBERS = [
     id: 'mika',
     name: 'Mika',
     role: 'Master Braider & Texture Specialist',
+    phone: '+1 (619) 928-7084',
+    phoneRaw: '16199287084',
     experience: 'Master Specialist',
     specialty: 'Specialized in girls’ & women’s braids: knotless box braids, designer swirl cornrows, goddess locs, and gentle protective styles.',
     initials: 'MK',
@@ -24,6 +26,8 @@ const BARBERS = [
     id: 'lusca',
     name: 'Lusca',
     role: 'Lead Master Barber & Men’s Specialist',
+    phone: '+1 (619) 886-1267',
+    phoneRaw: '16198861267',
     experience: 'Master Barber',
     specialty: 'Specialized in boys’ & men’s precision haircuts: surgical zero skin fades, beard architecture, and straight razor contouring.',
     initials: 'LC',
@@ -120,14 +124,23 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between text-xs font-bold text-gold pt-2">
-                  <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    <span>View full profile, cuts & techniques</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-mono hidden sm:inline">
-                    Master Craft
-                  </span>
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+                  <a
+                    href={`tel:${barber.phoneRaw}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1.5 bg-black/60 hover:bg-gold hover:text-black text-gray-200 border border-white/15 hover:border-gold px-2.5 py-1 text-xs font-mono transition-all rounded-xs font-bold"
+                    title={`Call ${barber.name} directly`}
+                  >
+                    <Phone className="w-3 h-3 text-gold" />
+                    <span>Call: {barber.phone}</span>
+                  </a>
+
+                  <div className="flex items-center text-xs font-bold text-gold">
+                    <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      <span>View profile</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

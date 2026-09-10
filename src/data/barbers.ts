@@ -2,6 +2,8 @@ export interface BarberProfile {
   id: 'mika' | 'lusca';
   name: string;
   role: string;
+  phone: string;
+  phoneRaw: string;
   experience: string;
   experienceYears: number;
   initials: string;
@@ -34,6 +36,8 @@ export const MASTER_BARBERS: BarberProfile[] = [
     id: 'mika',
     name: 'Mika',
     role: 'Master Braider, Locs & Texture Artisan',
+    phone: '+1 (619) 928-7084',
+    phoneRaw: '16199287084',
     experience: 'Master Artisan',
     experienceYears: 10,
     initials: 'MK',
@@ -113,6 +117,8 @@ export const MASTER_BARBERS: BarberProfile[] = [
     id: 'lusca',
     name: 'Lusca',
     role: 'Lead Master Barber & Men’s Haircut Specialist',
+    phone: '+1 (619) 886-1267',
+    phoneRaw: '16198861267',
     experience: 'Master Barber',
     experienceYears: 10,
     initials: 'LC',

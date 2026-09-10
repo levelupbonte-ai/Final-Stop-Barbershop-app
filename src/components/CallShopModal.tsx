@@ -13,18 +13,22 @@ export default function CallShopModal({ isOpen, onClose }: CallShopModalProps) {
 
   const phoneLines = [
     {
-      id: 'line1',
-      title: 'Main Lounge Line',
-      numberDisplay: '+1 (619) 886-1267',
-      telHref: 'tel:16198861267',
-      description: 'Appointments, walk-in inquiries & front desk'
-    },
-    {
-      id: 'line2',
-      title: 'Direct Chair Line',
+      id: 'mika',
+      barberName: 'Mika',
+      role: 'Master Braider, Locs & Protective Artisan',
+      title: 'Mika — Direct Line',
       numberDisplay: '+1 (619) 928-7084',
       telHref: 'tel:16199287084',
-      description: 'Barber direct contact & fast assistance'
+      description: 'Knotless braids, cornrows, locs retwist & protective styling'
+    },
+    {
+      id: 'lusca',
+      barberName: 'Lusca',
+      role: 'Lead Master Barber & Haircut Specialist',
+      title: 'Lusca — Direct Line',
+      numberDisplay: '+1 (619) 886-1267',
+      telHref: 'tel:16198861267',
+      description: 'Skin fades, precision haircuts, beard sculpting & straight razor'
     }
   ];
 
@@ -134,11 +138,19 @@ export default function CallShopModal({ isOpen, onClose }: CallShopModalProps) {
           </div>
 
           {/* Shop Location & Hours Quick Note */}
-          <div className="bg-[#0A0A0B] p-3 border border-white/5 text-[11px] text-gray-400 space-y-1">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-3.5 h-3.5 text-gold shrink-0" />
-              <span>5277 El Cajon Blvd, San Diego, CA</span>
-            </div>
+          <div className="bg-[#0A0A0B] p-3 border border-white/5 text-[11px] text-gray-400 space-y-1.5">
+            <a 
+              href="https://maps.app.goo.gl/tUej1WdvZRudfqVX6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-2 hover:text-gold transition-colors group"
+            >
+              <div className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-gold shrink-0" />
+                <span>4748 University Ave, San Diego, CA 92105</span>
+              </div>
+              <ExternalLink className="w-3 h-3 text-gray-500 group-hover:text-gold shrink-0" />
+            </a>
             <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-gold shrink-0" />
               <span>Open Daily: 10:00 AM – 6:00 PM</span>
