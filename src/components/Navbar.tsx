@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Menu, X, Calendar, Phone, Search, Users, ChevronRight, ChevronLeft, ChevronDown } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
-export type NavView = 'home' | 'barbers' | 'services' | 'waitlist' | 'gallery' | 'reviews' | 'route' | 'admin';
+export type NavView = 'home' | 'barbers' | 'services' | 'waitlist' | 'gallery' | 'reviews' | 'route';
 
 interface NavbarProps {
   currentView?: string;
