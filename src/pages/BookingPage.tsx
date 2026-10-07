@@ -19,12 +19,10 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { format, addDays, startOfToday } from 'date-fns';
-import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { saveReservation } from '../lib/firestoreService';
 import CallShopModal from '../components/CallShopModal';
-import { sendBookingConfirmationEmail } from '../lib/emailService';
-import { OFFICIAL_SERVICES, ServiceItem } from '../data/services';
+import { useSiteData } from '../lib/site/SiteDataProvider';
+import { bookAppointment, errorMessage, formatTime12h } from '../lib/site/api';
+import type { BookingConfirmation } from '../types/content';
 
 interface BookingPageProps {
   onBackToHome: () => void;
@@ -32,33 +30,26 @@ interface BookingPageProps {
   initialService?: string;
 }
 
-const SERVICES: ServiceItem[] = OFFICIAL_SERVICES;
-
-const CATEGORIES = ['All', 'Haircuts', 'Combos', 'Beard & Shave', 'Lineups & Detailing', 'Treatments'] as const;
-
-const TIME_SLOTS = [
-  '10:00 AM', '10:45 AM', '11:30 AM', '12:15 PM', '1:00 PM', '1:45 PM', '2:30 PM', '3:15 PM', '4:00 PM', '4:45 PM', '5:30 PM'
-];
-
-const BARBERS = [
-  { id: 'any', name: 'First Available Master Artist', phone: '' },
-  { id: 'mika', name: 'Mika (Master Braider • Women’s & Girls’ Braids & Locs)', phone: '(619) 928-7084' },
-  { id: 'lusca', name: 'Lusca (Master Barber • Precision Fades, Men’s & Boys’ Cuts)', phone: '(619) 886-1267' }
-];
-
 export default function BookingPage({ onBackToHome, initialBarber, initialService }: BookingPageProps) {
   // Step navigation: 1 = Plan, 2 = Date & Time, 3 = Guest Info (Name & Email), 4 = Confirm Reservation
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const { services: SERVICES, barbers, site } = useSiteData();
+  const CATEGORIES = ['All', ...Array.from(new Set(SERVICES.map((s) => s.category)))];
+  const TIME_SLOTS = site.booking.timeSlots;
+  const BARBERS = [
+    { id: 'any', name: 'First Available Master Artist', phone: '' },
+    ...barbers.map((b) => ({ id: b.id, name: `${b.name} (${b.role})`, phone: b.phone }))
+  ];
 
   // Form State
   const [selectedServiceId, setSelectedServiceId] = useState(
-    initialService && SERVICES.some(s => s.id === initialService) ? initialService : SERVICES[0].id
+    initialService && SERVICES.some(s => s.id === initialService) ? initialService : SERVICES[0]?.id
   );
   const [selectedDate, setSelectedDate] = useState(format(startOfToday(), 'yyyy-MM-dd'));
-  const [selectedTime, setSelectedTime] = useState('11:30 AM');
+  const [selectedTime, setSelectedTime] = useState(TIME_SLOTS[0] ?? '');
   const [selectedBarber, setSelectedBarber] = useState(
-    initialBarber === 'lusca' ? 'lusca' : initialBarber === 'mika' ? 'mika' : 'any'
+    initialBarber && barbers.some((b) => b.id === initialBarber) ? initialBarber : 'any'
   );
   const [weekOffset, setWeekOffset] = useState(0);
 
@@ -72,7 +63,8 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
   // Submission & Result State
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [confirmedData, setConfirmedData] = useState<any>(null);
+  const [confirmedData, setConfirmedData] = useState<BookingConfirmation | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
 
   useEffect(() => {
@@ -91,9 +83,9 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
     if (!guestName.trim()) {
       errors.name = 'Please enter your name for your reservation ticket';
     }
-    if (!guestEmail.trim()) {
-      errors.email = 'Please enter your email to receive your reservation ticket';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim())) {
+    if (!guestEmail.trim() && !guestPhone.trim()) {
+      errors.email = 'Please enter your email (or a phone number) to receive your reservation ticket';
+    } else if (guestEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim())) {
       errors.email = 'Please enter a valid email address';
     }
 
@@ -101,68 +93,27 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
     return Object.keys(errors).length === 0;
   };
 
-  // Real-Time Booking without Google Account Requirement
+  // Booking goes through the validated server-side RPC: the ticket code,
+  // service name and price are decided by the database, not by the browser.
   const handleConfirmReservation = async () => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      const randomTicketNum = Math.floor(10000 + Math.random() * 90000);
-      const generatedTicketId = `FS-${randomTicketNum}`;
-
-      const reservationData = {
-        ticketId: generatedTicketId,
-        name: guestName.trim(),
-        fullName: guestName.trim(),
-        clientName: guestName.trim(),
-        email: guestEmail.trim().toLowerCase(),
-        clientEmail: guestEmail.trim().toLowerCase(),
-        phone: guestPhone.trim() || 'Not specified',
-        service: selectedService.name,
-        serviceId: selectedService.id,
-        price: selectedService.price,
-        duration: selectedService.duration,
+      const confirmation = await bookAppointment({
+        serviceSlug: selectedService.id,
         date: selectedDate,
         time: selectedTime,
-        barber: BARBERS.find(b => b.id === selectedBarber)?.name || 'First Available',
-        notes: specialNotes.trim() || '',
-        status: 'confirmed',
-        createdAt: serverTimestamp()
-      };
-
-      let docId = generatedTicketId;
-      try {
-        docId = await saveReservation(reservationData as any);
-      } catch (dbErr) {
-        console.warn('Real-time database record created locally:', dbErr);
-      }
-
-      const payload = {
-        ...reservationData,
-        id: docId,
-        ticketId: generatedTicketId
-      };
-
-      // Automatically send confirmation email with ticket details via EmailJS
-      sendBookingConfirmationEmail({
-        toName: guestName.trim(),
-        toEmail: guestEmail.trim(),
-        ticketId: generatedTicketId,
-        serviceName: selectedService.name,
-        duration: selectedService.duration,
-        price: selectedService.price,
-        date: selectedDate,
-        time: selectedTime,
-        barberName: BARBERS.find(b => b.id === selectedBarber)?.name || 'First Available Master Barber',
-        phone: guestPhone.trim(),
-        notes: specialNotes.trim()
-      }).catch((err) => console.warn('EmailJS background warning:', err));
-
-      setConfirmedData(payload);
-      localStorage.setItem('finalstop_active_booking', JSON.stringify(payload));
+        teamMemberSlug: selectedBarber === 'any' ? null : selectedBarber,
+        name: guestName,
+        email: guestEmail,
+        phone: guestPhone,
+        notes: specialNotes
+      });
+      setConfirmedData(confirmation);
       setIsSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      console.error('Reservation error:', err);
-      alert('An error occurred while confirming your reservation. Please try again or call the shop.');
+      setSubmitError(errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -191,9 +142,9 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
 
           {/* Logo Center */}
           <div className="flex items-center cursor-pointer" onClick={onBackToHome}>
-            <img 
-              src="https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png" 
-              alt="Final Stop Barber Shop" 
+            <img
+              src={site.branding.logoUrl ?? undefined}
+              alt={site.branding.logoAlt}
               className="h-10 md:h-12 w-auto object-contain"
               referrerPolicy="no-referrer"
             />
@@ -204,7 +155,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
             type="button"
             onClick={() => setIsCallModalOpen(true)}
             className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border border-white/15 px-2.5 py-1.5 rounded-sm"
-            title="Call Mika or Lusca direct lines"
+            title="Call our direct lines"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
             <span className="hidden sm:inline">Call Barbers Direct</span>
@@ -233,7 +184,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                 Your reservation has been confirmed!
               </h1>
               <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-md mx-auto mb-4">
-                Thank you <strong className="text-white">{confirmedData?.clientName}</strong>, your appointment slot is locked in. A confirmation ticket with all details has been emailed to you.
+                Thank you <strong className="text-white">{guestName.trim().split(' ')[0]}</strong>, your appointment slot is locked in. A confirmation ticket with all details has been emailed to you.
               </p>
               
               <div className="bg-gold/10 border border-gold/40 p-3 rounded-xs inline-block max-w-md mx-auto text-left font-mono text-xs text-gold">
@@ -242,18 +193,18 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                   <span>Check your inbox:</span>
                 </p>
                 <p className="text-gray-300 break-all">
-                  A ticket summary was sent to <strong className="text-gold">{confirmedData?.clientEmail || guestEmail}</strong>. (Please check your spam or promotions folder if not found in your main inbox).
+                  A ticket summary was sent to <strong className="text-gold">{guestEmail || guestPhone}</strong>. (Please check your spam or promotions folder if not found in your main inbox).
                 </p>
               </div>
             </div>
 
             {/* Compact Reference Pill */}
             <div className="bg-[#0A0A0B] border border-white/10 p-3.5 mb-8 rounded-xs font-mono text-xs text-gray-400 flex flex-wrap items-center justify-center gap-3">
-              <span className="text-gold font-bold">Ticket #{confirmedData?.ticketId}</span>
+              <span className="text-gold font-bold">Ticket #{confirmedData?.ticketCode}</span>
               <span className="text-white/20">&bull;</span>
-              <span className="text-white">{confirmedData?.date} at {confirmedData?.time}</span>
+              <span className="text-white">{confirmedData?.appointmentDate} at {confirmedData ? formatTime12h(confirmedData.appointmentTime) : ''}</span>
               <span className="text-white/20">&bull;</span>
-              <span className="text-gray-300">{confirmedData?.service}</span>
+              <span className="text-gray-300">{confirmedData?.serviceName}</span>
             </div>
 
             {/* 3 Streamlined Buttons: Print Ticket / Back to Home / Book Another */}
@@ -322,7 +273,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                   key={s.num}
                   type="button"
                   onClick={() => {
-                    if (s.num === 4 && (!guestName || !guestEmail)) return;
+                    if (s.num === 4 && (!guestName || (!guestEmail && !guestPhone))) return;
                     if (s.num <= currentStep) setCurrentStep(s.num as any);
                   }}
                   className={`py-2.5 px-2 text-center border transition-all cursor-pointer ${
@@ -575,7 +526,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                               : 'bg-[#17171B] border-white/10 text-gray-300 hover:border-gold/40 hover:text-white'
                           }`}
                         >
-                          {slot}
+                          {formatTime12h(slot)}
                         </button>
                       );
                     })}
@@ -823,7 +774,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                     <div>
                       <span className="text-gray-400 text-[10px] uppercase block">Appointment Schedule</span>
                       <span className="text-white font-bold block">
-                        {selectedDate} at <span className="text-gold">{selectedTime}</span>
+                        {selectedDate} at <span className="text-gold">{formatTime12h(selectedTime)}</span>
                       </span>
                     </div>
 
@@ -855,13 +806,18 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                       rel="noopener noreferrer"
                       className="hover:text-gold transition-colors underline-offset-2 hover:underline"
                     >
-                      Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105
+                      {site.name} &bull; {site.contact.address}
                     </a>
                   </div>
                 </div>
 
                 {/* Final Booking Button */}
                 <div className="space-y-3">
+                  {submitError && (
+                    <p role="alert" className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 px-4 py-3 rounded-sm">
+                      {submitError}
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={handleConfirmReservation}
@@ -910,7 +866,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
 
       {/* Booking Page Footer */}
       <footer className="border-t border-white/10 py-6 px-6 bg-[#0A0A0B] text-center text-xs text-gray-500 w-full">
-        <p>&copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105</p>
+        <p>&copy; {new Date().getFullYear()} {site.name} &bull; {site.contact.address}</p>
       </footer>
 
       {/* Direct Phone Assistance Modal with 2 Lines */}

@@ -10,7 +10,7 @@ import {
   Search
 } from 'lucide-react';
 import CallShopModal from '../components/CallShopModal';
-import { OFFICIAL_SERVICES, ServiceItem } from '../data/services';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface ServicesPageProps {
   onBackToHome: () => void;
@@ -18,9 +18,7 @@ interface ServicesPageProps {
   onNavigateToBarbers: () => void;
 }
 
-export const COMPLETE_SERVICES = OFFICIAL_SERVICES;
 
-const CATEGORIES = ['All', 'Haircuts', 'Combos', 'Beard & Shave', 'Lineups & Detailing', 'Treatments'] as const;
 
 export default function ServicesPage({
   onBackToHome,
@@ -30,6 +28,8 @@ export default function ServicesPage({
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const { services: OFFICIAL_SERVICES, barbers, site } = useSiteData();
+  const CATEGORIES = ['All', ...Array.from(new Set(OFFICIAL_SERVICES.map((s) => s.category)))];
 
   const filteredServices = OFFICIAL_SERVICES.filter((service) => {
     const matchesCategory = selectedCategory === 'All' || service.category === selectedCategory;
@@ -60,7 +60,7 @@ export default function ServicesPage({
               onClick={onNavigateToBarbers}
               className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-sm cursor-pointer bg-transparent"
             >
-              <span>View Mika & Lusca (Barbers)</span>
+              <span>View {barbers.map((b) => b.name).join(' & ')} (Barbers)</span>
               <ChevronRight className="w-3.5 h-3.5 text-gold" />
             </button>
 
@@ -89,7 +89,7 @@ export default function ServicesPage({
           </h1>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-            Exact prices from our shop terminal with zero hidden fees. Pay upon service completion at 4748 University Ave.
+            Exact prices from our shop terminal with zero hidden fees. Pay upon service completion at {site.contact.address}.
           </p>
         </div>
 

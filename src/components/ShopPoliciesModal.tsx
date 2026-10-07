@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Shield, Sparkles, AlertCircle, Clock, HeartHandshake, CheckCircle2, X, Scissors } from 'lucide-react';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 import ScrollIndicator from './ScrollIndicator';
 
 interface ShopPoliciesModalProps {
@@ -8,6 +9,8 @@ interface ShopPoliciesModalProps {
 }
 
 export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModalProps) {
+  const { site } = useSiteData();
+  const phoneList = site.contact.phones.map((p) => `${p.label}: ${p.display}`).join(' / ');
   const modalBodyRef = useRef<HTMLDivElement>(null);
   if (!isOpen) return null;
 
@@ -29,7 +32,7 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
                 Salon Safety & House Policies
               </h2>
               <p className="text-[11px] font-mono text-gold uppercase tracking-wider">
-                Final Stop Barber Shop &bull; 4748 University Ave
+                {site.name} &bull; {site.contact.address}
               </p>
             </div>
           </div>
@@ -112,7 +115,7 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Free Cancellation:</strong> Please give us at least 2 hours notice via phone (Mika: (619) 928-7084 / Lusca: (619) 886-1267) if you need to reschedule.</span>
+                <span><strong>Free Cancellation:</strong> Please give us at least 2 hours notice via phone ({phoneList}) if you need to reschedule.</span>
               </li>
             </ul>
           </div>
@@ -170,7 +173,9 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
         {/* Footer */}
         <div className="sticky bottom-0 bg-[#121215] border-t border-white/10 p-4 flex flex-wrap items-center justify-between gap-3">
           <span className="text-[11px] font-mono text-gray-400">
-            Questions? Call Mika <a href="tel:16199287084" className="text-gold font-bold hover:underline">(619) 928-7084</a> or Lusca <a href="tel:16198861267" className="text-gold font-bold hover:underline">(619) 886-1267</a>
+            Questions? Call {site.contact.phones.map((p, i) => (
+              <span key={p.tel}>{i > 0 ? ' or ' : ''}<a href={`tel:${p.tel}`} className="text-gold font-bold hover:underline">{p.display}</a></span>
+            ))}
           </span>
           <button
             type="button"

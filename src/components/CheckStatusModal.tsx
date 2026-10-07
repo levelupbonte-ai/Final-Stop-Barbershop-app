@@ -11,8 +11,21 @@ import {
   Calendar,
   Sparkles
 } from 'lucide-react';
-import { db } from '../lib/firebase';
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
+import { errorMessage, fetchTicketStatus, formatTime12h } from '../lib/site/api';
+import { useSiteData } from '../lib/site/SiteDataProvider';
+
+interface StatusResult {
+  type: 'reservation' | 'waitlist';
+  ticketId: string;
+  name: string;
+  barber: string | null;
+  service: string | null;
+  date: string | null;
+  time: string | null;
+  position: number | null;
+  estMinutes: number | null;
+  status: string;
+}
 
 interface CheckStatusModalProps {
   isOpen: boolean;
@@ -33,151 +46,77 @@ export default function CheckStatusModal({
 }: CheckStatusModalProps) {
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [isSearching, setIsSearching] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<StatusResult | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const { barbers } = useSiteData();
+
+  // Lookup is by ticket code only: the code is the secret that proves the
+  // visitor owns the booking. Names/phones are never searchable publicly.
+  const performSearch = async (term: string) => {
+    const code = term.trim();
+    if (!code) return;
+
+    setIsSearching(true);
+    setNotFound(false);
+    setSearchError(null);
+    setResult(null);
+
+    try {
+      const ticket = await fetchTicketStatus(code);
+      if (!ticket || (ticket.type !== 'appointment' && ticket.type !== 'waitlist')) {
+        setNotFound(true);
+        return;
+      }
+      setResult({
+        type: ticket.type === 'appointment' ? 'reservation' : 'waitlist',
+        ticketId: ticket.ticketCode,
+        name: ticket.firstName,
+        barber: ticket.teamMemberName ?? null,
+        service: ticket.serviceName ?? null,
+        date: ticket.appointmentDate ?? null,
+        time: ticket.appointmentTime ? ticket.appointmentTime.slice(0, 5) : null,
+        position: ticket.position ?? null,
+        estMinutes: ticket.estMinutes ?? null,
+        status: ticket.status === 'in_chair' ? 'in-chair' : ticket.status
+      });
+    } catch (err) {
+      setSearchError(errorMessage(err));
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   useEffect(() => {
+    if (!isOpen) return;
     if (initialQuery) {
       setSearchQuery(initialQuery);
-      performSearch(initialQuery);
+      void performSearch(initialQuery);
       return;
     }
-
-    // Auto-check if client has a cached ticket or appointment in localStorage
-    const savedTicket = localStorage.getItem('finalstop_active_ticket');
-    const savedBooking = localStorage.getItem('finalstop_active_booking');
-    
-    if (savedTicket) {
-      try {
-        const parsed = JSON.parse(savedTicket);
-        setResult(parsed);
-      } catch (e) {
-        // ignore
+    // Re-check the visitor's own last waitlist ticket, if this browser has one.
+    try {
+      const saved = localStorage.getItem('levelup_waitlist_ticket');
+      const code = saved ? (JSON.parse(saved) as { ticketCode?: string }).ticketCode : undefined;
+      if (code) {
+        setSearchQuery(code);
+        void performSearch(code);
       }
-    } else if (savedBooking) {
-      try {
-        const parsed = JSON.parse(savedBooking);
-        setResult(parsed);
-      } catch (e) {
-        // ignore
-      }
+    } catch {
+      // ignore
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, initialQuery]);
 
   if (!isOpen) return null;
 
-  const performSearch = async (term: string) => {
-    const queryStr = term.trim().toLowerCase();
-    if (!queryStr) return;
-
-    setIsSearching(true);
-    setNotFound(false);
-    setResult(null);
-
-    try {
-      let foundData: any = null;
-
-      // 1. Search in waitlist collection
-      try {
-        const waitlistRef = collection(db, 'waitlist');
-        const snap = await getDocs(waitlistRef);
-        snap.forEach((doc) => {
-          const data = doc.data();
-          const nameMatch = data.name && data.name.toLowerCase().includes(queryStr);
-          const idMatch = data.ticketId && data.ticketId.toLowerCase().includes(queryStr);
-          const phoneMatch = data.phone && data.phone.toLowerCase().includes(queryStr);
-
-          if (nameMatch || idMatch || phoneMatch) {
-            foundData = { ...data, type: 'waitlist' };
-          }
-        });
-      } catch (err) {
-        console.warn('Firestore waitlist search fallback:', err);
-      }
-
-      // 2. If not found in waitlist, search in reservations collection
-      if (!foundData) {
-        try {
-          const resRef = collection(db, 'reservations');
-          const snap = await getDocs(resRef);
-          snap.forEach((doc) => {
-            const data = doc.data();
-            const nameMatch = (data.fullName && data.fullName.toLowerCase().includes(queryStr)) ||
-                              (data.name && data.name.toLowerCase().includes(queryStr));
-            const idMatch = (data.ticketId && data.ticketId.toLowerCase().includes(queryStr)) ||
-                            (doc.id && doc.id.toLowerCase().includes(queryStr));
-            const phoneMatch = data.phone && data.phone.toLowerCase().includes(queryStr);
-
-            if (nameMatch || idMatch || phoneMatch) {
-              foundData = { 
-                ...data, 
-                ticketId: data.ticketId || doc.id.substring(0, 7).toUpperCase(),
-                name: data.fullName || data.name,
-                type: 'reservation' 
-              };
-            }
-          });
-        } catch (err) {
-          console.warn('Firestore reservations search fallback:', err);
-        }
-      }
-
-      // 3. Fallback to localStorage check
-      if (!foundData) {
-        const savedTicket = localStorage.getItem('finalstop_active_ticket');
-        const savedBooking = localStorage.getItem('finalstop_active_booking');
-        
-        if (savedTicket) {
-          const parsed = JSON.parse(savedTicket);
-          if (
-            parsed.name?.toLowerCase().includes(queryStr) || 
-            parsed.ticketId?.toLowerCase().includes(queryStr) ||
-            parsed.phone?.toLowerCase().includes(queryStr)
-          ) {
-            foundData = parsed;
-          }
-        } else if (savedBooking) {
-          const parsed = JSON.parse(savedBooking);
-          if (
-            parsed.fullName?.toLowerCase().includes(queryStr) ||
-            parsed.name?.toLowerCase().includes(queryStr) ||
-            parsed.ticketId?.toLowerCase().includes(queryStr) ||
-            parsed.id?.toLowerCase().includes(queryStr)
-          ) {
-            foundData = parsed;
-          }
-        }
-      }
-
-      if (foundData) {
-        setResult(foundData);
-      } else {
-        setNotFound(true);
-      }
-    } catch (err) {
-      console.error('Search error:', err);
-      setNotFound(true);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
   const handleSearch = async (e: FormEvent) => {
     e.preventDefault();
-    performSearch(searchQuery);
+    void performSearch(searchQuery);
   };
 
   const handleRefresh = async () => {
-    if (!result) return;
-    setIsSearching(true);
-    try {
-      const idToFind = result.ticketId || result.id;
-      if (idToFind) {
-        await performSearch(idToFind);
-      }
-    } finally {
-      setIsSearching(false);
-    }
+    if (result) await performSearch(result.ticketId);
   };
 
   const isWaitlist = result?.type !== 'reservation';
@@ -226,7 +165,7 @@ export default function CheckStatusModal({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Client Name or Ticket ID (e.g. Thomas, FS-102)"
+                placeholder="Ticket number (e.g. FS-7KQ2M9XA)"
                 className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 outline-none font-mono"
               />
               <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
@@ -242,6 +181,12 @@ export default function CheckStatusModal({
         </form>
 
         {/* Not Found Alert */}
+        {searchError && (
+          <p role="alert" className="mb-4 text-xs text-red-300 border border-red-500/40 bg-red-500/10 px-3 py-2">
+            {searchError}
+          </p>
+        )}
+
         {notFound && (
           <div className="p-4 bg-red-950/40 border border-red-500/30 text-red-300 text-xs mb-6 space-y-2">
             <div className="flex items-center gap-2 font-bold">
@@ -296,21 +241,21 @@ export default function CheckStatusModal({
                 </p>
                 <p className="text-sm text-white font-medium flex items-center gap-1.5 mt-1">
                   <User className="w-3.5 h-3.5 text-gold" />
-                  <span>{result.name || result.fullName || result.clientName}</span>
+                  <span>{result.name}</span>
                 </p>
               </div>
 
               <div className="text-right">
                 <span className="text-[10px] font-mono uppercase text-gray-500 block">Assigned Barber</span>
                 <span className="text-xs text-gray-200 font-mono font-bold block mt-0.5">
-                  {result.barber || 'Mika &amp; Lusca (Final Stop)'}
+                  {result.barber || barbers.map((b) => b.name).join(' & ')}
                 </span>
                 <span className="text-[11px] text-gray-400 block mt-1">
                   {result.service}
                 </span>
                 {result.date && (
                   <span className="text-[10px] font-mono text-gold block mt-0.5">
-                    {result.date} at {result.time}
+                    {result.date} at {result.time ? formatTime12h(result.time) : ''}
                   </span>
                 )}
               </div>
@@ -490,7 +435,7 @@ export default function CheckStatusModal({
             <div className="bg-[#0A0A0B] border border-white/5 p-6 text-center text-xs text-gray-400 space-y-3 rounded-xs">
               <Clock className="w-8 h-8 text-gold/60 mx-auto" />
               <p>
-                Check your live queue position or view confirmation details for your scheduled appointment with Mika &amp; Lusca anytime.
+                Check your live queue position or view confirmation details for your scheduled appointment anytime.
               </p>
             </div>
           )

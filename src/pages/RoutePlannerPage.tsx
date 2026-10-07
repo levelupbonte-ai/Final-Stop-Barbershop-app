@@ -1,3 +1,4 @@
+import { useSiteData } from '../lib/site/SiteDataProvider';
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { 
   ArrowLeft, 
@@ -29,12 +30,9 @@ interface AddressSuggestion {
   lng: number;
 }
 
-const DESTINATION = {
-  name: "Final Stop Barber Shop",
-  address: "4748 University Ave, San Diego, CA 92105",
-  lat: 32.7497911,
-  lng: -117.0924401,
-};
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+}
 
 const POPULAR_POINTS = [
   { label: 'Downtown / Gaslamp', lat: 32.7157, lng: -117.1611, desc: 'Downtown San Diego (92101)' },
@@ -46,6 +44,13 @@ const POPULAR_POINTS = [
 ];
 
 export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps) {
+  const { site } = useSiteData();
+  const DESTINATION = {
+    name: site.name,
+    address: site.contact.address,
+    lat: site.contact.coordinates?.lat ?? 0,
+    lng: site.contact.coordinates?.lng ?? 0,
+  };
   const [startAddress, setStartAddress] = useState('');
   const [startCoords, setStartCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
@@ -173,9 +178,8 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
 
     const destPopup = new mapboxgl.Popup({ offset: 25, closeButton: false }).setHTML(`
       <div style="background:#151517;color:#fff;padding:10px;font-family:sans-serif;font-size:12px;border:1px solid #C5A059;">
-        <strong style="color:#C5A059;font-size:13px;display:block;margin-bottom:4px;">${DESTINATION.name}</strong>
-        <span>4748 University Ave</span><br/>
-        <span style="color:#888;font-size:10px;">San Diego, CA 92105</span>
+        <strong style="color:#C5A059;font-size:13px;display:block;margin-bottom:4px;">${escapeHtml(DESTINATION.name)}</strong>
+        <span>${escapeHtml(DESTINATION.address)}</span>
       </div>
     `);
 
@@ -392,9 +396,9 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
           </button>
 
           <div className="flex items-center cursor-pointer" onClick={onBackToHome}>
-            <img 
-              src="https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png" 
-              alt="Final Stop Barber Shop" 
+            <img
+              src={site.branding.logoUrl ?? undefined}
+              alt={site.branding.logoAlt}
               className="h-10 md:h-12 w-auto object-contain"
               referrerPolicy="no-referrer"
             />
@@ -405,7 +409,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
             type="button"
             onClick={() => setIsCallModalOpen(true)}
             className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border border-white/10 px-2.5 py-1.5 rounded-sm"
-            title="Call Mika or Lusca direct lines"
+            title="Call our direct lines"
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
             <span className="hidden sm:inline">Call Barbers Direct</span>
@@ -615,7 +619,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
                     ))}
                     <li className="flex items-center gap-2 text-gold font-bold">
                       <span>🏁</span>
-                      <span>Arrive: Final Stop Barber Shop (4748 University Ave)</span>
+                      <span>Arrive: {DESTINATION.name} ({DESTINATION.address})</span>
                     </li>
                   </ul>
                 </div>
@@ -709,7 +713,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-6 px-6 bg-[#0A0A0B] text-center text-xs text-gray-500 w-full mt-10">
-        <p>&copy; {new Date().getFullYear()} Final Stop Barber Shop &bull; 4748 University Ave, San Diego, CA 92105</p>
+        <p>&copy; {new Date().getFullYear()} {site.name} &bull; {site.contact.address}</p>
       </footer>
 
       {/* Direct Phone Assistance Modal with 2 Lines */}

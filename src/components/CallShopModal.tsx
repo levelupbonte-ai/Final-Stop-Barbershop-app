@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, X, Copy, Check, Clock, MapPin, ExternalLink } from 'lucide-react';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface CallShopModalProps {
   isOpen: boolean;
@@ -8,29 +9,23 @@ interface CallShopModalProps {
 
 export default function CallShopModal({ isOpen, onClose }: CallShopModalProps) {
   const [copiedNumber, setCopiedNumber] = useState<string | null>(null);
+  const { site, barbers } = useSiteData();
 
   if (!isOpen) return null;
 
-  const phoneLines = [
-    {
-      id: 'mika',
-      barberName: 'Mika',
-      role: 'Master Braider, Locs & Protective Artisan',
-      title: 'Mika — Direct Line',
-      numberDisplay: '+1 (619) 928-7084',
-      telHref: 'tel:16199287084',
-      description: 'Knotless braids, cornrows, locs retwist & protective styling'
-    },
-    {
-      id: 'lusca',
-      barberName: 'Lusca',
-      role: 'Lead Master Barber & Haircut Specialist',
-      title: 'Lusca — Direct Line',
-      numberDisplay: '+1 (619) 886-1267',
-      telHref: 'tel:16198861267',
-      description: 'Skin fades, precision haircuts, beard sculpting & straight razor'
-    }
-  ];
+  // Phone lines come from website_settings.contact; each line can point to a team member.
+  const phoneLines = site.contact.phones.map((line, i) => {
+    const member = barbers.find((b) => b.id === line.teamMember);
+    return {
+      id: line.teamMember ?? `line-${i}`,
+      barberName: member?.name ?? line.label,
+      role: member?.role ?? '',
+      title: member ? `${member.name} — Direct Line` : line.label,
+      numberDisplay: line.display,
+      telHref: `tel:${line.tel}`,
+      description: member?.specialty ?? line.label
+    };
+  });
 
   const handleCopy = (num: string, id: string) => {
     navigator.clipboard?.writeText(num);
@@ -140,20 +135,20 @@ export default function CallShopModal({ isOpen, onClose }: CallShopModalProps) {
           {/* Shop Location & Hours Quick Note */}
           <div className="bg-[#0A0A0B] p-3 border border-white/5 text-[11px] text-gray-400 space-y-1.5">
             <a 
-              href="https://maps.app.goo.gl/tUej1WdvZRudfqVX6"
+              href={site.contact.mapsUrl || undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between gap-2 hover:text-gold transition-colors group"
             >
               <div className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-gold shrink-0" />
-                <span>4748 University Ave, San Diego, CA 92105</span>
+                <span>{site.contact.address}</span>
               </div>
               <ExternalLink className="w-3 h-3 text-gray-500 group-hover:text-gold shrink-0" />
             </a>
             <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-gold shrink-0" />
-              <span>Open Daily: 10:00 AM – 6:00 PM</span>
+              <span>{site.hours.summary.join(" · ")}</span>
             </div>
           </div>
         </div>

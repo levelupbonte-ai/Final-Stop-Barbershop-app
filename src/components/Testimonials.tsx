@@ -1,44 +1,24 @@
 import { Star, ExternalLink, MessageSquarePlus, Award, Scissors, DollarSign } from 'lucide-react';
 
-const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/tUej1WdvZRudfqVX6";
+import { useSiteData } from '../lib/site/SiteDataProvider';
+
+const AVATAR_COLORS = ['bg-[#1E3A8A]', 'bg-[#B45309]', 'bg-[#065F46]', 'bg-[#7C2D12]', 'bg-[#4C1D95]'];
 
 export default function Testimonials() {
-  const reviews = [
-    {
-      name: "Trevorn Kitt",
-      subtitle: "2 reviews",
-      date: "1 year ago",
-      content: "Even when it was near closing time, he still took me in without hesitation and gave me a full transformation. The attention to detail and professionalism were top-tier. He didn’t rush the cut at all — every line was clean and the fade was flawless. You can tell he takes real pride in his work. Highly recommend if you’re looking for a barber who delivers quality every time!",
-      rating: 5,
-      price: "$30–40",
-      service: "Haircuts / Coupes de cheveux",
-      isLocalGuide: false,
-      avatarColor: "bg-[#1E3A8A]"
-    },
-    {
-      name: "Ivan Guevara",
-      subtitle: "Local Guide · 72 reviews · 6 photos",
-      date: "1 year ago",
-      content: "Anthony really took his time to give me a fresh cut, dude is dedicated to his craft and it shows!!!",
-      rating: 5,
-      price: "$30–40",
-      service: "Mid drop fade • All fades, tapers & braiding",
-      barberMention: "Anthony",
-      isLocalGuide: true,
-      avatarColor: "bg-[#B45309]"
-    },
-    {
-      name: "Allen SamuelsClarence",
-      subtitle: "Local Guide · 20 reviews · 12 photos",
-      date: "1 year ago",
-      content: "REGULAR BARBER 🔥 I’ve been looking for one for the past 2 years and finally found one … clean friendly ! Highly recommend",
-      rating: 5,
-      price: "$20–30",
-      service: "Regular Precision Cut",
-      isLocalGuide: true,
-      avatarColor: "bg-[#065F46]"
-    }
-  ];
+  const { reviews: allReviews, site } = useSiteData();
+  const GOOGLE_MAPS_URL = site.contact.mapsUrl || undefined;
+  const reviews = allReviews.slice(0, 3).map((r, i) => ({
+    name: r.author,
+    subtitle: r.role,
+    date: r.date,
+    content: r.text,
+    rating: r.rating,
+    price: r.price,
+    service: r.service,
+    barberMention: r.barber,
+    isLocalGuide: r.isLocalGuide,
+    avatarColor: AVATAR_COLORS[i % AVATAR_COLORS.length]
+  }));
 
   return (
     <section id="testimonials" className="py-24 bg-[#0F0F10] border-y border-white/5 relative overflow-hidden">

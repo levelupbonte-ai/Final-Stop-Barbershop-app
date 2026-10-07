@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Briefcase, X, Check, Calendar, Users, Building, Phone, Mail, FileText, Sparkles, Send } from 'lucide-react';
-import { saveProQuote } from '../lib/firestoreService';
+import { useSiteData } from '../lib/site/SiteDataProvider';
+import { errorMessage as toErrorMessage, submitForm } from '../lib/site/api';
 
 interface ProQuoteModalProps {
   isOpen: boolean;
@@ -8,6 +9,8 @@ interface ProQuoteModalProps {
 }
 
 export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
+  const { site } = useSiteData();
+  const mainPhone = site.contact.phones[0];
   const [formData, setFormData] = useState({
     clientName: '',
     companyName: '',
@@ -16,7 +19,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
     serviceType: 'Wedding & Groomsmen' as const,
     headcount: 5,
     eventDate: '',
-    location: 'Final Stop Lounge (Private VIP Buyout)',
+    location: 'In-shop (private VIP buyout)',
     estimatedBudget: '',
     notes: ''
   });
@@ -32,27 +35,26 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const ticketId = `PRO-${Math.floor(100 + Math.random() * 900)}`;
-
     try {
-      await saveProQuote({
-        ticketId,
-        clientName: formData.clientName,
-        companyName: formData.companyName || undefined,
-        phone: formData.phone,
+      const { ticketCode } = await submitForm({
+        formType: 'quote',
+        name: formData.clientName,
         email: formData.email,
-        serviceType: formData.serviceType,
-        headcount: Number(formData.headcount) || 1,
-        eventDate: formData.eventDate,
-        location: formData.location,
-        estimatedBudget: formData.estimatedBudget || undefined,
-        notes: formData.notes || undefined,
-        status: 'new'
+        phone: formData.phone,
+        company: formData.companyName,
+        message: formData.notes,
+        data: {
+          service_type: formData.serviceType,
+          headcount: Number(formData.headcount) || 1,
+          event_date: formData.eventDate || null,
+          location: formData.location || null,
+          estimated_budget: formData.estimatedBudget || null
+        }
       });
 
-      setSubmittedTicket(ticketId);
+      setSubmittedTicket(ticketCode);
     } catch (err) {
-      setErrorMessage('An error occurred while submitting. Please try again or call our shop directly.');
+      setErrorMessage(toErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -68,7 +70,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
       serviceType: 'Wedding & Groomsmen',
       headcount: 5,
       eventDate: '',
-      location: 'Final Stop Lounge (Private VIP Buyout)',
+      location: 'In-shop (private VIP buyout)',
       estimatedBudget: '',
       notes: ''
     });
@@ -126,7 +128,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
-                href="tel:16198861267"
+                href={mainPhone ? `tel:${mainPhone.tel}` : undefined}
                 className="w-full sm:w-auto px-5 py-2.5 bg-gold hover:bg-gold-light text-black font-bold text-xs uppercase tracking-wider rounded-xs transition-colors text-center cursor-pointer"
               >
                 Call Shop Directly

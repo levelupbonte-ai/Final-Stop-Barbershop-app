@@ -2,17 +2,12 @@ import { useEffect, useRef } from 'react';
 import { MapPin, Navigation, Phone, ExternalLink, Clock } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import { getMapboxToken, getMapStyle, FALLBACK_DARK_MAP_STYLE } from '../lib/mapboxConfig';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
-const SHOP_LOCATION = {
-  lat: 32.7497911,
-  lng: -117.0924401,
-  name: "Final Stop Barber Shop",
-  address: "4748 University Ave, San Diego, CA 92105",
-  phone: "+1 (619) 886-1267"
-};
-
-const GOOGLE_MAPS_LINK = "https://maps.app.goo.gl/tUej1WdvZRudfqVX6";
-const DIRECTIONS_URL = "https://www.google.com/maps/dir/?api=1&destination=4748+University+Ave,+San+Diego,+CA+92105";
+// Values below come from the database and are injected into Mapbox popup HTML.
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string);
+}
 
 interface MapSectionProps {
   onNavigateToRoutePlanner?: () => void;
@@ -21,9 +16,14 @@ interface MapSectionProps {
 export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const { site } = useSiteData();
+  const { contact, hours } = site;
+  const SHOP_LOCATION = contact.coordinates;
+  const GOOGLE_MAPS_LINK = contact.mapsUrl || undefined;
+  const DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(contact.address)}`;
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || !SHOP_LOCATION) return;
     if (mapRef.current) return;
 
     const token = getMapboxToken();
@@ -71,16 +71,11 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
       .setHTML(`
         <div style="color: #000; font-family: sans-serif; padding: 6px 10px; text-align: center;">
           <strong style="font-size: 13px; text-transform: uppercase; color: #000; display: block; margin-bottom: 2px;">
-            FINAL STOP BARBER SHOP
+            ${escapeHtml(site.name)}
           </strong>
           <span style="font-size: 11px; color: #666; display: block;">
-            4748 University Ave, San Diego
+            ${escapeHtml(contact.address)}
           </span>
-          <div style="margin-top: 6px;">
-            <span style="display: inline-block; background: #C5A059; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; text-transform: uppercase;">
-              Open 10 AM - 6 PM
-            </span>
-          </div>
         </div>
       `);
 
@@ -99,7 +94,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [SHOP_LOCATION?.lat, SHOP_LOCATION?.lng, site.name, contact.address]);
 
   return (
     <section id="contact" className="py-24 bg-dark-bg relative border-t border-white/5">
@@ -132,7 +127,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
               className="text-gray-300 hover:text-gold text-xs leading-relaxed transition-colors flex items-center gap-1 group"
               title="Open Google Maps location"
             >
-              <span>4748 University Ave<br />San Diego, CA 92105</span>
+              <span>{contact.address}</span>
             </a>
             <span className="text-[10px] text-gold/80 font-mono mt-2 flex items-center gap-1">
               <span>Click for Google Maps</span>
@@ -146,14 +141,12 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
             </div>
             <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-2">Barber Direct Lines</h4>
             <div className="text-xs text-gray-300 font-mono space-y-2 w-full">
-              <div className="bg-black/40 p-2 border border-white/5 rounded-xs">
-                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-sans font-bold">Mika (Braids & Locs)</span>
-                <a href="tel:16199287084" className="text-gold hover:underline font-bold block">+1 (619) 928-7084</a>
-              </div>
-              <div className="bg-black/40 p-2 border border-white/5 rounded-xs">
-                <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-sans font-bold">Lusca (Haircuts & Fades)</span>
-                <a href="tel:16198861267" className="text-gold hover:underline font-bold block">+1 (619) 886-1267</a>
-              </div>
+              {contact.phones.map((line) => (
+                <div key={line.tel} className="bg-black/40 p-2 border border-white/5 rounded-xs">
+                  <span className="text-[10px] text-gray-400 uppercase tracking-wider block font-sans font-bold">{line.label}</span>
+                  <a href={`tel:${line.tel}`} className="text-gold hover:underline font-bold block">{line.display}</a>
+                </div>
+              ))}
             </div>
             <span className="text-[11px] text-gray-500 mt-2">Direct Call or Text</span>
           </div>
@@ -164,8 +157,9 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
             </div>
             <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-2">Business Hours</h4>
             <p className="text-gray-400 text-xs leading-relaxed">
-              Monday - Saturday: 10:00 AM - 6:00 PM<br />
-              Sunday: Closed
+              {hours.summary.map((line) => (
+                <span key={line} className="block">{line}</span>
+              ))}
             </p>
           </div>
         </div>
@@ -177,7 +171,7 @@ export default function MapSection({ onNavigateToRoutePlanner }: MapSectionProps
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
               <span className="text-xs font-mono text-gray-300 font-bold">
-                4748 University Ave, San Diego, CA
+                {contact.address}
               </span>
             </div>
 

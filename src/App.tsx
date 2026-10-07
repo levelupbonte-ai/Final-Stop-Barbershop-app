@@ -18,7 +18,6 @@ import BarberProfilePage from './pages/BarberProfilePage';
 import BarbersPage from './pages/BarbersPage';
 import ServicesPage from './pages/ServicesPage';
 import WaitlistPage from './pages/WaitlistPage';
-import AdminPage from './pages/AdminPage';
 import GalleryPage from './pages/GalleryPage';
 import ReviewsPage from './pages/ReviewsPage';
 import BookingPage from './pages/BookingPage';
@@ -28,11 +27,10 @@ import RoutePlannerPage from './pages/RoutePlannerPage';
 import CheckStatusModal from './components/CheckStatusModal';
 import WalkInHubModal, { ModalMode } from './components/WalkInHubModal';
 import ClientStatusHub from './components/ClientStatusHub';
-import OwnerWaitlistModal from './components/OwnerWaitlistModal';
 import WelcomePromoModal from './components/WelcomePromoModal';
 import CallShopModal from './components/CallShopModal';
 import ShopPoliciesModal from './components/ShopPoliciesModal';
-import { getIsWaitlistOpen } from './lib/waitlistService';
+import { useSiteData } from './lib/site/SiteDataProvider';
 import { updateDocumentSEO } from './lib/seo';
 
 export type ActiveView = 
@@ -44,17 +42,12 @@ export type ActiveView =
   | 'booking' 
   | 'route' 
   | 'gallery' 
-  | 'reviews' 
-  | 'admin';
+  | 'reviews';
 
 export default function App() {
   // Parse initial view from pathname or hash if present
   const [currentView, setCurrentView] = useState<ActiveView>(() => {
     if (typeof window !== 'undefined') {
-      const path = window.location.pathname.toLowerCase();
-      if (path === '/admin' || path === '/admin/' || path.startsWith('/admin')) {
-        return 'admin';
-      }
       const hash = window.location.hash.replace('#', '');
       if (hash.startsWith('barber-profile')) return 'barber-profile';
       if (hash === 'barbers') return 'barbers';
@@ -64,18 +57,19 @@ export default function App() {
       if (hash === 'route') return 'route';
       if (hash === 'gallery') return 'gallery';
       if (hash === 'reviews') return 'reviews';
-      if (hash === 'admin') return 'admin';
     }
     return 'home';
   });
 
   // Selected barber for profile or booking
-  const [selectedBarberId, setSelectedBarberId] = useState<'mika' | 'lusca'>(() => {
+  const { site, barbers } = useSiteData();
+  const defaultBarberId = barbers[0]?.id ?? '';
+  const [selectedBarberId, setSelectedBarberId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      if (hash.includes('id=lusca')) return 'lusca';
+      const match = window.location.hash.match(/id=([a-z0-9-]+)/);
+      if (match && barbers.some((b) => b.id === match[1])) return match[1];
     }
-    return 'mika';
+    return defaultBarberId;
   });
 
   // Selected service for booking pre-selection
@@ -89,34 +83,25 @@ export default function App() {
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
 
-  // Shop Owner-controlled waitlist state
-  const [isWaitlistOpen, setIsWaitlistOpen] = useState<boolean>(getIsWaitlistOpen);
-  const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
+  // Waitlist open/closed is managed by the shop from the LevelUp dashboard.
+  const isWaitlistOpen = site.features.includes('waitlist') && site.waitlist.open;
 
   // Dynamic SEO Synchronization per page/view
   useEffect(() => {
     updateDocumentSEO(currentView);
   }, [currentView]);
 
-  // Pathname and Hash change listener for true browser navigation (Back / Forward buttons, /admin direct link)
+  // Hash change listener for browser navigation (Back / Forward buttons)
   useEffect(() => {
     const handleLocationChange = () => {
-      const path = window.location.pathname.toLowerCase();
-      if (path === '/admin' || path === '/admin/' || path.startsWith('/admin')) {
-        setCurrentView('admin');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        return;
-      }
-
       const rawHash = window.location.hash.replace('#', '');
       const [viewName, queryStr] = rawHash.split('?');
 
       if (viewName === 'barber-profile') {
         setCurrentView('barber-profile');
-        if (queryStr && queryStr.includes('id=lusca')) {
-          setSelectedBarberId('lusca');
-        } else if (queryStr && queryStr.includes('id=mika')) {
-          setSelectedBarberId('mika');
+        const match = queryStr?.match(/id=([a-z0-9-]+)/);
+        if (match && barbers.some((b) => b.id === match[1])) {
+          setSelectedBarberId(match[1]);
         }
       } else if (
         viewName === 'barbers' ||
@@ -125,8 +110,7 @@ export default function App() {
         viewName === 'booking' ||
         viewName === 'route' ||
         viewName === 'gallery' ||
-        viewName === 'reviews' ||
-        viewName === 'admin'
+        viewName === 'reviews'
       ) {
         setCurrentView(viewName as ActiveView);
       } else {
@@ -141,7 +125,7 @@ export default function App() {
       window.removeEventListener('hashchange', handleLocationChange);
       window.removeEventListener('popstate', handleLocationChange);
     };
-  }, []);
+  }, [barbers]);
 
   // Global call modal listener
   useEffect(() => {
@@ -150,27 +134,17 @@ export default function App() {
     return () => window.removeEventListener('open-call-modal', handleOpenCall);
   }, []);
 
-  // Timed VIP Welcome Promo Pop-up (strictly 5 seconds after arrival)
+  // Timed VIP welcome pop-up, configured from the dashboard (website_settings.promo_popup).
   useEffect(() => {
+    if (!site.promoPopup.enabled) return;
     const timer = setTimeout(() => {
       setIsPromoModalOpen(true);
-    }, 5000);
+    }, site.promoPopup.delaySeconds * 1000);
     return () => clearTimeout(timer);
-  }, []);
-
-  // Waitlist status event listener
-  useEffect(() => {
-    const handleWaitlistChange = (e: any) => {
-      if (e.detail && typeof e.detail.isOpen === 'boolean') {
-        setIsWaitlistOpen(e.detail.isOpen);
-      }
-    };
-    window.addEventListener('waitlist-status-changed', handleWaitlistChange);
-    return () => window.removeEventListener('waitlist-status-changed', handleWaitlistChange);
-  }, []);
+  }, [site.promoPopup.enabled, site.promoPopup.delaySeconds]);
 
   // Navigation handlers
-  const navigateTo = (view: ActiveView, params?: { barberId?: 'mika' | 'lusca'; service?: string }) => {
+  const navigateTo = (view: ActiveView, params?: { barberId?: string; service?: string }) => {
     if (params?.barberId) {
       setSelectedBarberId(params.barberId);
     }
@@ -181,8 +155,6 @@ export default function App() {
     if (view === 'barber-profile') {
       const bId = params?.barberId || selectedBarberId;
       window.location.hash = `#barber-profile?id=${bId}`;
-    } else if (view === 'admin') {
-      window.history.pushState(null, '', '/admin');
     } else if (view === 'home') {
       window.history.pushState(null, '', '/');
     } else {
@@ -198,27 +170,27 @@ export default function App() {
     setIsStatusModalOpen(true);
   };
 
-  // 1. PAGE: Barber Profile Page (Dedicated Clickable Profile for Mika or Lusca)
+  // 1. PAGE: Barber Profile Page 
   if (currentView === 'barber-profile') {
     return (
       <BarberProfilePage
         barberId={selectedBarberId}
         onBackToHome={() => navigateTo('home')}
-        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId: barberId as any })}
-        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId: barberId as any })}
+        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId })}
+        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId })}
         onSwitchBarber={(nextBarberId) => navigateTo('barber-profile', { barberId: nextBarberId })}
       />
     );
   }
 
-  // 2. PAGE: All Barbers Overview (Mika & Lusca)
+  // 2. PAGE: All Barbers Overview
   if (currentView === 'barbers') {
     return (
       <BarbersPage
         onBackToHome={() => navigateTo('home')}
         onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
-        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId: barberId as any })}
-        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId: barberId as any })}
+        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId })}
+        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId })}
       />
     );
   }
@@ -284,16 +256,6 @@ export default function App() {
     );
   }
 
-  // 9. PAGE: Admin Console & Firestore Database Management (Completely separated staff portal)
-  if (currentView === 'admin') {
-    return (
-      <AdminPage
-        isWaitlistOpen={isWaitlistOpen}
-        onWaitlistToggle={(isOpen) => setIsWaitlistOpen(isOpen)}
-      />
-    );
-  }
-
   // 10. PAGE: Default Home Page
   return (
     <div className="min-h-screen bg-dark-bg text-gray-200">
@@ -314,7 +276,7 @@ export default function App() {
       <Hero onNavigateToBooking={() => navigateTo('booking')} />
 
       <main>
-        {/* Clickable Barbers Section (Mika & Lusca) */}
+        {/* Clickable barbers section */}
         <TeamAndPricing 
           onNavigateToBooking={() => navigateTo('booking')}
           onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
@@ -375,17 +337,7 @@ export default function App() {
         onClose={() => setHubMode(null)}
         onOpenStatusCheck={() => handleOpenCheckStatus()}
         isWaitlistOpen={isWaitlistOpen}
-        onOpenOwnerControls={() => setIsOwnerModalOpen(true)}
         onNavigateToBooking={() => navigateTo('booking')}
-      />
-
-      {/* 3. Shop Owner Waitlist Control Modal */}
-      <OwnerWaitlistModal 
-        isOpen={isOwnerModalOpen}
-        onClose={() => setIsOwnerModalOpen(false)}
-        isWaitlistOpen={isWaitlistOpen}
-        onStatusChange={(newState) => setIsWaitlistOpen(newState)}
-        onOpenFullAdmin={() => navigateTo('admin')}
       />
 
       {/* 4. Timed Welcome VIP 15% Off Pop-up Modal */}

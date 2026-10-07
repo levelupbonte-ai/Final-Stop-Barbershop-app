@@ -12,14 +12,21 @@ import {
   Sparkles,
   Scissors
 } from 'lucide-react';
-import { 
-  getWaitlistQueue, 
-  saveWaitlistEntry, 
-  FirestoreWaitlistEntry 
-} from '../lib/firestoreService';
 import CallShopModal from '../components/CallShopModal';
-import { sendWaitlistConfirmationEmail } from '../lib/emailService';
-import { OFFICIAL_SERVICES } from '../data/services';
+import { useSiteData } from '../lib/site/SiteDataProvider';
+import { errorMessage, fetchPublicWaitlist, joinWaitlist } from '../lib/site/api';
+import type { PublicQueueEntry } from '../types/content';
+
+interface StoredTicket {
+  ticketCode: string;
+  name: string;
+  barber: string;
+  service: string;
+  position: number;
+  estMinutes: number;
+}
+
+const TICKET_STORAGE_KEY = 'levelup_waitlist_ticket';
 
 interface WaitlistPageProps {
   onBackToHome: () => void;
@@ -34,9 +41,12 @@ export default function WaitlistPage({
   initialBarber,
   isWaitlistOpen = true
 }: WaitlistPageProps) {
-  const [queue, setQueue] = useState<FirestoreWaitlistEntry[]>([]);
+  const { services: OFFICIAL_SERVICES, barbers, site } = useSiteData();
+  const [queue, setQueue] = useState<PublicQueueEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [queueError, setQueueError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
 
   // Form states
@@ -44,32 +54,32 @@ export default function WaitlistPage({
   const [clientPhone, setClientPhone] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [selectedBarber, setSelectedBarber] = useState(
-    initialBarber === 'lusca' ? 'Lusca' : initialBarber === 'mika' ? 'Mika' : 'First Available'
+    initialBarber && barbers.some((b) => b.id === initialBarber) ? initialBarber : ''
   );
-  const [selectedService, setSelectedService] = useState(`${OFFICIAL_SERVICES[0].name} (${OFFICIAL_SERVICES[0].price})`);
-  const [activeTicket, setActiveTicket] = useState<FirestoreWaitlistEntry | null>(null);
+  const [selectedService, setSelectedService] = useState(OFFICIAL_SERVICES[0]?.id ?? '');
+  const [activeTicket, setActiveTicket] = useState<StoredTicket | null>(null);
 
-  // Load queue
+  // Load the public queue (names are masked server-side, no contact details).
   const fetchQueue = async () => {
     setIsLoading(true);
+    setQueueError(null);
     try {
-      const data = await getWaitlistQueue();
-      setQueue(data);
+      setQueue(await fetchPublicWaitlist());
     } catch (err) {
-      console.warn('Error loading waitlist:', err);
+      setQueueError(errorMessage(err));
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchQueue();
+    void fetchQueue();
     try {
-      const saved = localStorage.getItem('finalstop_active_ticket');
-      if (saved) {
-        setActiveTicket(JSON.parse(saved));
-      }
-    } catch {}
+      const saved = localStorage.getItem(TICKET_STORAGE_KEY);
+      if (saved) setActiveTicket(JSON.parse(saved) as StoredTicket);
+    } catch {
+      // Storage unavailable: the ticket code is still shown after joining.
+    }
   }, []);
 
   const handleJoin = async (e: FormEvent) => {
@@ -77,43 +87,32 @@ export default function WaitlistPage({
     if (!clientName.trim() || !clientPhone.trim()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      const ticketId = 'FS-' + Math.floor(100 + Math.random() * 900);
-      const position = queue.length + 1;
-      const estMinutes = position * 15;
-
-      const newEntry: Omit<FirestoreWaitlistEntry, 'id'> = {
-        ticketId,
+      const ticket = await joinWaitlist({
+        name: clientName,
+        phone: clientPhone,
+        email: clientEmail,
+        serviceSlug: selectedService || null,
+        teamMemberSlug: selectedBarber || null
+      });
+      const stored: StoredTicket = {
+        ticketCode: ticket.ticketCode,
         name: clientName.trim(),
-        phone: clientPhone.trim(),
-        email: clientEmail.trim() || undefined,
-        barber: selectedBarber,
-        service: selectedService,
-        position,
-        estMinutes,
-        status: 'waiting',
-        joinedAt: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        barber: barbers.find((b) => b.id === selectedBarber)?.name ?? 'First Available',
+        service: OFFICIAL_SERVICES.find((s) => s.id === selectedService)?.name ?? '',
+        position: ticket.position,
+        estMinutes: ticket.estMinutes
       };
-
-      const docId = await saveWaitlistEntry(newEntry);
-      const fullTicket = { ...newEntry, id: docId };
-
-      if (clientEmail.trim() && clientEmail.includes('@')) {
-        sendWaitlistConfirmationEmail({
-          toEmail: clientEmail.trim(),
-          clientName: clientName.trim(),
-          ticketId,
-          barberName: selectedBarber,
-          serviceName: selectedService,
-          estimatedWait: `~${estMinutes} min`
-        }).catch(err => console.warn('Resend email note:', err));
+      setActiveTicket(stored);
+      try {
+        localStorage.setItem(TICKET_STORAGE_KEY, JSON.stringify(stored));
+      } catch {
+        // ignore
       }
-
-      setActiveTicket(fullTicket);
-      localStorage.setItem('finalstop_active_ticket', JSON.stringify(fullTicket));
       await fetchQueue();
     } catch (err) {
-      console.error('Failed to join waitlist:', err);
+      setSubmitError(errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -170,7 +169,7 @@ export default function WaitlistPage({
           </h1>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-3"></div>
           <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-            No appointment? Check into the live walk-in queue for Mika or Lusca (over 20 years of experience each). Monitor your exact place in line and head to the shop as your turn nears.
+            No appointment? Check into the live walk-in queue. Monitor your exact place in line and head to the shop as your turn nears.
           </p>
         </div>
 
@@ -184,7 +183,7 @@ export default function WaitlistPage({
                   <span>Your Active Walk-In Pass</span>
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-                  Ticket #{activeTicket.ticketId} &bull; {activeTicket.name}
+                  Ticket #{activeTicket.ticketCode} &bull; {activeTicket.name}
                 </h2>
                 <p className="text-xs text-gray-400 mt-1">
                   Barber: <span className="text-gold font-bold">{activeTicket.barber}</span> &bull; Service: {activeTicket.service}
@@ -231,6 +230,10 @@ export default function WaitlistPage({
                 <div className="py-12 text-center text-gray-500 font-mono text-sm">
                   Loading current queue...
                 </div>
+              ) : queueError ? (
+                <div role="alert" className="py-12 text-center text-sm text-red-300">
+                  {queueError}
+                </div>
               ) : queue.length === 0 ? (
                 <div className="py-12 text-center">
                   <Clock className="w-10 h-10 text-gold/40 mx-auto mb-3" />
@@ -243,16 +246,16 @@ export default function WaitlistPage({
                 <div className="space-y-3">
                   {queue.map((item, idx) => (
                     <div
-                      key={item.id || item.ticketId || idx}
+                      key={`${item.position}-${idx}`}
                       className={`p-4 border flex items-center justify-between transition-all rounded-xs ${
-                        item.status === 'in-chair'
+                        item.status === 'in_chair'
                           ? 'bg-gold/10 border-gold/50 text-white shadow-md'
                           : 'bg-[#18181D] border-white/5 text-gray-300'
                       }`}
                     >
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-mono font-bold text-sm ${
-                          item.status === 'in-chair'
+                          item.status === 'in_chair'
                             ? 'bg-gold text-black'
                             : 'bg-white/10 text-gold border border-white/10'
                         }`}>
@@ -261,25 +264,23 @@ export default function WaitlistPage({
 
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm text-white">{item.name}</span>
-                            <span className="text-[10px] font-mono text-gray-400">({item.ticketId})</span>
-                            {item.status === 'in-chair' && (
+                            <span className="font-bold text-sm text-white">{item.displayName}</span>
+                            {item.status === 'in_chair' && (
                               <span className="text-[10px] bg-gold text-black font-bold uppercase px-1.5 py-0.5 rounded-xs">
                                 In Chair
                               </span>
                             )}
                           </div>
                           <span className="text-xs text-gray-400 block mt-0.5">
-                            Barber: <strong className="text-gold">{item.barber}</strong> &bull; {item.service}
+                            Barber: <strong className="text-gold">{item.teamMemberName ?? 'First Available'}</strong>{item.serviceName ? <> &bull; {item.serviceName}</> : null}
                           </span>
                         </div>
                       </div>
 
                       <div className="text-right font-mono">
                         <span className="text-xs text-gold block font-bold">
-                          {item.status === 'in-chair' ? 'In Progress' : `~${(idx + 1) * 15} min`}
+                          {item.status === 'in_chair' ? 'In Progress' : `~${item.estMinutes} min`}
                         </span>
-                        <span className="text-[10px] text-gray-500">Joined at {item.joinedAt}</span>
                       </div>
                     </div>
                   ))}
@@ -342,9 +343,10 @@ export default function WaitlistPage({
                     onChange={(e) => setSelectedBarber(e.target.value)}
                     className="w-full bg-[#0A0A0B] border border-white/15 px-3 py-2.5 text-white focus:border-gold focus:outline-none rounded-xs"
                   >
-                    <option value="First Available">First Available Master Barber (Fastest)</option>
-                    <option value="Mika">Mika (Master Braider & Haircuts)</option>
-                    <option value="Lusca">Lusca (Master Barber & Styling)</option>
+                    <option value="">First Available Master Barber (Fastest)</option>
+                    {barbers.map((b) => (
+                      <option key={b.id} value={b.id}>{b.name} ({b.role})</option>
+                    ))}
                   </select>
                 </div>
 
@@ -356,13 +358,18 @@ export default function WaitlistPage({
                     className="w-full bg-[#0A0A0B] border border-white/15 px-3 py-2.5 text-white focus:border-gold focus:outline-none rounded-xs"
                   >
                     {OFFICIAL_SERVICES.map((s) => (
-                      <option key={s.id} value={`${s.name} (${s.price})`}>
+                      <option key={s.id} value={s.id}>
                         {s.name} ({s.price} - {s.duration})
                       </option>
                     ))}
                   </select>
                 </div>
 
+                {submitError && (
+                  <p role="alert" className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 px-3 py-2 rounded-xs">
+                    {submitError}
+                  </p>
+                )}
                 <button
                   type="submit"
                   disabled={isSubmitting || !isWaitlistOpen}
@@ -385,7 +392,7 @@ export default function WaitlistPage({
                 className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/15 py-2.5 flex items-center justify-center gap-2 cursor-pointer rounded-xs"
               >
                 <Phone className="w-3.5 h-3.5 text-gold" />
-                <span>Call (619) 886-1267</span>
+                <span>Call {site.contact.phones[0]?.display}</span>
               </button>
             </div>
           </div>

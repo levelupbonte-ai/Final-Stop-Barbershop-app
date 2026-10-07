@@ -1,24 +1,12 @@
 import React, { useState } from 'react';
 import { X, Clock, Scissors, Calendar, Sparkles, Check, Search } from 'lucide-react';
-import { OFFICIAL_SERVICES, ServiceItem } from '../data/services';
-
-export const ALL_SERVICES = OFFICIAL_SERVICES.map(s => ({
-  name: s.name,
-  price: s.price,
-  duration: s.duration,
-  desc: s.description,
-  category: s.category,
-  featured: s.featured,
-  id: s.id
-}));
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface MobilePricingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigateToBooking?: (selectedServiceName?: string) => void;
 }
-
-const CATEGORIES = ['All', 'Haircuts', 'Combos', 'Beard & Shave', 'Lineups & Detailing', 'Treatments'] as const;
 
 export default function MobilePricingModal({
   isOpen,
@@ -27,6 +15,17 @@ export default function MobilePricingModal({
 }: MobilePricingModalProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const { services } = useSiteData();
+  const ALL_SERVICES = services.map((s) => ({
+    name: s.name,
+    price: s.price,
+    duration: s.duration,
+    desc: s.description,
+    category: s.category,
+    featured: s.featured,
+    id: s.id
+  }));
+  const CATEGORIES = ['All', ...Array.from(new Set(services.map((s) => s.category)))];
 
   if (!isOpen) return null;
 
@@ -54,7 +53,7 @@ export default function MobilePricingModal({
             Verified Shop Pricing
           </span>
           <h2 className="text-lg font-serif font-bold text-white">
-            Services & Price Menu ({OFFICIAL_SERVICES.length})
+            Services & Price Menu ({services.length})
           </h2>
         </div>
         <button
