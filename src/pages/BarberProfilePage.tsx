@@ -12,18 +12,18 @@ import {
   ChevronRight,
   ZoomIn
 } from 'lucide-react';
-import { MASTER_BARBERS } from '../data/barbers';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 import CallShopModal from '../components/CallShopModal';
 import ImageLightboxModal, { LightboxImageItem } from '../components/ImageLightboxModal';
 
 interface BarberProfilePageProps {
-  barberId: 'mika' | 'lusca';
+  barberId: string;
   onBack?: () => void;
   onBackToHome?: () => void;
   onNavigateToBooking: (barberId?: string, service?: string) => void;
   onOpenWaitlist: (barberId?: string) => void;
-  onSelectBarber?: (barberId: 'mika' | 'lusca') => void;
-  onSwitchBarber?: (barberId: 'mika' | 'lusca') => void;
+  onSelectBarber?: (barberId: string) => void;
+  onSwitchBarber?: (barberId: string) => void;
 }
 
 export default function BarberProfilePage({
@@ -38,10 +38,26 @@ export default function BarberProfilePage({
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<LightboxImageItem | null>(null);
 
+  const { barbers: MASTER_BARBERS } = useSiteData();
   const barber = MASTER_BARBERS.find(b => b.id === barberId) || MASTER_BARBERS[0];
   const handleBack = onBackToHome || onBack || (() => {});
   const handleSelectBarber = onSwitchBarber || onSelectBarber || (() => {});
-  const otherBarber = MASTER_BARBERS.find(b => b.id !== barber.id) || MASTER_BARBERS[1];
+  const otherBarber = MASTER_BARBERS.find(b => b.id !== barber?.id) ?? null;
+
+  if (!barber) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-sm text-gray-400">This profile is not available.</p>
+        <button
+          type="button"
+          onClick={handleBack}
+          className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-widest px-6 py-3 cursor-pointer"
+        >
+          Back to Home
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
@@ -59,6 +75,7 @@ export default function BarberProfilePage({
           </button>
 
           <div className="flex items-center gap-3">
+            {otherBarber && (
             <button
               type="button"
               onClick={() => handleSelectBarber(otherBarber.id)}
@@ -67,14 +84,15 @@ export default function BarberProfilePage({
               <span>View {otherBarber.name}'s Profile</span>
               <ChevronRight className="w-3.5 h-3.5 text-gold" />
             </button>
+            )}
 
             <a
-              href={`tel:${barber.phoneRaw || (barber.id === 'mika' ? '16199287084' : '16198861267')}`}
+              href={`tel:${barber.phoneRaw}`}
               className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border border-white/10 px-2.5 py-1.5 rounded-sm"
               title={`Direct line to ${barber.name}`}
             >
               <Phone className="w-3.5 h-3.5 text-gold" />
-              <span className="hidden md:inline">Call {barber.name}: {barber.phone || (barber.id === 'mika' ? '(619) 928-7084' : '(619) 886-1267')}</span>
+              <span className="hidden md:inline">Call {barber.name}: {barber.phone}</span>
               <span className="md:hidden">Call</span>
             </a>
           </div>
@@ -163,12 +181,12 @@ export default function BarberProfilePage({
                 </button>
 
                 <a
-                  href={`tel:${barber.phoneRaw || (barber.id === 'mika' ? '16199287084' : '16198861267')}`}
+                  href={`tel:${barber.phoneRaw}`}
                   className="bg-white/5 hover:bg-gold hover:text-black text-gray-200 border border-white/20 hover:border-gold text-xs sm:text-sm font-semibold px-4 py-3.5 flex items-center gap-2 transition-all cursor-pointer rounded-sm font-mono"
                   title={`Call ${barber.name} directly`}
                 >
                   <Phone className="w-4 h-4 text-gold" />
-                  <span>Call {barber.name}: {barber.phone || (barber.id === 'mika' ? '(619) 928-7084' : '(619) 886-1267')}</span>
+                  <span>Call {barber.name}: {barber.phone}</span>
                 </a>
 
                 <button
@@ -361,6 +379,7 @@ export default function BarberProfilePage({
             >
               Book Now
             </button>
+            {otherBarber && (
             <button
               type="button"
               onClick={() => handleSelectBarber(otherBarber.id)}
@@ -368,6 +387,7 @@ export default function BarberProfilePage({
             >
               Explore {otherBarber.name}'s Profile &rarr;
             </button>
+            )}
           </div>
         </div>
 

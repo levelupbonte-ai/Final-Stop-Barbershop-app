@@ -1,26 +1,10 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 export default function FAQ() {
-  const faqs = [
-    {
-      question: "How far in advance should I book an appointment?",
-      answer: "We recommend booking at least 24 to 48 hours in advance to secure your preferred time and barber, especially for Friday and Saturday slots."
-    },
-    {
-      question: "Do you accept walk-in clients?",
-      answer: "Yes! Walk-ins are always welcome based on daily chair availability. You can also join our live same-day waitlist directly from the website to track your turn in real time."
-    },
-    {
-      question: "What grooming products do you use?",
-      answer: "We exclusively formulate and use premium artisan grooming goods, natural eucalyptus steam balms, alcohol-free witch hazel toners, and certified organic beard oils gentle on all skin types."
-    },
-    {
-      question: "Can I cancel or reschedule my appointment?",
-      answer: "Yes, you can reschedule or cancel your reservation free of charge up to 2 hours before your scheduled appointment time."
-    }
-  ];
+  const { faqs } = useSiteData();
 
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 

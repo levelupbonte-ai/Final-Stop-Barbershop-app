@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ZoomIn, Scissors, Sparkles, Filter } from 'lucide-react';
 import ImageLightboxModal, { LightboxImageItem } from './ImageLightboxModal';
-import { getGalleryItems, FirestoreGalleryItem } from '../lib/firestoreService';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface GalleryProps {
   onBookAppointment?: (service?: string, barber?: string) => void;
@@ -9,29 +9,19 @@ interface GalleryProps {
 
 export default function Gallery({ onBookAppointment }: GalleryProps) {
   const [selectedImage, setSelectedImage] = useState<LightboxImageItem | null>(null);
-  const [galleryItems, setGalleryItems] = useState<FirestoreGalleryItem[]>([]);
-  const [activeFilter, setActiveFilter] = useState<'All' | 'Mika' | 'Lusca'>('All');
+  const { gallery: galleryItems, galleryBanner, barbers } = useSiteData();
+  const [activeFilter, setActiveFilter] = useState<string>('All');
 
-  useEffect(() => {
-    let isMounted = true;
-    getGalleryItems().then((items) => {
-      if (isMounted && items && items.length > 0) {
-        setGalleryItems(items);
+  const featuredBanner: LightboxImageItem | null = galleryBanner
+    ? {
+        src: galleryBanner.imageUrl,
+        alt: galleryBanner.alt,
+        title: galleryBanner.title,
+        category: galleryBanner.category,
+        barber: galleryBanner.credit,
+        description: galleryBanner.description,
       }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const featuredBanner: LightboxImageItem = {
-    src: 'https://i.ibb.co/Y4yKyxRB/Chat-GPT-Image-Sep-6-2026-03-26-27-PM.png',
-    alt: 'Exclusive Final Stop Signature Styles & Finishes',
-    title: 'Final Stop Signature Styles Showcase',
-    category: 'Master Collection',
-    barber: 'Mika & Lusca (Over 20 Years Experience)',
-    description: 'A curated showcase of our master craft: Mika\'s protective braids & locs for women & girls, and Lusca\'s precision skin fades, beard architecture & boys\' cuts.',
-  };
+    : null;
 
   const filteredItems = galleryItems.filter((item) => {
     if (activeFilter === 'All') return true;
@@ -54,7 +44,7 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
             Click any style below to inspect the artistry, detailed technique description, and barber attribution.
           </p>
 
-          {/* Filter Pills: All, Mika (Girls' Braids), Lusca (Boys' Cuts) */}
+          {/* Filter pills: all + one per team member */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
             <button
               type="button"
@@ -67,32 +57,25 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
             >
               All Styles ({galleryItems.length})
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('Mika')}
-              className={`px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-sm transition-all cursor-pointer ${
-                activeFilter === 'Mika'
-                  ? 'bg-gold text-black font-bold shadow-md'
-                  : 'bg-[#151517] text-gray-400 hover:text-white border border-white/10'
-              }`}
-            >
-              Mika &bull; Girls’ Braids & Locs
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('Lusca')}
-              className={`px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-sm transition-all cursor-pointer ${
-                activeFilter === 'Lusca'
-                  ? 'bg-gold text-black font-bold shadow-md'
-                  : 'bg-[#151517] text-gray-400 hover:text-white border border-white/10'
-              }`}
-            >
-              Lusca &bull; Boys’ Cuts & Fades
-            </button>
+            {barbers.map((barber) => (
+              <button
+                key={barber.id}
+                type="button"
+                onClick={() => setActiveFilter(barber.name)}
+                className={`px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-sm transition-all cursor-pointer ${
+                  activeFilter === barber.name
+                    ? 'bg-gold text-black font-bold shadow-md'
+                    : 'bg-[#151517] text-gray-400 hover:text-white border border-white/10'
+                }`}
+              >
+                {barber.name}{barber.galleryLabel ? <> &bull; {barber.galleryLabel}</> : null}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Featured 6-in-1 Showcase Banner - Clickable */}
+        {/* Featured showcase banner (content block "gallery_banner") */}
+        {featuredBanner && galleryBanner && (
         <div 
           onClick={() => setSelectedImage(featuredBanner)}
           className="mb-12 border border-white/10 overflow-hidden relative group bg-[#151517] shadow-xl cursor-pointer"
@@ -114,10 +97,10 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
             <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
                 <span className="text-gold font-mono text-xs uppercase tracking-widest block mb-1">
-                  Final Stop Barber Shop &bull; Mika & Lusca
+                  {galleryBanner.eyebrow}
                 </span>
                 <h3 className="text-xl md:text-3xl font-serif font-bold text-white mb-2">
-                  Master Barber Artistry Portfolio
+                  {galleryBanner.heading}
                 </h3>
                 <p className="text-xs md:text-sm text-gray-300 max-w-2xl line-clamp-2">
                   {featuredBanner.description}
@@ -133,15 +116,15 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
             </div>
           </div>
         </div>
+        )}
 
         {/* Grid of Clickable Images */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems.map((item, idx) => {
-            const barberDisplay = item.barber === 'Both' 
-              ? 'Mika & Lusca (Founders)' 
-              : item.barber === 'Mika' 
-                ? 'Mika (Master Braider & Locs)' 
-                : 'Lusca (Master Barber & Fades)';
+            const member = barbers.find((b) => b.name === item.barber);
+            const barberDisplay = member
+              ? `${member.name} (${member.role})`
+              : barbers.map((b) => b.name).join(' & ');
 
             const lightboxItem: LightboxImageItem = {
               src: item.imageUrl,

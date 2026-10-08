@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Star, ExternalLink, Award, Scissors, DollarSign } from 'lucide-react';
 import CallShopModal from '../components/CallShopModal';
 
-const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/tUej1WdvZRudfqVX6";
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface ReviewsPageProps {
   onBackToHome: () => void;
@@ -10,80 +10,15 @@ interface ReviewsPageProps {
   onNavigateToBarbers: () => void;
 }
 
-const VERIFIED_REVIEWS = [
-  {
-    author: 'Trevorn Kitt',
-    role: 'Google Maps Review (2 avis)',
-    barber: 'Master Barber',
-    rating: 5,
-    date: '1 year ago',
-    price: '$30–40',
-    service: 'Haircuts / Coupes de cheveux',
-    isLocalGuide: false,
-    text: 'Even when it was near closing time, he still took me in without hesitation and gave me a full transformation. The attention to detail and professionalism were top-tier. He didn’t rush the cut at all — every line was clean and the fade was flawless. You can tell he takes real pride in his work. Highly recommend if you’re looking for a barber who delivers quality every time!'
-  },
-  {
-    author: 'Ivan Guevara',
-    role: 'Local Guide · 72 reviews · 6 photos',
-    barber: 'Anthony',
-    rating: 5,
-    date: '1 year ago',
-    price: '$30–40',
-    service: 'Mid drop fade • Fades, tapers & braiding',
-    isLocalGuide: true,
-    text: 'Anthony really took his time to give me a fresh cut, dude is dedicated to his craft and it shows!!!'
-  },
-  {
-    author: 'Allen SamuelsClarence',
-    role: 'Local Guide · 20 reviews · 12 photos',
-    barber: 'Final Stop Crew',
-    rating: 5,
-    date: '1 year ago',
-    price: '$20–30',
-    service: 'Regular Cut',
-    isLocalGuide: true,
-    text: 'REGULAR BARBER 🔥 I’ve been looking for one for the past 2 years and finally found one … clean friendly ! Highly recommend'
-  },
-  {
-    author: 'Marcus D.',
-    role: 'Regular Client (3 Years)',
-    barber: 'Mika',
-    rating: 5,
-    date: '2 days ago',
-    price: '$45',
-    service: 'Signature Fade & Beard',
-    isLocalGuide: false,
-    text: 'Mika is a true artist behind the chair and it shows in every minute. His fade transitions are insanely clean, the shop is spotless, and the energy is top tier.'
-  },
-  {
-    author: 'Darnell W.',
-    role: 'Regular Client',
-    barber: 'Lusca',
-    rating: 5,
-    date: '5 days ago',
-    price: '$50',
-    service: 'Master Beard Sculpt & Haircut',
-    isLocalGuide: false,
-    text: 'Lusca is a true master of beard sculpting and hair textures. Masterful dedication reflected in calm precision and eucalyptus hot towel treatment. My braids and beard have never looked sharper.'
-  },
-  {
-    author: 'Julian B.',
-    role: 'San Diego Visitor',
-    barber: 'Mika',
-    rating: 5,
-    date: '1 week ago',
-    price: '$40',
-    service: 'Hot Towel Fade',
-    isLocalGuide: false,
-    text: 'Visiting San Diego and stopped by Final Stop on a friend\'s recommendation. Smooth online booking, great greeting, and razor-sharp straight razor detailing. 10/10.'
-  }
-];
 
 export default function ReviewsPage({
   onBackToHome,
   onNavigateToBooking,
   onNavigateToBarbers
 }: ReviewsPageProps) {
+  const { reviews: VERIFIED_REVIEWS, site, barbers } = useSiteData();
+  const GOOGLE_MAPS_URL = site.contact.mapsUrl || undefined;
+  const teamNames = barbers.map((b) => b.name).join(' & ');
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
 
   return (
@@ -106,7 +41,7 @@ export default function ReviewsPage({
               onClick={onNavigateToBarbers}
               className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-block cursor-pointer bg-transparent border-none"
             >
-              Mika & Lusca (Barbers)
+              {teamNames} (Barbers)
             </button>
             <button
               type="button"

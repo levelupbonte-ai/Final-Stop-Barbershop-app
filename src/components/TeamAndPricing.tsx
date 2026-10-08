@@ -1,51 +1,24 @@
 import { useState } from 'react';
 import { Scissors, Clock, Award, Receipt, ChevronRight, Phone } from 'lucide-react';
-import MobilePricingModal, { ALL_SERVICES } from './MobilePricingModal';
-import { OFFICIAL_SERVICES } from '../data/services';
+import MobilePricingModal from './MobilePricingModal';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface TeamAndPricingProps {
   onNavigateToBooking?: (serviceName?: string) => void;
-  onSelectBarber?: (barberId: 'mika' | 'lusca') => void;
+  onSelectBarber?: (barberId: string) => void;
   onNavigateToServices?: () => void;
 }
 
-const BARBERS = [
-  {
-    id: 'mika',
-    name: 'Mika',
-    role: 'Master Braider & Texture Specialist',
-    phone: '+1 (619) 928-7084',
-    phoneRaw: '16199287084',
-    experience: 'Master Specialist',
-    specialty: 'Specialized in girls’ & women’s braids: knotless box braids, designer swirl cornrows, goddess locs, and gentle protective styles.',
-    initials: 'MK',
-    badge: 'Master of Women’s Braids & Locs',
-    tags: ['Knotless Braids', 'Designer Cornrows', 'Goddess Locs', 'Protective Styling']
-  },
-  {
-    id: 'lusca',
-    name: 'Lusca',
-    role: 'Lead Master Barber & Men’s Specialist',
-    phone: '+1 (619) 886-1267',
-    phoneRaw: '16198861267',
-    experience: 'Master Barber',
-    specialty: 'Specialized in boys’ & men’s precision haircuts: surgical zero skin fades, beard architecture, and straight razor contouring.',
-    initials: 'LC',
-    badge: 'Master of Men’s Cuts & Zero Fades',
-    tags: ['Skin Fades', 'Men’s & Boys’ Cuts', 'Beard Sculpting', 'Razor Lineups']
-  }
-];
-
-const PRICING_LIST = OFFICIAL_SERVICES.slice(0, 8).map(s => ({
-  id: s.id,
-  name: s.name,
-  price: s.price,
-  duration: s.duration,
-  desc: s.description
-}));
-
 export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: TeamAndPricingProps) {
   const [isMobilePricingOpen, setIsMobilePricingOpen] = useState(false);
+  const { barbers: BARBERS, services, site } = useSiteData();
+  const PRICING_LIST = services.slice(0, 8).map((s) => ({
+    id: s.id,
+    name: s.name,
+    price: s.price,
+    duration: s.duration,
+    desc: s.description
+  }));
 
   return (
     <section id="team-pricing" className="py-20 bg-[#0E0E10] relative border-t border-white/5">
@@ -61,7 +34,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
           </h2>
           <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Excellence at Final Stop Barber Shop is embodied by Mika and Lusca, our lead artisans. Click their profiles to explore their work and book your chair directly.
+            Excellence at {site.name} is embodied by {BARBERS.map((b) => b.name).join(' and ')}, our lead artisans. Click their profiles to explore their work and book your chair directly.
           </p>
         </div>
 
@@ -70,7 +43,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
           {BARBERS.map((barber) => (
             <div 
               key={barber.id}
-              onClick={() => onSelectBarber?.(barber.id as any)}
+              onClick={() => onSelectBarber?.(barber.id)}
               className="bg-[#151517] border border-white/10 hover:border-gold transition-all duration-300 p-7 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer active:scale-[0.99] rounded-sm"
               title={`Click to view ${barber.name}'s profile and cuts`}
             >
@@ -226,7 +199,7 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
                 className="w-full bg-[#18181C] hover:bg-gold hover:text-black text-gold border border-gold/40 text-xs font-semibold uppercase tracking-wider py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 cursor-pointer group"
               >
                 <Receipt className="w-4 h-4 text-gold group-hover:text-black transition-colors" />
-                <span>View Full Service & Price Menu ({ALL_SERVICES.length})</span>
+                <span>View Full Service & Price Menu ({services.length})</span>
                 <ChevronRight className="w-4 h-4 text-gold group-hover:text-black transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>

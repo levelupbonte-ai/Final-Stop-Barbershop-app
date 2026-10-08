@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Search, Users, Calendar } from 'lucide-react';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface ClientStatusHubProps {
   onOpenCheckStatus: (initialQuery?: string) => void;
@@ -16,6 +17,8 @@ export default function ClientStatusHub({
   isWaitlistOpen = false,
   onNavigateToBooking
 }: ClientStatusHubProps) {
+  const { barbers } = useSiteData();
+  const teamNames = barbers.map((b) => b.name).join(' & ');
   const [quickQuery, setQuickQuery] = useState('');
 
   const handleQuickCheck = (e: FormEvent) => {
@@ -38,7 +41,7 @@ export default function ClientStatusHub({
               Client Service Center & Live Desk
             </h2>
             <p className="text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
-              Check your chair status in real time or book a dedicated appointment with Mika & Lusca (each with over 20 years of mastery).
+              Check your chair status in real time or book a dedicated appointment with {teamNames}.
             </p>
           </div>
         </div>
@@ -118,7 +121,7 @@ export default function ClientStatusHub({
                   </div>
                   <div className="flex items-center justify-between">
                     <span>Active barbers:</span>
-                    <span className="text-emerald-400 font-bold">Mika &bull; Lusca</span>
+                    <span className="text-emerald-400 font-bold">{barbers.map((b) => b.name).join(' • ')}</span>
                   </div>
                 </div>
               </div>
@@ -154,7 +157,7 @@ export default function ClientStatusHub({
                 Book Guaranteed Appointment
               </h3>
               <p className="text-xs text-gray-400 leading-relaxed mb-6">
-                Guaranteed zero wait: pick your custom date and time slot with Mika or Lusca (over 20 years experience each).
+                Guaranteed zero wait: pick your custom date and time slot with {barbers.map((b) => b.name).join(' or ')}.
               </p>
 
               <div className="bg-[#0A0A0B] p-3 border border-white/5 space-y-1.5 mb-6 text-[11px] font-mono text-gray-400 rounded-xs">

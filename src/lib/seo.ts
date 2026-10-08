@@ -59,12 +59,6 @@ export const SEO_DATA: Record<string, PageSEO> = {
     description: 'Get turn-by-turn directions, bus routes, and parking details for Final Stop Barber Shop located at 4748 University Ave, San Diego, CA 92105.',
     canonicalPath: '/#route',
     keywords: 'final stop barber shop location, university ave barber shop directions, parking near 4748 university ave'
-  },
-  admin: {
-    title: 'Staff & Owner Management Portal | Final Stop Barber Shop',
-    description: 'Administrative portal for Final Stop Barber Shop staff to manage confirmed reservations, live walk-in desk, and photo database.',
-    canonicalPath: '/admin',
-    keywords: 'admin portal, staff management'
   }
 };
 

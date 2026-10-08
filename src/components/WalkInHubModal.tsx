@@ -12,10 +12,8 @@ import {
   Calendar,
   Key
 } from 'lucide-react';
-import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { saveWaitlistEntry } from '../lib/firestoreService';
-import { OFFICIAL_SERVICES } from '../data/services';
+import { useSiteData } from '../lib/site/SiteDataProvider';
+import { errorMessage, joinWaitlist, submitForm } from '../lib/site/api';
 
 export type ModalMode = 'waitlist' | 'promo' | null;
 
@@ -24,7 +22,6 @@ interface WalkInHubModalProps {
   onClose: () => void;
   onOpenStatusCheck?: () => void;
   isWaitlistOpen?: boolean;
-  onOpenOwnerControls?: () => void;
   onNavigateToBooking?: () => void;
 }
 
@@ -33,84 +30,88 @@ export default function WalkInHubModal({
   onClose, 
   onOpenStatusCheck,
   isWaitlistOpen = false,
-  onOpenOwnerControls,
   onNavigateToBooking
 }: WalkInHubModalProps) {
+  const { services: OFFICIAL_SERVICES, barbers, site } = useSiteData();
+
   // Waitlist form states
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
-  const [selectedBarber, setSelectedBarber] = useState('First Available Barber');
-  const [selectedService, setSelectedService] = useState(`${OFFICIAL_SERVICES[0].name} (${OFFICIAL_SERVICES[0].price})`);
-  const [waitlistSuccess, setWaitlistSuccess] = useState<any>(null);
+  const [selectedBarber, setSelectedBarber] = useState('');
+  const [selectedService, setSelectedService] = useState(OFFICIAL_SERVICES[0]?.id ?? '');
+  const [waitlistSuccess, setWaitlistSuccess] = useState<{
+    ticketId: string;
+    position: number;
+    estMinutes: number;
+    name: string;
+    barber: string;
+    service: string;
+  } | null>(null);
 
   // Promo form states
   const [promoContact, setPromoContact] = useState('');
   const [promoSuccess, setPromoSuccess] = useState(false);
 
-  // Loading state
+  // Loading / error state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!mode) return null;
 
-  // 1. Submit to Waitlist
+  // 1. Join the live walk-in queue (position and ETA are computed server-side)
   const handleJoinWaitlist = async (e: FormEvent) => {
     e.preventDefault();
     if (!clientName.trim() || !clientPhone.trim()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      const ticketId = 'FS-' + Math.floor(100 + Math.random() * 900);
-      const position = Math.floor(2 + Math.random() * 3);
-      const estMinutes = position * 15;
-
-      const ticketData = {
-        ticketId,
+      const ticket = await joinWaitlist({
+        name: clientName,
+        phone: clientPhone,
+        serviceSlug: selectedService || null,
+        teamMemberSlug: selectedBarber || null
+      });
+      setWaitlistSuccess({
+        ticketId: ticket.ticketCode,
+        position: ticket.position,
+        estMinutes: ticket.estMinutes,
         name: clientName.trim(),
-        phone: clientPhone.trim(),
-        barber: selectedBarber,
-        service: selectedService,
-        status: 'waiting' as const,
-        position,
-        estMinutes,
-        joinedAt: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-      };
-
-      try {
-        await saveWaitlistEntry(ticketData);
-      } catch (err) {
-        console.warn('Waitlist save fallback:', err);
-      }
-
-      localStorage.setItem('finalstop_active_ticket', JSON.stringify(ticketData));
-      setWaitlistSuccess(ticketData);
+        barber: barbers.find((b) => b.id === selectedBarber)?.name ?? 'First Available',
+        service: OFFICIAL_SERVICES.find((s) => s.id === selectedService)?.name ?? ''
+      });
     } catch (err) {
-      console.error(err);
+      setSubmitError(errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 2. Submit VIP Club / Promo
+  // 2. VIP club sign-up (email or phone)
   const handleJoinPromo = async (e: FormEvent) => {
     e.preventDefault();
-    if (!promoContact.trim()) return;
+    const contact = promoContact.trim();
+    if (!contact) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      try {
-        await addDoc(collection(db, 'vip_club'), {
-          contact: promoContact.trim(),
-          createdAt: serverTimestamp(),
-          codeGranted: 'FINALSTOP15'
-        });
-      } catch (err) {
-        console.warn('Firestore fallback for promo:', err);
-      }
+      const isEmail = contact.includes('@');
+      await submitForm({
+        formType: 'vip_signup',
+        name: 'VIP member',
+        email: isEmail ? contact : undefined,
+        phone: isEmail ? undefined : contact
+      });
       setPromoSuccess(true);
+    } catch (err) {
+      setSubmitError(errorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const promo = site.promoPopup;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
@@ -152,7 +153,7 @@ export default function WalkInHubModal({
                 <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <div className="text-xs text-gray-300 leading-relaxed font-sans">
                   <span className="text-white font-mono font-bold block mb-0.5">Need a haircut today?</span>
-                  Book directly with Mika or Lusca (over 20 years experience each) to guarantee your chair.
+                  Book directly with {barbers.map((b) => b.name).join(' or ')} to guarantee your chair.
                 </div>
               </div>
             </div>
@@ -288,9 +289,10 @@ export default function WalkInHubModal({
                     onChange={(e) => setSelectedBarber(e.target.value)}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
-                    <option value="First Available Barber">First Available Master Barber (Fastest)</option>
-                    <option value="Mika">Mika (Master Braider & Locs • 619-928-7084)</option>
-                    <option value="Lusca">Lusca (Master Barber & Fades • 619-886-1267)</option>
+                    <option value="">First Available Master Barber (Fastest)</option>
+                    {barbers.map((b) => (
+                      <option key={b.id} value={b.id}>{b.name} ({b.role})</option>
+                    ))}
                   </select>
                 </div>
 
@@ -304,13 +306,18 @@ export default function WalkInHubModal({
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white outline-none"
                   >
                     {OFFICIAL_SERVICES.map((s) => (
-                      <option key={s.id} value={`${s.name} (${s.price})`}>
+                      <option key={s.id} value={s.id}>
                         {s.name} ({s.price} - {s.duration})
                       </option>
                     ))}
                   </select>
                 </div>
 
+                {submitError && (
+                  <p role="alert" className="text-xs text-red-300 border border-red-500/40 bg-red-500/10 px-3 py-2">
+                    {submitError}
+                  </p>
+                )}
                 <div className="pt-2">
                   <button
                     type="submit"
@@ -337,11 +344,11 @@ export default function WalkInHubModal({
             </div>
 
             <h3 className="text-xl sm:text-2xl font-serif font-bold text-white mb-2">
-              Get Exclusive Promos & 15% Off
+              Get Exclusive Promos & {promo.discountLabel}
             </h3>
 
             <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-              Join our VIP Member list to receive 15% off your next cut, flash weekday deals, and priority access during peak hours.
+              Join our VIP Member list to receive {promo.discountLabel} your next cut, flash weekday deals, and priority access during peak hours.
             </p>
 
             {promoSuccess ? (
@@ -354,10 +361,10 @@ export default function WalkInHubModal({
                     Welcome to the VIP Club!
                   </span>
                   <p className="text-sm text-gray-300 mt-1">
-                    Here is your exclusive 15% off promo code:
+                    Here is your exclusive {promo.discountLabel} promo code:
                   </p>
                   <div className="mt-3 p-3 bg-gold/10 border border-gold inline-block font-mono font-black text-xl text-gold tracking-widest">
-                    FINALSTOP15
+                    {promo.code}
                   </div>
                   <p className="text-[11px] text-gray-400 mt-2">
                     Mention this code at checkout during your visit at the salon.
@@ -398,10 +405,15 @@ export default function WalkInHubModal({
                     <ShieldCheck className="w-4 h-4 text-gold" />
                     <span>Member Benefits:</span>
                   </div>
-                  <p>&bull; 15% discount on your visit</p>
+                  <p>&bull; {promo.discountLabel} discount on your visit</p>
                   <p>&bull; Priority chair alerts on busy weekend shifts</p>
                 </div>
 
+                {submitError && (
+                  <p role="alert" className="text-xs text-red-300 border border-red-500/40 bg-red-500/10 px-3 py-2">
+                    {submitError}
+                  </p>
+                )}
                 <div className="pt-2">
                   <button
                     type="submit"
@@ -409,7 +421,7 @@ export default function WalkInHubModal({
                     className="w-full bg-gold hover:bg-gold-light text-black font-bold uppercase tracking-wider text-xs py-3.5 transition-all shadow-md active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Gift className="w-4 h-4 text-black" />
-                    <span>{isSubmitting ? 'Registering...' : 'Claim My 15% Off Code'}</span>
+                    <span>{isSubmitting ? 'Registering...' : `Claim My ${promo.discountLabel} Code`}</span>
                   </button>
                 </div>
               </form>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Calendar, Scissors, Award, Sparkles, CheckCircle2 } from 'lucide-react';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
 export interface LightboxImageItem {
   src: string;
@@ -25,6 +26,7 @@ export default function ImageLightboxModal({
   onClose,
   onBookStyle
 }: ImageLightboxModalProps) {
+  const { site } = useSiteData();
   if (!isOpen || !image) return null;
 
   return (
@@ -127,7 +129,7 @@ export default function ImageLightboxModal({
               <span>Book This Style</span>
             </button>
             <p className="text-center text-[10px] text-gray-400 mt-2 font-mono">
-              Appointments & Walk-Ins Welcome • 4748 University Ave
+              Appointments & Walk-Ins Welcome • {site.contact.address}
             </p>
           </div>
         </div>

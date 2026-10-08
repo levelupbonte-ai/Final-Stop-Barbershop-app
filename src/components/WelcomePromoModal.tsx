@@ -1,8 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { X, Sparkles, Check, Gift, ArrowRight } from 'lucide-react';
-import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { sendConfirmationEmail } from '../lib/emailService';
+import { errorMessage, submitForm } from '../lib/site/api';
 
 interface WelcomePromoModalProps {
   isOpen: boolean;
@@ -18,43 +16,36 @@ export default function WelcomePromoModal({
   const [contact, setContact] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!contact.trim()) return;
+    const value = contact.trim();
+    if (!value) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      if (db) {
-        await addDoc(collection(db, 'vip_signups'), {
-          contact: contact.trim(),
-          source: 'welcome_modal',
-          status: 'active',
-          registeredAt: serverTimestamp()
-        });
-      }
-
-      // If user provided an email address, send the VIP welcome notification via Resend
-      if (contact.includes('@')) {
-        sendConfirmationEmail({
-          to: contact.trim(),
-          clientName: 'VIP Member',
-          type: 'vip_signup' as any,
-          details: {}
-        }).catch(err => console.warn('VIP email notice:', err));
-      }
-    } catch (err) {
-      console.warn('VIP registry recorded locally:', err);
-    } finally {
-      setIsSubmitting(false);
+      const isEmail = value.includes('@');
+      await submitForm({
+        formType: 'vip_signup',
+        name: 'VIP member',
+        email: isEmail ? value : undefined,
+        phone: isEmail ? undefined : value,
+        data: { origin: 'welcome_modal' }
+      });
       setIsSuccess(true);
       try {
-        localStorage.setItem('finalstop_welcome_promo_claimed', 'true');
-      } catch (e) {
+        localStorage.setItem('levelup_welcome_promo_claimed', 'true');
+      } catch {
         // ignore storage error
       }
+    } catch (err) {
+      setSubmitError(errorMessage(err));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -130,6 +121,11 @@ export default function WelcomePromoModal({
                   <Gift className="w-4 h-4 text-black" />
                   <span>{isSubmitting ? 'Registering...' : 'Join Private VIP Club'}</span>
                 </button>
+                {submitError && (
+                  <p role="alert" className="text-xs text-red-300 mt-2">
+                    {submitError}
+                  </p>
+                )}
               </form>
 
               {/* Dismiss Text */}

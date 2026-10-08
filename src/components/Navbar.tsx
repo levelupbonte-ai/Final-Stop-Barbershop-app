@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Menu, X, Calendar, Phone, Search, Users, ChevronRight, ChevronLeft, ChevronDown } from 'lucide-react';
+import { useSiteData } from '../lib/site/SiteDataProvider';
 
-export type NavView = 'home' | 'barbers' | 'services' | 'waitlist' | 'gallery' | 'reviews' | 'route' | 'admin';
+export type NavView = 'home' | 'barbers' | 'services' | 'waitlist' | 'gallery' | 'reviews' | 'route';
 
 interface NavbarProps {
   currentView?: string;
@@ -24,6 +25,8 @@ export default function Navbar({
   onOpenCallModal,
   isWaitlistOpen = false,
 }: NavbarProps) {
+  const { site, barbers } = useSiteData();
+  const teamNames = barbers.map((b) => b.name).join(' & ');
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navContainerRef = useRef<HTMLDivElement>(null);
@@ -90,9 +93,9 @@ export default function Navbar({
           className="flex items-center group bg-transparent border-none p-0 cursor-pointer shrink-0"
           aria-label="Final Stop Barber Shop Home"
         >
-          <img 
-            src="https://i.ibb.co/FR3LpjN/Chat-GPT-Image-Sep-6-2026-01-08-28-PM.png" 
-            alt="Final Stop Barber Shop Logo" 
+          <img
+            src={site.branding.logoUrl ?? undefined}
+            alt={site.branding.logoAlt}
             className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             referrerPolicy="no-referrer"
           />
@@ -161,7 +164,7 @@ export default function Navbar({
             type="button"
             onClick={onOpenCallModal}
             className="text-xs font-semibold text-gray-200 hover:text-gold transition-colors flex items-center gap-1.5 px-2.5 py-2 cursor-pointer bg-transparent border border-white/10 rounded-xs font-mono"
-            title="Call Mika or Lusca direct lines"
+            title={`Call ${teamNames} direct lines`}
           >
             <Phone className="w-3.5 h-3.5 text-gold" />
             <span className="hidden xl:inline">Call Barbers</span>
@@ -265,7 +268,7 @@ export default function Navbar({
                 className="w-full text-center text-xs text-gray-400 hover:text-gold py-2 font-mono flex items-center justify-center gap-1.5 cursor-pointer bg-transparent border-none"
               >
                 <Phone className="w-3.5 h-3.5 text-gold" />
-                <span>Call Barbers: Mika & Lusca</span>
+                <span>Call Barbers: {teamNames}</span>
               </button>
             </li>
 
