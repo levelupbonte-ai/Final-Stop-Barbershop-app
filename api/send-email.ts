@@ -85,7 +85,7 @@ export default async function handler(req: any, res: any) {
 
   const kind = req.body?.kind as Kind;
   const ticketCode = String(req.body?.ticketCode ?? '').trim().toUpperCase();
-  if (!(kind in TABLES) || !TICKET_RE.test(ticketCode)) {
+  if (!Object.prototype.hasOwnProperty.call(TABLES, kind) || !TICKET_RE.test(ticketCode)) {
     return res.status(400).json({ success: false, error: { code: 'VALIDATION', message: 'Invalid request' } });
   }
 
