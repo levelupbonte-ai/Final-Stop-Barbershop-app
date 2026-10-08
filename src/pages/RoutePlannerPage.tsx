@@ -215,7 +215,7 @@ export default function RoutePlannerPage({ onBackToHome }: RoutePlannerPageProps
 
       startMarkerRef.current = new mapboxgl.Marker(startEl)
         .setLngLat([origin.lng, origin.lat])
-        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(`<div style="color:#000;padding:4px;font-size:11px;font-weight:bold;">Start: ${originLabel}</div>`))
+        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(`<div style="color:#000;padding:4px;font-size:11px;font-weight:bold;">Start: ${escapeHtml(originLabel)}</div>`))
         .addTo(map);
 
       // Call OSRM Driving routing API
