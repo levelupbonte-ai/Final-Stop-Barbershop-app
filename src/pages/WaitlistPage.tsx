@@ -15,6 +15,8 @@ import {
 import CallShopModal from '../components/CallShopModal';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import { errorMessage, fetchPublicWaitlist, joinWaitlist } from '../lib/site/api';
+import { LIMITS, check, normalizeTicketCode, waitlistSchema } from '../lib/site/validation';
+import { useSubmitLock } from '../lib/site/useSubmitLock';
 import type { PublicQueueEntry } from '../types/content';
 
 interface StoredTicket {
@@ -58,6 +60,7 @@ export default function WaitlistPage({
   );
   const [selectedService, setSelectedService] = useState(OFFICIAL_SERVICES[0]?.id ?? '');
   const [activeTicket, setActiveTicket] = useState<StoredTicket | null>(null);
+  const submitOnce = useSubmitLock();
 
   // Load the public queue (names are masked server-side, no contact details).
   const fetchQueue = async () => {
@@ -76,46 +79,72 @@ export default function WaitlistPage({
     void fetchQueue();
     try {
       const saved = localStorage.getItem(TICKET_STORAGE_KEY);
-      if (saved) setActiveTicket(JSON.parse(saved) as StoredTicket);
+      // Stored by this page, but still checked before display.
+      const t = saved ? (JSON.parse(saved) as Partial<StoredTicket>) : null;
+      if (
+        t &&
+        normalizeTicketCode(t.ticketCode) &&
+        typeof t.name === 'string' &&
+        t.name.length <= LIMITS.name &&
+        Number.isFinite(t.position) &&
+        Number.isFinite(t.estMinutes)
+      ) {
+        setActiveTicket({
+          ticketCode: t.ticketCode as string,
+          name: t.name,
+          barber: String(t.barber ?? '').slice(0, LIMITS.shortText),
+          service: String(t.service ?? '').slice(0, LIMITS.shortText),
+          position: t.position as number,
+          estMinutes: t.estMinutes as number
+        });
+      }
     } catch {
       // Storage unavailable: the ticket code is still shown after joining.
     }
   }, []);
 
-  const handleJoin = async (e: FormEvent) => {
+  const handleJoin = (e: FormEvent) => {
     e.preventDefault();
-    if (!clientName.trim() || !clientPhone.trim()) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const ticket = await joinWaitlist({
+    return submitOnce(async () => {
+      const input = {
         name: clientName,
         phone: clientPhone,
         email: clientEmail,
         serviceSlug: selectedService || null,
         teamMemberSlug: selectedBarber || null
-      });
-      const stored: StoredTicket = {
-        ticketCode: ticket.ticketCode,
-        name: clientName.trim(),
-        barber: barbers.find((b) => b.id === selectedBarber)?.name ?? 'First Available',
-        service: OFFICIAL_SERVICES.find((s) => s.id === selectedService)?.name ?? '',
-        position: ticket.position,
-        estMinutes: ticket.estMinutes
       };
-      setActiveTicket(stored);
-      try {
-        localStorage.setItem(TICKET_STORAGE_KEY, JSON.stringify(stored));
-      } catch {
-        // ignore
+      // Mobile phone is required here; everything is checked before sending.
+      const valid = check(waitlistSchema, input);
+      if (!valid.ok || !valid.data.phone) {
+        setSubmitError(valid.ok ? 'Please enter your mobile phone number.' : valid.message);
+        return;
       }
-      await fetchQueue();
-    } catch (err) {
-      setSubmitError(errorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        const ticket = await joinWaitlist(input);
+        const stored: StoredTicket = {
+          ticketCode: ticket.ticketCode,
+          name: valid.data.name,
+          barber: barbers.find((b) => b.id === selectedBarber)?.name ?? 'First Available',
+          service: OFFICIAL_SERVICES.find((s) => s.id === selectedService)?.name ?? '',
+          position: ticket.position,
+          estMinutes: ticket.estMinutes
+        };
+        setActiveTicket(stored);
+        try {
+          localStorage.setItem(TICKET_STORAGE_KEY, JSON.stringify(stored));
+        } catch {
+          // ignore
+        }
+        await fetchQueue();
+      } catch (err) {
+        setSubmitError(errorMessage(err));
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   return (
@@ -309,6 +338,8 @@ export default function WaitlistPage({
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                     placeholder="e.g. Marcus Taylor"
+                    maxLength={LIMITS.name}
+                    autoComplete="name"
                     className="w-full bg-[#0A0A0B] border border-white/15 px-3 py-2.5 text-white focus:border-gold focus:outline-none rounded-xs"
                   />
                 </div>
@@ -321,6 +352,9 @@ export default function WaitlistPage({
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
                     placeholder="(619) 555-0199"
+                    maxLength={LIMITS.phone + 10}
+                    autoComplete="tel"
+                    inputMode="tel"
                     className="w-full bg-[#0A0A0B] border border-white/15 px-3 py-2.5 text-white focus:border-gold focus:outline-none rounded-xs"
                   />
                 </div>
@@ -332,6 +366,9 @@ export default function WaitlistPage({
                     value={clientEmail}
                     onChange={(e) => setClientEmail(e.target.value)}
                     placeholder="marcus@example.com"
+                    maxLength={LIMITS.email}
+                    autoComplete="email"
+                    inputMode="email"
                     className="w-full bg-[#0A0A0B] border border-white/15 px-3 py-2.5 text-white focus:border-gold focus:outline-none rounded-xs"
                   />
                 </div>

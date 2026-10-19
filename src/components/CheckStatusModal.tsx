@@ -12,6 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { errorMessage, fetchTicketStatus, formatTime12h } from '../lib/site/api';
+import { normalizeTicketCode } from '../lib/site/validation';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface StatusResult {
@@ -54,8 +55,15 @@ export default function CheckStatusModal({
   // Lookup is by ticket code only: the code is the secret that proves the
   // visitor owns the booking. Names/phones are never searchable publicly.
   const performSearch = async (term: string) => {
-    const code = term.trim();
-    if (!code) return;
+    if (isSearching || !term.trim()) return;
+    // Checked before sending: ticket numbers look like FS-7KQ2M9XA.
+    const code = normalizeTicketCode(term);
+    if (!code) {
+      setResult(null);
+      setNotFound(false);
+      setSearchError('Please enter your ticket number, e.g. FS-7KQ2M9XA.');
+      return;
+    }
 
     setIsSearching(true);
     setNotFound(false);
@@ -153,7 +161,7 @@ export default function CheckStatusModal({
             Check Reservation / Ticket Status
           </h3>
           <p className="text-xs text-gray-400 leading-relaxed">
-            Enter your <strong>name</strong> or <strong>ticket ID</strong> (e.g., FS-102, RES-892) to track live queue position and chair status.
+            Enter your <strong>ticket number</strong> (e.g. FS-7KQ2M9XA) to track live queue position and chair status.
           </p>
         </div>
 
@@ -166,6 +174,8 @@ export default function CheckStatusModal({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Ticket number (e.g. FS-7KQ2M9XA)"
+                maxLength={20}
+                autoComplete="off"
                 className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 outline-none font-mono"
               />
               <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />

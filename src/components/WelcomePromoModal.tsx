@@ -1,6 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { X, Sparkles, Check, Gift, ArrowRight } from 'lucide-react';
 import { errorMessage, submitForm } from '../lib/site/api';
+import { LIMITS, parseEmailOrPhone } from '../lib/site/validation';
+import { useSubmitLock } from '../lib/site/useSubmitLock';
 
 interface WelcomePromoModalProps {
   isOpen: boolean;
@@ -17,36 +19,41 @@ export default function WelcomePromoModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const submitOnce = useSubmitLock();
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const value = contact.trim();
-    if (!value) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const isEmail = value.includes('@');
-      await submitForm({
-        formType: 'vip_signup',
-        name: 'VIP member',
-        email: isEmail ? value : undefined,
-        phone: isEmail ? undefined : value,
-        data: { origin: 'welcome_modal' }
-      });
-      setIsSuccess(true);
-      try {
-        localStorage.setItem('levelup_welcome_promo_claimed', 'true');
-      } catch {
-        // ignore storage error
+    return submitOnce(async () => {
+      const value = parseEmailOrPhone(contact);
+      if (!value.ok) {
+        setSubmitError(value.message);
+        return;
       }
-    } catch (err) {
-      setSubmitError(errorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        await submitForm({
+          formType: 'vip_signup',
+          name: 'VIP member',
+          email: value.data.email ?? undefined,
+          phone: value.data.phone ?? undefined,
+          data: { origin: 'welcome_modal' }
+        });
+        setIsSuccess(true);
+        try {
+          localStorage.setItem('levelup_welcome_promo_claimed', 'true');
+        } catch {
+          // ignore storage error
+        }
+      } catch (err) {
+        setSubmitError(errorMessage(err));
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   const handleDismiss = () => {
@@ -109,6 +116,7 @@ export default function WelcomePromoModal({
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
                     placeholder="Enter your email or phone number..."
+                    maxLength={LIMITS.email}
                     className="w-full bg-[#0A0A0B] border border-white/20 focus:border-gold px-4 py-3.5 text-sm text-white placeholder-gray-500 outline-none font-mono transition-colors"
                   />
                 </div>

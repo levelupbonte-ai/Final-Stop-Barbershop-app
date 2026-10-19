@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Briefcase, X, Check, Calendar, Users, Building, Phone, Mail, FileText, Sparkles, Send } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import { errorMessage as toErrorMessage, submitForm } from '../lib/site/api';
+import { LIMITS, check, formSchema, quoteDetailsSchema } from '../lib/site/validation';
+import { useSubmitLock } from '../lib/site/useSubmitLock';
 
 interface ProQuoteModalProps {
   isOpen: boolean;
@@ -27,37 +29,51 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedTicket, setSubmittedTicket] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const submitOnce = useSubmitLock();
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
-    try {
-      const { ticketCode } = await submitForm({
-        formType: 'quote',
+    return submitOnce(async () => {
+      // Everything is checked before sending (phone and email are both required here).
+      const details = check(quoteDetailsSchema, {
+        service_type: formData.serviceType,
+        headcount: Number(formData.headcount),
+        event_date: formData.eventDate,
+        location: formData.location,
+        estimated_budget: formData.estimatedBudget
+      });
+      if (!details.ok) {
+        setErrorMessage(details.message);
+        return;
+      }
+      const input = {
+        formType: 'quote' as const,
         name: formData.clientName,
         email: formData.email,
         phone: formData.phone,
         company: formData.companyName,
         message: formData.notes,
-        data: {
-          service_type: formData.serviceType,
-          headcount: Number(formData.headcount) || 1,
-          event_date: formData.eventDate || null,
-          location: formData.location || null,
-          estimated_budget: formData.estimatedBudget || null
-        }
-      });
+        data: details.data
+      };
+      const valid = check(formSchema, input);
+      if (!valid.ok || !valid.data.email || !valid.data.phone) {
+        setErrorMessage(valid.ok ? 'Please enter both a phone number and an email address.' : valid.message);
+        return;
+      }
 
-      setSubmittedTicket(ticketCode);
-    } catch (err) {
-      setErrorMessage(toErrorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      try {
+        const { ticketCode } = await submitForm(input);
+        setSubmittedTicket(ticketCode);
+      } catch (err) {
+        setErrorMessage(toErrorMessage(err));
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   const resetForm = () => {
@@ -173,6 +189,8 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                     type="text"
                     required
                     placeholder="e.g. Marcus Vance"
+                    maxLength={LIMITS.name}
+                    autoComplete="name"
                     value={formData.clientName}
                     onChange={e => setFormData({ ...formData, clientName: e.target.value })}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -188,6 +206,8 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                     <input
                       type="text"
                       placeholder="e.g. San Diego Media / Vance Wedding"
+                      maxLength={LIMITS.company}
+                      autoComplete="organization"
                       value={formData.companyName}
                       onChange={e => setFormData({ ...formData, companyName: e.target.value })}
                       className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -207,6 +227,9 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                       type="tel"
                       required
                       placeholder="(619) 886-1267"
+                      maxLength={LIMITS.phone + 10}
+                      autoComplete="tel"
+                      inputMode="tel"
                       value={formData.phone}
                       onChange={e => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -224,6 +247,9 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                       type="email"
                       required
                       placeholder="contact@company.com"
+                      maxLength={LIMITS.email}
+                      autoComplete="email"
+                      inputMode="email"
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
                       className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-9 pr-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -279,6 +305,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                     <input
                       type="date"
                       required
+                      min={new Date().toLocaleDateString('en-CA')}
                       value={formData.eventDate}
                       onChange={e => setFormData({ ...formData, eventDate: e.target.value })}
                       className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold pl-9 pr-3.5 py-2.5 text-xs text-white outline-none rounded-xs"
@@ -293,6 +320,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                   <input
                     type="text"
                     placeholder="e.g. $300 - $600"
+                    maxLength={60}
                     value={formData.estimatedBudget}
                     onChange={e => setFormData({ ...formData, estimatedBudget: e.target.value })}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"
@@ -307,6 +335,7 @@ export default function ProQuoteModal({ isOpen, onClose }: ProQuoteModalProps) {
                 <textarea
                   rows={3}
                   placeholder="e.g. Morning private session starting at 8 AM, custom cuts and styling for wedding party..."
+                  maxLength={LIMITS.message}
                   value={formData.notes}
                   onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3.5 py-2.5 text-xs text-white placeholder-gray-500 outline-none rounded-xs"

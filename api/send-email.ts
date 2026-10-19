@@ -20,6 +20,68 @@ const TABLES: Record<Kind, { table: string; email: string; name: string; created
 };
 
 const TICKET_RE = /^[A-Z0-9]{1,8}-[A-Z0-9]{8}$/;
+const EMAIL_RE = /^[^\s@<>"'(),;:\\]{1,64}@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+const BODY_LIMIT = 1024;
+const RATE_WINDOW_MS = 60 * 1000;
+const RATE_MAX = 10;
+
+// Strict request schema: exactly { kind, ticketCode }, small JSON object.
+export function parseEmailRequest(
+  headers: Record<string, unknown>,
+  body: unknown
+): { ok: true; kind: Kind; ticketCode: string; status?: undefined } | { ok: false; status: number; kind?: undefined; ticketCode?: undefined } {
+  if (Number(headers['content-length'] || 0) > BODY_LIMIT) return { ok: false, status: 413 };
+  if (!String(headers['content-type'] || '').toLowerCase().startsWith('application/json')) return { ok: false, status: 415 };
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { ok: false, status: 400 };
+  if (JSON.stringify(body).length > BODY_LIMIT) return { ok: false, status: 413 };
+  const keys = Object.keys(body);
+  if (keys.some((k) => k !== 'kind' && k !== 'ticketCode')) return { ok: false, status: 400 };
+  const { kind, ticketCode } = body as { kind?: unknown; ticketCode?: unknown };
+  if (typeof kind !== 'string' || !Object.prototype.hasOwnProperty.call(TABLES, kind)) return { ok: false, status: 400 };
+  if (typeof ticketCode !== 'string' || ticketCode.length > 20) return { ok: false, status: 400 };
+  const code = ticketCode.trim().toUpperCase();
+  if (!TICKET_RE.test(code)) return { ok: false, status: 400 };
+  return { ok: true, kind: kind as Kind, ticketCode: code };
+}
+
+// Per-instance rate limit (each warm Vercel instance has its own counter;
+// the database also allows one email per ticket).
+const hits = new Map<string, { count: number; resetAt: number }>();
+export function rateLimited(ip: string, now = Date.now()): boolean {
+  let e = hits.get(ip);
+  if (!e || e.resetAt <= now) {
+    e = { count: 0, resetAt: now + RATE_WINDOW_MS };
+    hits.set(ip, e);
+  }
+  e.count += 1;
+  if (hits.size > 5000) for (const [k, v] of hits) if (v.resetAt <= now) hits.delete(k);
+  return e.count > RATE_MAX;
+}
+
+function clientIp(req: any): string {
+  const fwd = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
+  return fwd || String(req.headers?.['x-real-ip'] || '') || req.socket?.remoteAddress || 'unknown';
+}
+
+// Text from the database used in the From name / subject: one line, no
+// control characters, no angle brackets or quotes, bounded length.
+function headerText(value: unknown, max = 80): string {
+  return String(value ?? '')
+    .replace(/[\u0000-\u001f\u007f<>"]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, max);
+}
+
+function httpsUrl(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' ? url.href : null;
+  } catch {
+    return null;
+  }
+}
 
 function escapeHtml(value: unknown): string {
   return String(value ?? '').replace(/[&<>"']/g, (c) =>
@@ -83,11 +145,22 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ success: false, error: { code: 'METHOD_NOT_ALLOWED', message: 'Method not allowed' } });
   }
 
-  const kind = req.body?.kind as Kind;
-  const ticketCode = String(req.body?.ticketCode ?? '').trim().toUpperCase();
-  if (!Object.prototype.hasOwnProperty.call(TABLES, kind) || !TICKET_RE.test(ticketCode)) {
-    return res.status(400).json({ success: false, error: { code: 'VALIDATION', message: 'Invalid request' } });
+  if (rateLimited(clientIp(req))) {
+    res.setHeader?.('Retry-After', '60');
+    return res.status(429).json({ success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } });
   }
+
+  let body: unknown;
+  try {
+    body = req.body;
+  } catch {
+    body = null; // malformed JSON
+  }
+  const parsed = parseEmailRequest(req.headers || {}, body);
+  if (!parsed.ok) {
+    return res.status(parsed.status).json({ success: false, error: { code: 'VALIDATION', message: 'Invalid request' } });
+  }
+  const { kind, ticketCode } = parsed;
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const secretKey = process.env.SUPABASE_SECRET_KEY;
@@ -119,18 +192,18 @@ export default async function handler(req: any, res: any) {
     return res.status(500).json({ success: false, error: { code: 'INTERNAL', message: 'Could not send email' } });
   }
   const record = claimed as Record<string, any> | null;
-  const to = record?.[t.email];
-  if (!record || !to) {
+  const to = typeof record?.[t.email] === 'string' ? record[t.email].trim() : '';
+  if (!record || !to || to.length > 254 || !EMAIL_RE.test(to)) {
     // Unknown, expired, already emailed, or no email address: nothing to do.
     return res.status(202).json({ success: true });
   }
 
   const { data: site } = await db.rpc('get_public_website', { p_website_id: websiteId });
-  const siteName: string = site?.name ?? 'Our team';
+  const siteName: string = headerText(site?.name) || 'Our team';
   const branding = site?.settings?.branding ?? {};
   const contact = site?.settings?.contact ?? {};
-  const fromName: string = branding.email_from_name || siteName;
-  const name = String(record[t.name] ?? '').split(' ')[0] || 'there';
+  const fromName: string = headerText(branding.email_from_name) || siteName;
+  const name = headerText(record[t.name], 60).split(' ')[0] || 'there';
 
   let subject: string;
   let heading: string;
@@ -177,7 +250,7 @@ export default async function handler(req: any, res: any) {
       subject,
       html: renderEmail({
         siteName,
-        logoUrl: typeof branding.logo_url === 'string' ? branding.logo_url : null,
+        logoUrl: httpsUrl(branding.logo_url),
         heading,
         greeting,
         rows,
