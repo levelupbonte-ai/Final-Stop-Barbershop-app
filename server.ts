@@ -6,9 +6,10 @@ import sendEmailHandler from './api/send-email';
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  app.disable('x-powered-by');
 
-  // Parse JSON request bodies
-  app.use(express.json());
+  // Parse small JSON request bodies only (the API takes { kind, ticketCode }).
+  app.use(express.json({ limit: '2kb' }));
 
   // Health check endpoint
   app.get('/api/health', (_req, res) => {

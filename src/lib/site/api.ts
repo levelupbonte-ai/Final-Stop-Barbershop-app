@@ -4,6 +4,15 @@
 // - Every response is validated at runtime before it reaches components.
 import { z } from 'zod';
 import { supabase, WEBSITE_ID, isSupabaseConfigured } from '../supabase';
+import {
+  bookingSchema,
+  check,
+  formSchema,
+  normalizeTicketCode,
+  safeUrl,
+  telDigits,
+  waitlistSchema
+} from './validation';
 import type {
   BarberProfile,
   BookingConfirmation,
@@ -54,13 +63,16 @@ const FRIENDLY: Record<SiteErrorCode, string> = {
 // validation (22023) are written for end users and safe to display.
 function toSiteError(error: { code?: string; message?: string } | null | undefined): SiteApiError {
   const code = error?.code ?? '';
-  const message = error?.message ?? '';
+  const raw = error?.message ?? '';
+  // Our RPCs raise short end-user sentences; anything longer or technical
+  // falls back to the generic message.
+  const message = raw.length <= 120 && /^[\w\s.,'’!?-]+$/.test(raw) ? raw : '';
   if (code === 'PT404') return new SiteApiError('NOT_FOUND', FRIENDLY.NOT_FOUND);
   if (code === 'PT403') return new SiteApiError('FORBIDDEN', message || FRIENDLY.FORBIDDEN);
   if (code === 'PT409') return new SiteApiError('CONFLICT', FRIENDLY.CONFLICT);
   if (code === 'PT429') return new SiteApiError('RATE_LIMITED', FRIENDLY.RATE_LIMITED);
   if (code === '22023') return new SiteApiError('VALIDATION', message || FRIENDLY.VALIDATION);
-  if (/fetch|network/i.test(message)) return new SiteApiError('NETWORK', FRIENDLY.NETWORK);
+  if (/fetch|network/i.test(raw)) return new SiteApiError('NETWORK', FRIENDLY.NETWORK);
   return new SiteApiError('UNKNOWN', FRIENDLY.UNKNOWN);
 }
 
@@ -193,13 +205,13 @@ function toSiteConfig(raw: z.infer<typeof websiteSchema>): SiteConfig {
         .map((p) => ({
           label: asString(p.label),
           display: asString(p.display),
-          tel: asString(p.tel).replace(/[^\d+]/g, ''),
+          tel: telDigits(asString(p.tel)),
           teamMember: typeof p.team_member === 'string' ? p.team_member : undefined
         }))
         .filter((p) => p.display && p.tel),
       emails: stringArray.parse(contact.emails ?? []).filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)),
       address: asString(contact.address),
-      mapsUrl: asString(contact.maps_url),
+      mapsUrl: safeUrl(contact.maps_url) ?? '',
       coordinates:
         typeof coords.lat === 'number' && typeof coords.lng === 'number'
           ? { lat: coords.lat, lng: coords.lng }
@@ -207,7 +219,7 @@ function toSiteConfig(raw: z.infer<typeof websiteSchema>): SiteConfig {
     },
     hours: { summary: stringArray.parse(hours.summary ?? []) },
     social: Object.fromEntries(
-      Object.entries(social).filter(([, v]) => typeof v === 'string' && /^https:\/\//.test(v as string))
+      Object.entries(social).filter(([, v]) => safeUrl(v) !== null)
     ) as Record<string, string>,
     booking: {
       timeSlots: stringArray.parse(booking.time_slots ?? []).filter((t) => /^\d{2}:\d{2}$/.test(t)),
@@ -224,7 +236,7 @@ function toSiteConfig(raw: z.infer<typeof websiteSchema>): SiteConfig {
       discountLabel: asString(promo.discount_label, 'a discount')
     },
     branding: {
-      logoUrl: typeof branding.logo_url === 'string' ? branding.logo_url : null,
+      logoUrl: safeUrl(branding.logo_url, { allowPath: true }),
       logoAlt: asString(branding.logo_alt, raw.name),
       shortName: asString(branding.short_name, raw.name),
       tagline: asString(branding.tagline),
@@ -254,7 +266,7 @@ function toServiceItem(row: z.infer<typeof serviceRow>): ServiceItem {
 
 function toBarberProfile(row: z.infer<typeof teamRow>, reviews: ReviewItem[]): BarberProfile {
   const d = row.data ?? {};
-  const phoneRaw = asString(d.phone_raw) || (row.phone ?? '').replace(/\D/g, '');
+  const phoneRaw = telDigits(asString(d.phone_raw) || (row.phone ?? ''));
   return {
     id: row.slug,
     name: row.name,
@@ -270,7 +282,12 @@ function toBarberProfile(row: z.infer<typeof teamRow>, reviews: ReviewItem[]): B
     tagline: asString(d.tagline),
     specialty: asString(d.specialty),
     signatureTechniques: techniqueSchema.parse(d.signature_techniques ?? []),
-    portfolioCuts: portfolioSchema.parse(d.portfolio ?? []),
+    portfolioCuts: portfolioSchema
+      .parse(d.portfolio ?? [])
+      .flatMap((c) => {
+        const image = safeUrl(c.image, { allowPath: true });
+        return image ? [{ ...c, image }] : [];
+      }),
     highlights: stringArray.parse(d.highlights ?? []),
     galleryLabel: typeof d.gallery_label === 'string' ? d.gallery_label : undefined,
     clientReviews: reviews.map((r) => ({ author: r.author, date: r.date, rating: r.rating, comment: r.text }))
@@ -361,15 +378,21 @@ export async function fetchSiteContent(): Promise<SiteContent> {
         reviewsWithMember.filter((r) => r.memberId === t.id).map((r) => r.item)
       )
     ),
-    gallery: parse(z.array(galleryRow), galleryRes.data, 'gallery').map((g) => ({
-      id: g.id,
-      title: g.title,
-      description: g.description ?? '',
-      category: g.category ?? '',
-      targetAudience: g.audience ?? '',
-      imageUrl: g.image_url,
-      barber: g.team_members?.name ?? 'Both'
-    })),
+    gallery: parse(z.array(galleryRow), galleryRes.data, 'gallery').flatMap((g) => {
+      const imageUrl = safeUrl(g.image_url, { allowPath: true });
+      if (!imageUrl) return [];
+      return [
+        {
+          id: g.id,
+          title: g.title,
+          description: g.description ?? '',
+          category: g.category ?? '',
+          targetAudience: g.audience ?? '',
+          imageUrl,
+          barber: g.team_members?.name ?? 'Both'
+        }
+      ];
+    }),
     reviews: reviewsWithMember.filter((r) => r.memberId === null).map((r) => r.item),
     faqs: parse(z.array(faqRow), faqRes.data, 'faq'),
     hero: heroData
@@ -382,9 +405,9 @@ export async function fetchSiteContent(): Promise<SiteContent> {
         }
       : null,
     galleryBanner:
-      bannerData && typeof bannerData.image_url === 'string'
+      bannerData && safeUrl(bannerData.image_url, { allowPath: true })
         ? {
-            imageUrl: bannerData.image_url,
+            imageUrl: safeUrl(bannerData.image_url, { allowPath: true }) as string,
             alt: asString(bannerData.alt),
             eyebrow: asString(bannerData.eyebrow),
             heading: asString(bannerData.heading),
@@ -427,9 +450,11 @@ export async function fetchPublicWaitlist(): Promise<PublicQueueEntry[]> {
 
 export async function fetchTicketStatus(ticketCode: string): Promise<TicketStatus | null> {
   assertConfigured();
+  const code = normalizeTicketCode(ticketCode);
+  if (!code) throw new SiteApiError('VALIDATION', 'Please enter your ticket number, e.g. FS-7KQ2M9XA.');
   const { data, error } = await supabase.rpc('get_ticket_status', {
     p_website_id: WEBSITE_ID,
-    p_ticket_code: ticketCode.trim()
+    p_ticket_code: code
   });
   if (error) throw toSiteError(error);
   if (data == null) return null;
@@ -467,26 +492,12 @@ export async function fetchTicketStatus(ticketCode: string): Promise<TicketStatu
 // Writes (validated server-side RPCs)
 // ---------------------------------------------------------------------------
 
-const contactSchema = z
-  .object({
-    name: z.string().trim().min(1, 'Please enter your name.').max(120),
-    email: z.string().trim().email('Please enter a valid email.').max(254).optional().or(z.literal('')),
-    phone: z.string().trim().max(40).optional().or(z.literal(''))
-  })
-  .refine((v) => Boolean(v.email) || Boolean(v.phone), {
-    message: 'Please provide an email or a phone number.'
-  });
-
-function validateContact(input: { name: string; email?: string; phone?: string }) {
-  const result = contactSchema.safeParse(input);
-  if (!result.success) {
-    throw new SiteApiError('VALIDATION', result.error.issues[0]?.message ?? FRIENDLY.VALIDATION);
-  }
-  return {
-    name: result.data.name,
-    email: result.data.email || null,
-    phone: result.data.phone || null
-  };
+// Every write is validated (and cleaned) on the client first: nothing
+// unvalidated is sent. See ./validation.ts; the RPCs validate again.
+function validated<S extends z.ZodTypeAny>(schema: S, input: unknown): z.output<S> {
+  const result = check(schema, input);
+  if (!result.ok) throw new SiteApiError('VALIDATION', result.message);
+  return result.data;
 }
 
 export async function bookAppointment(input: {
@@ -500,20 +511,17 @@ export async function bookAppointment(input: {
   notes?: string;
 }): Promise<BookingConfirmation> {
   assertConfigured();
-  const contact = validateContact(input);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date) || !/^\d{2}:\d{2}$/.test(input.time)) {
-    throw new SiteApiError('VALIDATION', 'Please choose a valid date and time.');
-  }
+  const v = validated(bookingSchema, input);
   const { data, error } = await supabase.rpc('book_appointment', {
     p_website_id: WEBSITE_ID,
-    p_service_slug: input.serviceSlug,
-    p_date: input.date,
-    p_time: input.time,
-    p_name: contact.name,
-    p_email: contact.email,
-    p_phone: contact.phone,
-    p_team_member_slug: input.teamMemberSlug || null,
-    p_notes: input.notes?.trim() || null
+    p_service_slug: v.serviceSlug,
+    p_date: v.date,
+    p_time: v.time,
+    p_name: v.name,
+    p_email: v.email,
+    p_phone: v.phone,
+    p_team_member_slug: v.teamMemberSlug,
+    p_notes: v.notes
   });
   if (error) throw toSiteError(error);
   const r = parse(
@@ -549,14 +557,14 @@ export async function joinWaitlist(input: {
   teamMemberSlug?: string | null;
 }): Promise<WaitlistTicket> {
   assertConfigured();
-  const contact = validateContact(input);
+  const v = validated(waitlistSchema, input);
   const { data, error } = await supabase.rpc('join_waitlist', {
     p_website_id: WEBSITE_ID,
-    p_name: contact.name,
-    p_phone: contact.phone,
-    p_email: contact.email,
-    p_service_slug: input.serviceSlug || null,
-    p_team_member_slug: input.teamMemberSlug || null
+    p_name: v.name,
+    p_phone: v.phone,
+    p_email: v.email,
+    p_service_slug: v.serviceSlug,
+    p_team_member_slug: v.teamMemberSlug
   });
   if (error) throw toSiteError(error);
   const r = parse(
@@ -580,16 +588,16 @@ export async function submitForm(input: {
   data?: Record<string, string | number | boolean | null>;
 }): Promise<{ ticketCode: string }> {
   assertConfigured();
-  const contact = validateContact(input);
+  const v = validated(formSchema, input);
   const { data, error } = await supabase.rpc('submit_form', {
     p_website_id: WEBSITE_ID,
-    p_form_type: input.formType,
-    p_name: contact.name,
-    p_email: contact.email,
-    p_phone: contact.phone,
-    p_company: input.company?.trim() || null,
-    p_message: input.message?.trim() || null,
-    p_data: input.data ?? {},
+    p_form_type: v.formType,
+    p_name: v.name,
+    p_email: v.email,
+    p_phone: v.phone,
+    p_company: v.company,
+    p_message: v.message,
+    p_data: v.data,
     p_source: 'website'
   });
   if (error) throw toSiteError(error);

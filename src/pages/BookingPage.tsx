@@ -22,6 +22,8 @@ import { format, addDays, startOfToday } from 'date-fns';
 import CallShopModal from '../components/CallShopModal';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import { bookAppointment, errorMessage, formatTime12h } from '../lib/site/api';
+import { BOOKING_WINDOW_DAYS, LIMITS, bookingSchema, check } from '../lib/site/validation';
+import { useSubmitLock } from '../lib/site/useSubmitLock';
 import type { BookingConfirmation } from '../types/content';
 
 interface BookingPageProps {
@@ -58,7 +60,8 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [specialNotes, setSpecialNotes] = useState('');
-  const [formErrors, setFormErrors] = useState<{ name?: string; email?: string }>({});
+  const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; phone?: string; notes?: string }>({});
+  const submitOnce = useSubmitLock();
 
   // Submission & Result State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,48 +79,67 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
   const currentWeekDays = Array.from({ length: 7 }).map((_, i) => 
     addDays(startOfToday(), weekOffset * 7 + i)
   );
+  // Online booking is open for the next BOOKING_WINDOW_DAYS days only.
+  const lastBookableDay = addDays(startOfToday(), BOOKING_WINDOW_DAYS);
+  const maxWeekOffset = Math.floor(BOOKING_WINDOW_DAYS / 7);
+
+  const bookingInput = () => ({
+    serviceSlug: selectedService?.id,
+    date: selectedDate,
+    time: selectedTime,
+    teamMemberSlug: selectedBarber === 'any' ? null : selectedBarber,
+    name: guestName,
+    email: guestEmail,
+    phone: guestPhone,
+    notes: specialNotes
+  });
 
   // Validation before going to Step 4
+  // Same rules as the request itself (lib/site/validation.ts), shown per field:
+  // each failing field gets its message, then is set aside to check the next.
   const validateStep3 = () => {
-    const errors: { name?: string; email?: string } = {};
-    if (!guestName.trim()) {
-      errors.name = 'Please enter your name for your reservation ticket';
+    type GuestField = 'name' | 'email' | 'phone' | 'notes';
+    const errors: Partial<Record<GuestField, string>> = {};
+    const guest: Record<GuestField, string> = { name: guestName, email: guestEmail, phone: guestPhone, notes: specialNotes };
+    const neutral: Record<GuestField, string> = { name: 'Valid Name', email: '', phone: '', notes: '' };
+    for (let i = 0; i < 4; i++) {
+      const r = check(bookingSchema, { ...bookingInput(), ...guest });
+      const field = r.field as GuestField | undefined;
+      if (r.ok || !field || !(field in neutral) || errors[field]) break;
+      errors[field] = r.message;
+      guest[field] = neutral[field];
     }
-    if (!guestEmail.trim() && !guestPhone.trim()) {
-      errors.email = 'Please enter your email (or a phone number) to receive your reservation ticket';
-    } else if (guestEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim())) {
-      errors.email = 'Please enter a valid email address';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   // Booking goes through the validated server-side RPC: the ticket code,
   // service name and price are decided by the database, not by the browser.
-  const handleConfirmReservation = async () => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const confirmation = await bookAppointment({
-        serviceSlug: selectedService.id,
-        date: selectedDate,
-        time: selectedTime,
-        teamMemberSlug: selectedBarber === 'any' ? null : selectedBarber,
-        name: guestName,
-        email: guestEmail,
-        phone: guestPhone,
-        notes: specialNotes
-      });
-      setConfirmedData(confirmation);
-      setIsSuccess(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      setSubmitError(errorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const handleConfirmReservation = () =>
+    submitOnce(async () => {
+      // Checked again right before sending; nothing invalid leaves the browser.
+      const valid = check(bookingSchema, bookingInput());
+      if (!valid.ok) {
+        setSubmitError(valid.message);
+        return;
+      }
+      if (!TIME_SLOTS.includes(selectedTime)) {
+        setSubmitError('Please choose one of the available time slots.');
+        return;
+      }
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        const confirmation = await bookAppointment(bookingInput());
+        setConfirmedData(confirmation);
+        setIsSuccess(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        setSubmitError(errorMessage(err));
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
 
   const handlePrintTicket = () => {
     window.print();
@@ -273,7 +295,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                   key={s.num}
                   type="button"
                   onClick={() => {
-                    if (s.num === 4 && (!guestName || (!guestEmail && !guestPhone))) return;
+                    if (s.num === 4 && !validateStep3()) return;
                     if (s.num <= currentStep) setCurrentStep(s.num as any);
                   }}
                   className={`py-2.5 px-2 text-center border transition-all cursor-pointer ${
@@ -464,8 +486,9 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                       </button>
                       <button
                         type="button"
-                        onClick={() => setWeekOffset(w => w + 1)}
-                        className="p-1.5 border border-white/10 bg-white/5 hover:bg-white/10 text-white cursor-pointer"
+                        disabled={weekOffset >= maxWeekOffset}
+                        onClick={() => setWeekOffset(w => Math.min(maxWeekOffset, w + 1))}
+                        className="p-1.5 border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-white cursor-pointer"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -476,7 +499,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                     {currentWeekDays.map((day) => {
                       const dateStr = format(day, 'yyyy-MM-dd');
                       const isSelected = selectedDate === dateStr;
-                      const isSunday = day.getDay() === 0;
+                      const isSunday = day.getDay() === 0 || day > lastBookableDay;
 
                       return (
                         <button
@@ -629,6 +652,8 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                           if (formErrors.name) setFormErrors(prev => ({ ...prev, name: undefined }));
                         }}
                         placeholder="e.g. Jordan Miller"
+                        maxLength={LIMITS.name}
+                        autoComplete="name"
                         className={`w-full bg-[#0A0A0B] border pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 outline-none font-mono ${
                           formErrors.name ? 'border-red-500' : 'border-white/20 focus:border-gold'
                         }`}
@@ -654,6 +679,9 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                           if (formErrors.email) setFormErrors(prev => ({ ...prev, email: undefined }));
                         }}
                         placeholder="jordan@example.com"
+                        maxLength={LIMITS.email}
+                        autoComplete="email"
+                        inputMode="email"
                         className={`w-full bg-[#0A0A0B] border pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 outline-none font-mono ${
                           formErrors.email ? 'border-red-500' : 'border-white/20 focus:border-gold'
                         }`}
@@ -674,12 +702,23 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                       <input
                         type="tel"
                         value={guestPhone}
-                        onChange={(e) => setGuestPhone(e.target.value)}
+                        onChange={(e) => {
+                          setGuestPhone(e.target.value);
+                          if (formErrors.phone) setFormErrors(prev => ({ ...prev, phone: undefined }));
+                        }}
                         placeholder="+1 (619) 000-0000"
-                        className="w-full bg-[#0A0A0B] border border-white/20 focus:border-gold pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 outline-none font-mono"
+                        maxLength={LIMITS.phone + 10}
+                        autoComplete="tel"
+                        inputMode="tel"
+                        className={`w-full bg-[#0A0A0B] border pl-10 pr-4 py-3 text-sm text-white placeholder-gray-500 outline-none font-mono ${
+                          formErrors.phone ? 'border-red-500' : 'border-white/20 focus:border-gold'
+                        }`}
                       />
                       <Phone className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
                     </div>
+                    {formErrors.phone && (
+                      <p className="text-xs text-red-400 mt-1 font-mono">{formErrors.phone}</p>
+                    )}
                   </div>
 
                   {/* Special Notes */}
@@ -690,10 +729,19 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                     <textarea
                       rows={2}
                       value={specialNotes}
-                      onChange={(e) => setSpecialNotes(e.target.value)}
+                      onChange={(e) => {
+                        setSpecialNotes(e.target.value);
+                        if (formErrors.notes) setFormErrors(prev => ({ ...prev, notes: undefined }));
+                      }}
                       placeholder="e.g. Skin taper on sides, beard balm finish..."
-                      className="w-full bg-[#0A0A0B] border border-white/20 focus:border-gold p-3 text-sm text-white placeholder-gray-500 outline-none font-mono resize-none"
+                      maxLength={LIMITS.notes}
+                      className={`w-full bg-[#0A0A0B] border p-3 text-sm text-white placeholder-gray-500 outline-none font-mono resize-none ${
+                        formErrors.notes ? 'border-red-500' : 'border-white/20 focus:border-gold'
+                      }`}
                     />
+                    {formErrors.notes && (
+                      <p className="text-xs text-red-400 mt-1 font-mono">{formErrors.notes}</p>
+                    )}
                   </div>
                 </div>
 

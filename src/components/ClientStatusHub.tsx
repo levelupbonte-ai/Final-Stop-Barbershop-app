@@ -67,7 +67,7 @@ export default function ClientStatusHub({
                 Check My Turn / Ticket
               </h3>
               <p className="text-xs text-gray-400 leading-relaxed mb-5">
-                Already registered or have an active booking? Enter your name or ticket number to see if your chair is ready.
+                Already registered or have an active booking? Enter your ticket number to see if your chair is ready.
               </p>
 
               {/* Quick Input Search Form */}
@@ -77,7 +77,9 @@ export default function ClientStatusHub({
                     type="text"
                     value={quickQuery}
                     onChange={(e) => setQuickQuery(e.target.value)}
-                    placeholder="Your name or ticket number..."
+                    placeholder="Your ticket number (e.g. FS-7KQ2M9XA)"
+                    maxLength={20}
+                    autoComplete="off"
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-3 py-2.5 text-xs text-white placeholder-gray-500 outline-none font-mono rounded-xs"
                   />
                 </div>

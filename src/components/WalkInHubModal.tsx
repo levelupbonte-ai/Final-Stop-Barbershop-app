@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import { errorMessage, joinWaitlist, submitForm } from '../lib/site/api';
+import { LIMITS, check, parseEmailOrPhone, waitlistSchema } from '../lib/site/validation';
+import { useSubmitLock } from '../lib/site/useSubmitLock';
 
 export type ModalMode = 'waitlist' | 'promo' | null;
 
@@ -55,60 +57,72 @@ export default function WalkInHubModal({
   // Loading / error state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const submitOnce = useSubmitLock();
 
   if (!mode) return null;
 
   // 1. Join the live walk-in queue (position and ETA are computed server-side)
-  const handleJoinWaitlist = async (e: FormEvent) => {
+  const handleJoinWaitlist = (e: FormEvent) => {
     e.preventDefault();
-    if (!clientName.trim() || !clientPhone.trim()) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const ticket = await joinWaitlist({
+    return submitOnce(async () => {
+      const input = {
         name: clientName,
         phone: clientPhone,
         serviceSlug: selectedService || null,
         teamMemberSlug: selectedBarber || null
-      });
-      setWaitlistSuccess({
-        ticketId: ticket.ticketCode,
-        position: ticket.position,
-        estMinutes: ticket.estMinutes,
-        name: clientName.trim(),
-        barber: barbers.find((b) => b.id === selectedBarber)?.name ?? 'First Available',
-        service: OFFICIAL_SERVICES.find((s) => s.id === selectedService)?.name ?? ''
-      });
-    } catch (err) {
-      setSubmitError(errorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+      };
+      const valid = check(waitlistSchema, input);
+      if (!valid.ok || !valid.data.phone) {
+        setSubmitError(valid.ok ? 'Please enter your mobile phone number.' : valid.message);
+        return;
+      }
+
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        const ticket = await joinWaitlist(input);
+        setWaitlistSuccess({
+          ticketId: ticket.ticketCode,
+          position: ticket.position,
+          estMinutes: ticket.estMinutes,
+          name: valid.data.name,
+          barber: barbers.find((b) => b.id === selectedBarber)?.name ?? 'First Available',
+          service: OFFICIAL_SERVICES.find((s) => s.id === selectedService)?.name ?? ''
+        });
+      } catch (err) {
+        setSubmitError(errorMessage(err));
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   // 2. VIP club sign-up (email or phone)
-  const handleJoinPromo = async (e: FormEvent) => {
+  const handleJoinPromo = (e: FormEvent) => {
     e.preventDefault();
-    const contact = promoContact.trim();
-    if (!contact) return;
+    return submitOnce(async () => {
+      const contact = parseEmailOrPhone(promoContact);
+      if (!contact.ok) {
+        setSubmitError(contact.message);
+        return;
+      }
 
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const isEmail = contact.includes('@');
-      await submitForm({
-        formType: 'vip_signup',
-        name: 'VIP member',
-        email: isEmail ? contact : undefined,
-        phone: isEmail ? undefined : contact
-      });
-      setPromoSuccess(true);
-    } catch (err) {
-      setSubmitError(errorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+      setIsSubmitting(true);
+      setSubmitError(null);
+      try {
+        await submitForm({
+          formType: 'vip_signup',
+          name: 'VIP member',
+          email: contact.data.email ?? undefined,
+          phone: contact.data.phone ?? undefined
+        });
+        setPromoSuccess(true);
+      } catch (err) {
+        setSubmitError(errorMessage(err));
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   const promo = site.promoPopup;
@@ -259,6 +273,8 @@ export default function WalkInHubModal({
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                     placeholder="e.g. Johnathan Smith"
+                    maxLength={LIMITS.name}
+                    autoComplete="name"
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 outline-none"
                   />
                 </div>
@@ -273,6 +289,9 @@ export default function WalkInHubModal({
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
                     placeholder="e.g. (619) 886-1267"
+                    maxLength={LIMITS.phone + 10}
+                    autoComplete="tel"
+                    inputMode="tel"
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 outline-none font-mono"
                   />
                   <span className="text-[10px] text-gray-500 mt-1 block font-mono">
@@ -393,6 +412,7 @@ export default function WalkInHubModal({
                     value={promoContact}
                     onChange={(e) => setPromoContact(e.target.value)}
                     placeholder="e.g. john@gmail.com or (619) 886-1267"
+                    maxLength={LIMITS.email}
                     className="w-full bg-[#0A0A0B] border border-white/15 focus:border-gold px-4 py-3 text-xs sm:text-sm text-white placeholder-gray-500 outline-none"
                   />
                   <span className="text-[10px] text-gray-500 mt-1.5 block font-mono">
