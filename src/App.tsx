@@ -27,7 +27,6 @@ import RoutePlannerPage from './pages/RoutePlannerPage';
 import CheckStatusModal from './components/CheckStatusModal';
 import WalkInHubModal, { ModalMode } from './components/WalkInHubModal';
 import ClientStatusHub from './components/ClientStatusHub';
-import WelcomePromoModal from './components/WelcomePromoModal';
 import CallShopModal from './components/CallShopModal';
 import ShopPoliciesModal from './components/ShopPoliciesModal';
 import { useSiteData } from './lib/site/SiteDataProvider';
@@ -79,7 +78,6 @@ export default function App() {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [statusQuery, setStatusQuery] = useState('');
   const [hubMode, setHubMode] = useState<ModalMode>(null);
-  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isPoliciesOpen, setIsPoliciesOpen] = useState(false);
 
@@ -133,15 +131,6 @@ export default function App() {
     window.addEventListener('open-call-modal', handleOpenCall);
     return () => window.removeEventListener('open-call-modal', handleOpenCall);
   }, []);
-
-  // Timed VIP welcome pop-up, configured from the dashboard (website_settings.promo_popup).
-  useEffect(() => {
-    if (!site.promoPopup.enabled) return;
-    const timer = setTimeout(() => {
-      setIsPromoModalOpen(true);
-    }, site.promoPopup.delaySeconds * 1000);
-    return () => clearTimeout(timer);
-  }, [site.promoPopup.enabled, site.promoPopup.delaySeconds]);
 
   // Navigation handlers
   const navigateTo = (view: ActiveView, params?: { barberId?: string; service?: string }) => {
@@ -267,7 +256,6 @@ export default function App() {
         onNavigateToView={(view) => navigateTo(view as ActiveView)}
         onOpenCheckStatus={() => handleOpenCheckStatus()}
         onOpenWaitlist={() => navigateTo('waitlist')}
-        onOpenPromo={() => setIsPromoModalOpen(true)}
         onOpenCallModal={() => setIsCallModalOpen(true)}
         isWaitlistOpen={isWaitlistOpen}
       />
@@ -287,7 +275,6 @@ export default function App() {
         <ClientStatusHub 
           onOpenCheckStatus={handleOpenCheckStatus}
           onOpenWaitlist={() => navigateTo('waitlist')}
-          onOpenPromo={() => setIsPromoModalOpen(true)}
           isWaitlistOpen={isWaitlistOpen}
           onNavigateToBooking={() => navigateTo('booking')}
         />
@@ -337,13 +324,6 @@ export default function App() {
         onClose={() => setHubMode(null)}
         onOpenStatusCheck={() => handleOpenCheckStatus()}
         isWaitlistOpen={isWaitlistOpen}
-        onNavigateToBooking={() => navigateTo('booking')}
-      />
-
-      {/* 4. Timed Welcome VIP 15% Off Pop-up Modal */}
-      <WelcomePromoModal 
-        isOpen={isPromoModalOpen}
-        onClose={() => setIsPromoModalOpen(false)}
         onNavigateToBooking={() => navigateTo('booking')}
       />
 

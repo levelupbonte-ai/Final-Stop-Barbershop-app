@@ -10,7 +10,6 @@ interface NavbarProps {
   onNavigateToView?: (view: NavView) => void;
   onOpenCheckStatus?: () => void;
   onOpenWaitlist?: () => void;
-  onOpenPromo?: () => void;
   onOpenCallModal?: () => void;
   isWaitlistOpen?: boolean;
 }
@@ -21,7 +20,6 @@ export default function Navbar({
   onNavigateToView,
   onOpenCheckStatus,
   onOpenWaitlist,
-  onOpenPromo,
   onOpenCallModal,
   isWaitlistOpen = false,
 }: NavbarProps) {

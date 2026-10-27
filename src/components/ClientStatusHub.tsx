@@ -5,7 +5,6 @@ import { useSiteData } from '../lib/site/SiteDataProvider';
 interface ClientStatusHubProps {
   onOpenCheckStatus: (initialQuery?: string) => void;
   onOpenWaitlist: () => void;
-  onOpenPromo?: () => void;
   isWaitlistOpen?: boolean;
   onOpenOwnerControls?: () => void;
   onNavigateToBooking?: () => void;
