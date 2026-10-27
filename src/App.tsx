@@ -3,30 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
-import Navbar, { NavView } from './components/Navbar';
-import Hero from './components/Hero';
-import TeamAndPricing from './components/TeamAndPricing';
-import Gallery from './components/Gallery';
-import Testimonials from './components/Testimonials';
-import FAQ from './components/FAQ';
-import MapSection from './components/MapSection';
-import Footer from './components/Footer';
+import { useState, useEffect, useCallback } from 'react';
+import Lenis from 'lenis';
 
-// Full dedicated pages
-import BarberProfilePage from './pages/BarberProfilePage';
-import BarbersPage from './pages/BarbersPage';
-import ServicesPage from './pages/ServicesPage';
-import WaitlistPage from './pages/WaitlistPage';
-import GalleryPage from './pages/GalleryPage';
-import ReviewsPage from './pages/ReviewsPage';
-import BookingPage from './pages/BookingPage';
-import RoutePlannerPage from './pages/RoutePlannerPage';
+// Dedicated page folders (each interface in its own folder under src/pages/)
+import HomePage from './pages/home';
+import BarberProfilePage from './pages/barber-profile';
+import BarbersPage from './pages/barbers';
+import ServicesPage from './pages/services';
+import WaitlistPage from './pages/waitlist';
+import GalleryPage from './pages/gallery';
+import ReviewsPage from './pages/reviews';
+import BookingPage from './pages/booking';
+import RoutePlannerPage from './pages/route';
+import NotFoundPage from './pages/not-found';
 
 // Modals
 import CheckStatusModal from './components/CheckStatusModal';
 import WalkInHubModal, { ModalMode } from './components/WalkInHubModal';
-import ClientStatusHub from './components/ClientStatusHub';
 import CallShopModal from './components/CallShopModal';
 import ShopPoliciesModal from './components/ShopPoliciesModal';
 import { useSiteData } from './lib/site/SiteDataProvider';
@@ -41,32 +35,105 @@ export type ActiveView =
   | 'booking' 
   | 'route' 
   | 'gallery' 
-  | 'reviews';
+  | 'reviews'
+  | 'not-found';
+
+interface ParsedLocation {
+  view: ActiveView;
+  barberId?: string;
+  cleanPath?: string;
+}
+
+function parseBrowserLocation(validBarberIds: string[]): ParsedLocation {
+  if (typeof window === 'undefined') {
+    return { view: 'home' };
+  }
+
+  // If a legacy #hash exists in the URL, convert it immediately to a clean pathname
+  const rawHash = window.location.hash.replace(/^#\/?/, '');
+  if (rawHash) {
+    const [hashView, hashQuery] = rawHash.split('?');
+    if (hashView === 'barber-profile') {
+      const match = hashQuery?.match(/id=([a-z0-9-]+)/i);
+      const bId = match?.[1];
+      return {
+        view: 'barber-profile',
+        barberId: bId,
+        cleanPath: bId ? `/barbers/${bId}` : '/barber-profile',
+      };
+    }
+    if (
+      hashView === 'barbers' ||
+      hashView === 'services' ||
+      hashView === 'waitlist' ||
+      hashView === 'booking' ||
+      hashView === 'route' ||
+      hashView === 'gallery' ||
+      hashView === 'reviews'
+    ) {
+      return {
+        view: hashView as ActiveView,
+        cleanPath: `/${hashView}`,
+      };
+    }
+  }
+
+  // Parse clean pathname (no # in URL)
+  const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
+  const searchParams = new URLSearchParams(window.location.search);
+
+  if (pathname === '/' || pathname === '/home' || pathname === '/index.html') {
+    return { view: 'home', cleanPath: pathname === '/' ? undefined : '/' };
+  }
+  if (pathname === '/barbers') {
+    return { view: 'barbers' };
+  }
+  if (pathname.startsWith('/barbers/')) {
+    const slug = pathname.replace('/barbers/', '').trim().toLowerCase();
+    if (slug && (validBarberIds.length === 0 || validBarberIds.includes(slug))) {
+      return { view: 'barber-profile', barberId: slug };
+    }
+    return { view: 'not-found' };
+  }
+  if (pathname === '/barber-profile') {
+    const bId = searchParams.get('id') || undefined;
+    return { view: 'barber-profile', barberId: bId };
+  }
+  if (pathname === '/services' || pathname === '/pricing') {
+    return { view: 'services' };
+  }
+  if (pathname === '/waitlist' || pathname === '/queue') {
+    return { view: 'waitlist' };
+  }
+  if (pathname === '/booking' || pathname === '/book') {
+    return { view: 'booking' };
+  }
+  if (pathname === '/route' || pathname === '/directions') {
+    return { view: 'route' };
+  }
+  if (pathname === '/gallery' || pathname === '/portfolio') {
+    return { view: 'gallery' };
+  }
+  if (pathname === '/reviews' || pathname === '/testimonials') {
+    return { view: 'reviews' };
+  }
+
+  return { view: 'not-found' };
+}
 
 export default function App() {
-  // Parse initial view from pathname or hash if present
+  const { site, barbers } = useSiteData();
+  const validBarberIds = barbers.map((b) => b.id);
+  const defaultBarberId = barbers[0]?.id ?? '';
+
   const [currentView, setCurrentView] = useState<ActiveView>(() => {
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash.replace('#', '');
-      if (hash.startsWith('barber-profile')) return 'barber-profile';
-      if (hash === 'barbers') return 'barbers';
-      if (hash === 'services') return 'services';
-      if (hash === 'waitlist') return 'waitlist';
-      if (hash === 'booking') return 'booking';
-      if (hash === 'route') return 'route';
-      if (hash === 'gallery') return 'gallery';
-      if (hash === 'reviews') return 'reviews';
-    }
-    return 'home';
+    return parseBrowserLocation(validBarberIds).view;
   });
 
-  // Selected barber for profile or booking
-  const { site, barbers } = useSiteData();
-  const defaultBarberId = barbers[0]?.id ?? '';
   const [selectedBarberId, setSelectedBarberId] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const match = window.location.hash.match(/id=([a-z0-9-]+)/);
-      if (match && barbers.some((b) => b.id === match[1])) return match[1];
+    const parsed = parseBrowserLocation(validBarberIds);
+    if (parsed.barberId && barbers.some((b) => b.id === parsed.barberId)) {
+      return parsed.barberId;
     }
     return defaultBarberId;
   });
@@ -89,41 +156,49 @@ export default function App() {
     updateDocumentSEO(currentView);
   }, [currentView]);
 
-  // Hash change listener for browser navigation (Back / Forward buttons)
+  // Lenis Smooth Scroll (v0 Template Inertia Scroll)
   useEffect(() => {
-    const handleLocationChange = () => {
-      const rawHash = window.location.hash.replace('#', '');
-      const [viewName, queryStr] = rawHash.split('?');
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
 
-      if (viewName === 'barber-profile') {
-        setCurrentView('barber-profile');
-        const match = queryStr?.match(/id=([a-z0-9-]+)/);
-        if (match && barbers.some((b) => b.id === match[1])) {
-          setSelectedBarberId(match[1]);
-        }
-      } else if (
-        viewName === 'barbers' ||
-        viewName === 'services' ||
-        viewName === 'waitlist' ||
-        viewName === 'booking' ||
-        viewName === 'route' ||
-        viewName === 'gallery' ||
-        viewName === 'reviews'
-      ) {
-        setCurrentView(viewName as ActiveView);
-      } else {
-        setCurrentView('home');
-      }
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    };
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
 
-    window.addEventListener('hashchange', handleLocationChange);
-    window.addEventListener('popstate', handleLocationChange);
     return () => {
-      window.removeEventListener('hashchange', handleLocationChange);
-      window.removeEventListener('popstate', handleLocationChange);
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
     };
+  }, [currentView]);
+
+  // Sync location on mount (strip any legacy #hash) and on browser Back / Forward
+  const syncLocationState = useCallback(() => {
+    const parsed = parseBrowserLocation(barbers.map((b) => b.id));
+    if (parsed.cleanPath) {
+      window.history.replaceState(null, '', parsed.cleanPath);
+    }
+    setCurrentView(parsed.view);
+    if (parsed.barberId && barbers.some((b) => b.id === parsed.barberId)) {
+      setSelectedBarberId(parsed.barberId);
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [barbers]);
+
+  useEffect(() => {
+    syncLocationState();
+    window.addEventListener('popstate', syncLocationState);
+    window.addEventListener('hashchange', syncLocationState);
+    return () => {
+      window.removeEventListener('popstate', syncLocationState);
+      window.removeEventListener('hashchange', syncLocationState);
+    };
+  }, [syncLocationState]);
 
   // Global call modal listener
   useEffect(() => {
@@ -132,7 +207,7 @@ export default function App() {
     return () => window.removeEventListener('open-call-modal', handleOpenCall);
   }, []);
 
-  // Navigation handlers
+  // Clean Pathname Navigation (Zero # hashes in the browser address bar)
   const navigateTo = (view: ActiveView, params?: { barberId?: string; service?: string }) => {
     if (params?.barberId) {
       setSelectedBarberId(params.barberId);
@@ -141,13 +216,20 @@ export default function App() {
       setBookingService(params.service);
     }
 
-    if (view === 'barber-profile') {
-      const bId = params?.barberId || selectedBarberId;
-      window.location.hash = `#barber-profile?id=${bId}`;
-    } else if (view === 'home') {
-      window.history.pushState(null, '', '/');
+    let nextPath = '/';
+    if (view === 'home') {
+      nextPath = '/';
+    } else if (view === 'barber-profile') {
+      const bId = params?.barberId || selectedBarberId || defaultBarberId;
+      nextPath = bId ? `/barbers/${bId}` : '/barber-profile';
+    } else if (view === 'not-found') {
+      nextPath = '/404';
     } else {
-      window.location.hash = `#${view}`;
+      nextPath = `/${view}`;
+    }
+
+    if (window.location.pathname !== nextPath || window.location.hash) {
+      window.history.pushState(null, '', nextPath);
     }
 
     setCurrentView(view);
@@ -159,154 +241,119 @@ export default function App() {
     setIsStatusModalOpen(true);
   };
 
-  // 1. PAGE: Barber Profile Page 
-  if (currentView === 'barber-profile') {
-    return (
-      <BarberProfilePage
-        barberId={selectedBarberId}
-        onBackToHome={() => navigateTo('home')}
-        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId })}
-        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId })}
-        onSwitchBarber={(nextBarberId) => navigateTo('barber-profile', { barberId: nextBarberId })}
-      />
-    );
-  }
+  // Render active page from its dedicated folder
+  const renderPage = () => {
+    switch (currentView) {
+      case 'barber-profile':
+        return (
+          <BarberProfilePage
+            barberId={selectedBarberId}
+            onBackToHome={() => navigateTo('home')}
+            onNavigateToBooking={(barberId, service) => navigateTo('booking', { barberId, service })}
+            onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId })}
+            onSwitchBarber={(nextBarberId) => navigateTo('barber-profile', { barberId: nextBarberId })}
+          />
+        );
 
-  // 2. PAGE: All Barbers Overview
-  if (currentView === 'barbers') {
-    return (
-      <BarbersPage
-        onBackToHome={() => navigateTo('home')}
-        onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
-        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId })}
-        onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId })}
-      />
-    );
-  }
+      case 'barbers':
+        return (
+          <BarbersPage
+            onBackToHome={() => navigateTo('home')}
+            onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
+            onNavigateToBooking={(barberId) => navigateTo('booking', { barberId })}
+            onOpenWaitlist={(barberId) => navigateTo('waitlist', { barberId })}
+          />
+        );
 
-  // 3. PAGE: Full Services & Pricing Menu
-  if (currentView === 'services') {
-    return (
-      <ServicesPage
-        onBackToHome={() => navigateTo('home')}
-        onNavigateToBooking={(serviceId) => navigateTo('booking', { service: serviceId })}
-        onNavigateToBarbers={() => navigateTo('barbers')}
-      />
-    );
-  }
+      case 'services':
+        return (
+          <ServicesPage
+            onBackToHome={() => navigateTo('home')}
+            onNavigateToBooking={(serviceId) => navigateTo('booking', { service: serviceId })}
+            onNavigateToBarbers={() => navigateTo('barbers')}
+          />
+        );
 
-  // 4. PAGE: Live Walk-In Waitlist & Queue
-  if (currentView === 'waitlist') {
-    return (
-      <WaitlistPage
-        onBackToHome={() => navigateTo('home')}
-        onNavigateToBooking={() => navigateTo('booking')}
-        initialBarber={selectedBarberId}
-        isWaitlistOpen={isWaitlistOpen}
-      />
-    );
-  }
+      case 'waitlist':
+        return (
+          <WaitlistPage
+            onBackToHome={() => navigateTo('home')}
+            onNavigateToBooking={() => navigateTo('booking')}
+            initialBarber={selectedBarberId}
+            isWaitlistOpen={isWaitlistOpen}
+          />
+        );
 
-  // 5. PAGE: Full Booking Experience
-  if (currentView === 'booking') {
-    return (
-      <BookingPage 
-        onBackToHome={() => navigateTo('home')} 
-        initialBarber={selectedBarberId}
-        initialService={bookingService}
-      />
-    );
-  }
+      case 'booking':
+        return (
+          <BookingPage
+            onBackToHome={() => navigateTo('home')}
+            initialBarber={selectedBarberId}
+            initialService={bookingService}
+          />
+        );
 
-  // 6. PAGE: Route Planner (Mapbox Directions)
-  if (currentView === 'route') {
-    return <RoutePlannerPage onBackToHome={() => navigateTo('home')} />;
-  }
+      case 'route':
+        return <RoutePlannerPage onBackToHome={() => navigateTo('home')} />;
 
-  // 7. PAGE: Portfolio Gallery
-  if (currentView === 'gallery') {
-    return (
-      <GalleryPage
-        onBackToHome={() => navigateTo('home')}
-        onNavigateToBooking={() => navigateTo('booking')}
-        onNavigateToBarbers={() => navigateTo('barbers')}
-      />
-    );
-  }
+      case 'gallery':
+        return (
+          <GalleryPage
+            onBackToHome={() => navigateTo('home')}
+            onNavigateToBooking={(service, barberId) => navigateTo('booking', { service, barberId })}
+            onNavigateToBarbers={() => navigateTo('barbers')}
+          />
+        );
 
-  // 8. PAGE: Reviews Page
-  if (currentView === 'reviews') {
-    return (
-      <ReviewsPage
-        onBackToHome={() => navigateTo('home')}
-        onNavigateToBooking={() => navigateTo('booking')}
-        onNavigateToBarbers={() => navigateTo('barbers')}
-      />
-    );
-  }
+      case 'reviews':
+        return (
+          <ReviewsPage
+            onBackToHome={() => navigateTo('home')}
+            onNavigateToBooking={() => navigateTo('booking')}
+            onNavigateToBarbers={() => navigateTo('barbers')}
+          />
+        );
 
-  // 10. PAGE: Default Home Page
+      case 'not-found':
+        return (
+          <NotFoundPage
+            isWaitlistOpen={isWaitlistOpen}
+            onNavigateToView={(view) => navigateTo(view as ActiveView)}
+            onNavigateToBooking={() => navigateTo('booking')}
+            onOpenCheckStatus={() => handleOpenCheckStatus()}
+            onOpenCallModal={() => setIsCallModalOpen(true)}
+            onOpenPolicies={() => setIsPoliciesOpen(true)}
+          />
+        );
+
+      case 'home':
+      default:
+        return (
+          <HomePage
+            isWaitlistOpen={isWaitlistOpen}
+            onNavigateToView={(view) => navigateTo(view as ActiveView)}
+            onNavigateToBooking={(params) => navigateTo('booking', params)}
+            onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
+            onOpenCheckStatus={handleOpenCheckStatus}
+            onOpenCallModal={() => setIsCallModalOpen(true)}
+            onOpenPolicies={() => setIsPoliciesOpen(true)}
+          />
+        );
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-dark-bg text-gray-200">
-      
-      {/* Top Navbar */}
-      <Navbar 
-        currentView="home"
-        onNavigateToBooking={() => navigateTo('booking')}
-        onNavigateToView={(view) => navigateTo(view as ActiveView)}
-        onOpenCheckStatus={() => handleOpenCheckStatus()}
-        onOpenWaitlist={() => navigateTo('waitlist')}
-        onOpenCallModal={() => setIsCallModalOpen(true)}
-        isWaitlistOpen={isWaitlistOpen}
-      />
-
-      {/* Hero section */}
-      <Hero onNavigateToBooking={() => navigateTo('booking')} />
-
-      <main>
-        {/* Clickable barbers section */}
-        <TeamAndPricing 
-          onNavigateToBooking={() => navigateTo('booking')}
-          onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
-          onNavigateToServices={() => navigateTo('services')}
-        />
-        
-        {/* Client Status Hub & Live Queue */}
-        <ClientStatusHub 
-          onOpenCheckStatus={handleOpenCheckStatus}
-          onOpenWaitlist={() => navigateTo('waitlist')}
-          isWaitlistOpen={isWaitlistOpen}
-          onNavigateToBooking={() => navigateTo('booking')}
-        />
-
-        {/* Realizations portfolio */}
-        <Gallery />
-        
-        {/* Location & Map Section with interactive map & route planner */}
-        <MapSection onNavigateToRoutePlanner={() => navigateTo('route')} />
-
-        {/* Google Reviews testimonials */}
-        <Testimonials />
-        
-        {/* FAQ section */}
-        <FAQ />
-      </main>
-
-      {/* Footer */}
-      <Footer 
-        onNavigateToBooking={() => navigateTo('booking')} 
-        onNavigateToView={(view) => navigateTo(view as ActiveView)}
-        onOpenPolicies={() => setIsPoliciesOpen(true)}
-      />
+    <>
+      {renderPage()}
 
       {/* Salon Policies & Safety Rules Modal */}
-      <ShopPoliciesModal 
+      <ShopPoliciesModal
         isOpen={isPoliciesOpen}
         onClose={() => setIsPoliciesOpen(false)}
       />
 
-      {/* 1. Dedicated 'Check My Status' Modal */}
-      <CheckStatusModal 
+      {/* Dedicated 'Check My Status' Modal */}
+      <CheckStatusModal
         isOpen={isStatusModalOpen}
         onClose={() => {
           setIsStatusModalOpen(false);
@@ -318,8 +365,8 @@ export default function App() {
         onNavigateToBooking={() => navigateTo('booking')}
       />
 
-      {/* 2. Walk-in Waitlist Modal */}
-      <WalkInHubModal 
+      {/* Walk-in Waitlist Modal */}
+      <WalkInHubModal
         mode={hubMode}
         onClose={() => setHubMode(null)}
         onOpenStatusCheck={() => handleOpenCheckStatus()}
@@ -327,11 +374,11 @@ export default function App() {
         onNavigateToBooking={() => navigateTo('booking')}
       />
 
-      {/* 5. Direct Phone Lines Modal */}
-      <CallShopModal 
+      {/* Direct Phone Lines Modal */}
+      <CallShopModal
         isOpen={isCallModalOpen}
         onClose={() => setIsCallModalOpen(false)}
       />
-    </div>
+    </>
   );
 }

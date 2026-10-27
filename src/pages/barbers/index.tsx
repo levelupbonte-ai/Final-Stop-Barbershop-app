@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import { 
   ArrowLeft, 
-  Award, 
   Calendar, 
   ChevronRight, 
   Phone, 
   Scissors, 
-  Star, 
-  Clock, 
-  Sparkles 
+  Clock
 } from 'lucide-react';
-import { useSiteData } from '../lib/site/SiteDataProvider';
-import CallShopModal from '../components/CallShopModal';
+import { useSiteData } from '../../lib/site/SiteDataProvider';
+import CallShopModal from '../../components/CallShopModal';
 
 interface BarbersPageProps {
   onBackToHome: () => void;
@@ -33,12 +30,12 @@ export default function BarbersPage({
     <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
       
       {/* Header - Fixed/Sticky atop scrolling content */}
-      <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-[#09090B]/95 backdrop-blur-xl border-b border-white/10 py-4 shadow-lg">
+        <div className="w-full px-5 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
           <button
             type="button"
             onClick={onBackToHome}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
+            className="btn-obsidian text-xs px-3.5 py-2 group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
             <span>Back to Home</span>
@@ -48,17 +45,18 @@ export default function BarbersPage({
             <button
               type="button"
               onClick={() => setIsCallModalOpen(true)}
-              className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
+              className="btn-obsidian text-xs px-3.5 py-2"
               title="Call our direct lines"
             >
               <Phone className="w-3.5 h-3.5 text-gold" />
               <span className="hidden sm:inline">Call Barbers Direct</span>
+              <span className="sm:hidden">Call</span>
             </button>
 
             <button
               type="button"
               onClick={() => onNavigateToBooking()}
-              className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 flex items-center gap-1.5 cursor-pointer rounded-sm"
+              className="btn-gold text-xs px-4 py-2"
             >
               <Calendar className="w-3.5 h-3.5" />
               <span>Book Appointment</span>
@@ -105,14 +103,10 @@ export default function BarbersPage({
                         </span>
                         <Scissors className="w-3.5 h-3.5 text-gold/70 mt-0.5" />
                       </div>
-                      <div className="absolute -bottom-1 -right-1 bg-black border border-gold rounded-full p-1 text-gold">
-                        <Award className="w-3 h-3" />
-                      </div>
                     </div>
 
                     <div>
                       <div className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-gold uppercase tracking-wider bg-gold/10 px-2.5 py-0.5 mb-1">
-                        <Award className="w-3 h-3" />
                         <span>Master Specialist</span>
                       </div>
                       <h2 className="text-2xl font-serif font-bold text-white group-hover:text-gold transition-colors">
@@ -126,8 +120,7 @@ export default function BarbersPage({
 
                   <div className="text-right hidden sm:block">
                     <div className="flex items-center gap-1 text-gold justify-end">
-                      <Star className="w-3.5 h-3.5 fill-gold" />
-                      <span className="text-xs font-bold text-white">5.0</span>
+                      <span className="text-xs font-bold text-white">5.0 / 5.0</span>
                     </div>
                     <span className="text-[10px] text-gray-500 font-mono">380+ Google Reviews</span>
                   </div>
@@ -225,7 +218,7 @@ export default function BarbersPage({
 
             <div className="p-5 bg-[#17171C] border border-white/5 rounded-xs">
               <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-3">
-                <Sparkles className="w-5 h-5" />
+                <Scissors className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-white mb-2">All Hair Types & Textures</h3>
               <p className="text-xs text-gray-400 leading-relaxed">

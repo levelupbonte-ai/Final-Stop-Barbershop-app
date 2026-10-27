@@ -15,50 +15,55 @@ export const SEO_DATA: Record<string, PageSEO> = {
   booking: {
     title: 'Book an Appointment Online | Final Stop Barber Shop & Salon | finalstop.org',
     description: 'Book your chair online with master barber Mika or Lusca. Choose precision skin fades, beard sculpting, loc maintenance, or custom braids at Final Stop in San Diego.',
-    canonicalPath: '/#booking',
+    canonicalPath: '/booking',
     keywords: 'book barber san diego, barber appointment university ave, braid booking san diego, final stop booking'
   },
   services: {
     title: 'Services & Pricing Menu | Fades, Braids, Locs & Beards | Final Stop Barber Shop',
     description: 'View full haircut, shave, and hair pricing in San Diego: zero skin fades, hot lather razor shaves, women’s & girls’ knotless braids, dreadlocks, and youth cuts.',
-    canonicalPath: '/#services',
+    canonicalPath: '/services',
     keywords: 'barber prices san diego, braid prices san diego, haircut cost university ave, hair salon price list'
   },
   barbers: {
     title: 'Master Barbers Mika & Lusca | Final Stop Barber Shop San Diego',
     description: 'Meet Mika and Lusca, two master hair artists in African-American hair craft, razor fading, protective braids, and locs.',
-    canonicalPath: '/#barbers',
+    canonicalPath: '/barbers',
     keywords: 'best barbers in san diego, master braider san diego, mika braids, lusca barber, barber san diego'
   },
   'barber-profile': {
     title: 'Barber Profile & Portfolio | Mika & Lusca | Final Stop Barber Shop',
     description: 'Explore the dedicated portfolio, technique specialties, and client cuts of Mika (master braider) and Lusca (master barber) at Final Stop Barber Shop.',
-    canonicalPath: '/#barber-profile',
+    canonicalPath: '/barber-profile',
     keywords: 'mika braids san diego, lusca fade san diego, barber profile'
   },
   waitlist: {
     title: 'Live Walk-In Queue & Real-Time Wait Times | Final Stop Barber Shop',
     description: 'Check into our live digital walk-in queue or track your position in real-time before walking into our San Diego barber shop on University Ave.',
-    canonicalPath: '/#waitlist',
+    canonicalPath: '/waitlist',
     keywords: 'walk in barber san diego, barber waitlist online, no appointment barber san diego'
   },
   gallery: {
     title: 'Signature Hair Portfolio | Protective Braids & Razor Fades | Final Stop Barber Shop',
     description: 'Inspect our portfolio of client transformations: waist-length knotless braids, designer cornrows, sharp zero fades, and sculpted beards by Mika and Lusca.',
-    canonicalPath: '/#gallery',
+    canonicalPath: '/gallery',
     keywords: 'barber portfolio san diego, braid styles gallery, fade haircuts pictures san diego'
   },
   reviews: {
     title: 'Client Reviews & Ratings (4.9 Stars) | Final Stop Barber Shop San Diego',
     description: 'Read real verified client reviews for Final Stop Barber Shop. Loved for gentle braiding by Mika, crisp razor lines by Lusca, and our welcoming community atmosphere.',
-    canonicalPath: '/#reviews',
+    canonicalPath: '/reviews',
     keywords: 'final stop barber shop reviews, best reviewed barber san diego, customer ratings'
   },
   route: {
     title: 'Directions, Map & Parking | 4748 University Ave | Final Stop Barber Shop',
     description: 'Get turn-by-turn directions, bus routes, and parking details for Final Stop Barber Shop located at 4748 University Ave, San Diego, CA 92105.',
-    canonicalPath: '/#route',
+    canonicalPath: '/route',
     keywords: 'final stop barber shop location, university ave barber shop directions, parking near 4748 university ave'
+  },
+  'not-found': {
+    title: '404 Page Not Found | Final Stop Barber Shop & Salon',
+    description: 'The page you are looking for could not be found. Return to Final Stop Barber Shop & Salon in San Diego.',
+    canonicalPath: '/404'
   }
 };
 

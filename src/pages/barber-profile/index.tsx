@@ -12,9 +12,9 @@ import {
   ChevronRight,
   ZoomIn
 } from 'lucide-react';
-import { useSiteData } from '../lib/site/SiteDataProvider';
-import CallShopModal from '../components/CallShopModal';
-import ImageLightboxModal, { LightboxImageItem } from '../components/ImageLightboxModal';
+import { useSiteData } from '../../lib/site/SiteDataProvider';
+import CallShopModal from '../../components/CallShopModal';
+import ImageLightboxModal, { LightboxImageItem } from '../../components/ImageLightboxModal';
 
 interface BarberProfilePageProps {
   barberId: string;
@@ -63,15 +63,15 @@ export default function BarberProfilePage({
     <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
       
       {/* Top Breadcrumb Header - Fixed/Sticky atop scrolling content */}
-      <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-[#09090B]/95 backdrop-blur-xl border-b border-white/10 py-4 shadow-lg">
+        <div className="w-full px-5 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
+            className="btn-obsidian text-xs px-3.5 py-2 group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
-            <span>Back to Barbers & Home</span>
+            <span>Back to Home</span>
           </button>
 
           <div className="flex items-center gap-3">
@@ -79,7 +79,7 @@ export default function BarberProfilePage({
             <button
               type="button"
               onClick={() => handleSelectBarber(otherBarber.id)}
-              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-sm cursor-pointer bg-transparent"
+              className="btn-obsidian text-xs px-3.5 py-2 hidden sm:inline-flex"
             >
               <span>View {otherBarber.name}'s Profile</span>
               <ChevronRight className="w-3.5 h-3.5 text-gold" />
@@ -88,10 +88,10 @@ export default function BarberProfilePage({
 
             <a
               href={`tel:${barber.phoneRaw}`}
-              className="text-xs font-mono text-gray-300 hover:text-gold transition-colors flex items-center gap-1.5 cursor-pointer bg-transparent border border-white/10 px-2.5 py-1.5 rounded-sm"
+              className="btn-gold text-xs px-4 py-2"
               title={`Direct line to ${barber.name}`}
             >
-              <Phone className="w-3.5 h-3.5 text-gold" />
+              <Phone className="w-3.5 h-3.5" />
               <span className="hidden md:inline">Call {barber.name}: {barber.phone}</span>
               <span className="md:hidden">Call</span>
             </a>
@@ -122,7 +122,6 @@ export default function BarberProfilePage({
                 </div>
 
                 <div className="absolute -bottom-2 -right-2 bg-black border border-gold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg">
-                  <Award className="w-3.5 h-3.5 text-gold" />
                   <span className="text-[10px] font-bold text-white font-mono uppercase tracking-wide">
                     Master Artist
                   </span>
@@ -131,12 +130,7 @@ export default function BarberProfilePage({
 
               {/* Rating */}
               <div className="mt-5 flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
-                <div className="flex text-gold">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-gold" />
-                  ))}
-                </div>
-                <span className="text-xs font-bold text-white">5.0</span>
+                <span className="text-xs font-bold text-gold">5.0 / 5.0</span>
                 <span className="text-[10px] text-gray-400">(Google Verified)</span>
               </div>
             </div>

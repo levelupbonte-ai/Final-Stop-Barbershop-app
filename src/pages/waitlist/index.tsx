@@ -12,12 +12,12 @@ import {
   Sparkles,
   Scissors
 } from 'lucide-react';
-import CallShopModal from '../components/CallShopModal';
-import { useSiteData } from '../lib/site/SiteDataProvider';
-import { errorMessage, fetchPublicWaitlist, joinWaitlist } from '../lib/site/api';
-import { LIMITS, check, normalizeTicketCode, waitlistSchema } from '../lib/site/validation';
-import { useSubmitLock } from '../lib/site/useSubmitLock';
-import type { PublicQueueEntry } from '../types/content';
+import CallShopModal from '../../components/CallShopModal';
+import { useSiteData } from '../../lib/site/SiteDataProvider';
+import { errorMessage, fetchPublicWaitlist, joinWaitlist } from '../../lib/site/api';
+import { LIMITS, check, normalizeTicketCode, waitlistSchema } from '../../lib/site/validation';
+import { useSubmitLock } from '../../lib/site/useSubmitLock';
+import type { PublicQueueEntry } from '../../types/content';
 
 interface StoredTicket {
   ticketCode: string;
@@ -151,12 +151,12 @@ export default function WaitlistPage({
     <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
       
       {/* Header - Fixed/Sticky atop scrolling content */}
-      <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-[#09090B]/95 backdrop-blur-xl border-b border-white/10 py-4 shadow-lg">
+        <div className="w-full px-5 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
           <button
             type="button"
             onClick={onBackToHome}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
+            className="btn-obsidian text-xs px-3.5 py-2 group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
             <span>Back to Home</span>
@@ -166,17 +166,17 @@ export default function WaitlistPage({
             <button
               type="button"
               onClick={fetchQueue}
-              className="text-xs text-gray-400 hover:text-gold transition-colors flex items-center gap-1.5 border border-white/10 px-3 py-1.5 rounded-sm cursor-pointer bg-transparent"
+              className="btn-obsidian text-xs px-3.5 py-2"
               title="Refresh queue"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-gold' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-gold ${isLoading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refresh Queue</span>
             </button>
 
             <button
               type="button"
               onClick={() => onNavigateToBooking()}
-              className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 flex items-center gap-1.5 cursor-pointer rounded-sm"
+              className="btn-gold text-xs px-4 py-2"
             >
               <Calendar className="w-3.5 h-3.5" />
               <span>Book Specific Slot</span>

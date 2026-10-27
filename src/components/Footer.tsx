@@ -1,4 +1,5 @@
-import { Instagram, Facebook, Twitter, Youtube, MapPin, Phone, Mail, ShieldCheck } from 'lucide-react';
+import { Instagram, Facebook, Twitter, Youtube, ArrowUpRight, Calendar } from 'lucide-react';
+import { motion } from 'motion/react';
 import { NavView } from './Navbar';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import PoweredByLevelUp from './PoweredByLevelUp';
@@ -17,273 +18,352 @@ function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
 }
 
 interface FooterProps {
-  onNavigateToBooking?: () => void;
+  onNavigateToBooking?: (barberId?: string) => void;
   onNavigateToView?: (view: NavView) => void;
+  onSelectBarber?: (barberId: string) => void;
   onOpenPolicies?: () => void;
 }
 
 export default function Footer({ 
   onNavigateToBooking, 
   onNavigateToView,
+  onSelectBarber,
   onOpenPolicies
 }: FooterProps) {
   const { site, barbers } = useSiteData();
   const { contact, hours } = site;
   const social: Record<string, string | undefined> = site.social;
-  return (
-    <footer className="bg-[#0A0A0C] pt-20 pb-10 border-t border-white/10 overflow-hidden text-gray-400">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          
-          <div className="col-span-1 md:col-span-1">
-            <div className="mb-5 flex items-center gap-3">
-              {site.branding.logoUrl && (
-                <img 
-                  src={site.branding.logoUrl} 
-                  alt={site.branding.logoAlt} 
-                  className="h-12 w-auto object-contain hover:scale-105 transition-all"
-                  referrerPolicy="no-referrer"
-                />
-              )}
-              <div className="flex flex-col">
-                <span className="text-white font-serif font-black tracking-widest text-sm uppercase">
-                  {site.branding.shortName}
-                </span>
-                {site.branding.tagline && (
-                  <span className="text-gold font-mono text-[9px] uppercase tracking-widest font-bold">
-                    {site.branding.tagline}
-                  </span>
-                )}
-              </div>
-            </div>
-            {site.branding.description && (
-              <p className="text-xs text-gray-300 leading-relaxed mb-4">{site.branding.description}</p>
-            )}
-            {/* Dynamic Social Icons (Clean, sleek icons without bubbles) */}
-            <div className="flex items-center gap-3.5 mb-6 text-gray-400">
-              {social.instagram && (
-                <a 
-                  href={social.instagram} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="hover:text-gold transition-colors p-1"
-                  title="Instagram"
-                >
-                  <Instagram className="w-4 h-4" />
-                </a>
-              )}
-              {social.tiktok && (
-                <a 
-                  href={social.tiktok} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="hover:text-gold transition-colors p-1"
-                  title="TikTok"
-                >
-                  <TikTokIcon className="w-4 h-4" />
-                </a>
-              )}
-              {social.youtube && (
-                <a 
-                  href={social.youtube} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="hover:text-gold transition-colors p-1"
-                  title="YouTube"
-                >
-                  <Youtube className="w-4 h-4" />
-                </a>
-              )}
-              {social.facebook && (
-                <a 
-                  href={social.facebook} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="hover:text-gold transition-colors p-1"
-                  title="Facebook"
-                >
-                  <Facebook className="w-4 h-4" />
-                </a>
-              )}
-              {social.twitter && (
-                <a 
-                  href={social.twitter} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="hover:text-gold transition-colors p-1"
-                  title="X / Twitter"
-                >
-                  <Twitter className="w-4 h-4" />
-                </a>
-              )}
-            </div>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
-              <button
-                type="button"
-                onClick={onOpenPolicies}
-                className="inline-flex items-center gap-2 text-xs font-mono text-gold hover:text-white border border-gold/40 hover:border-gold px-3.5 py-2 transition-colors bg-gold/10 rounded-xs cursor-pointer font-semibold"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-gold" />
-                <span>Safety Rules & Policies</span>
-              </button>
 
-            </div>
+  const mika = barbers.find((b) => b.name.toLowerCase().includes('mika') || b.id.toLowerCase().includes('mika')) ?? barbers[0];
+  const lusca = barbers.find((b) => b.id !== mika?.id) ?? barbers[1] ?? barbers[0];
+
+  return (
+    <footer className="relative bg-[#0A0A0C] pt-24 pb-10 border-t border-white/10 overflow-hidden text-gray-400 font-sans select-none">
+      
+      {/* Giant Subtle Background Watermark */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center overflow-hidden z-0"
+      >
+        <span
+          className="font-sans font-black uppercase tracking-tighter text-white/[0.025] leading-none whitespace-nowrap"
+          style={{ fontSize: 'clamp(8rem, 24vw, 24rem)' }}
+        >
+          FINAL STOP
+        </span>
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-6">
+        
+        {/* Top Centered Callout + Single Big Bold BOOK Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col items-center text-center mb-20"
+        >
+          <h2
+            className="font-sans font-black uppercase tracking-tight text-white leading-none mb-8"
+            style={{ fontSize: 'clamp(2.75rem, 6.5vw, 4.75rem)' }}
+          >
+            READY TO{' '}
+            <span className="bg-gradient-to-b from-[#E5C98B] via-[#C5A059] to-[#9A7836] bg-clip-text text-transparent">
+              BOOK?
+            </span>
+          </h2>
+
+          {/* Single Big Bold Book Button */}
+          <button
+            type="button"
+            onClick={() => onNavigateToBooking?.()}
+            className="btn-gold rounded-full! px-12 sm:px-14 py-5 text-sm sm:text-base font-sans font-black uppercase tracking-[0.16em] shadow-[0_14px_44px_rgba(197,160,89,0.4)] hover:scale-[1.02] transition-all cursor-pointer group"
+          >
+            <Calendar className="w-5 h-5 text-black shrink-0" />
+            <span>Book Appointment Now</span>
+            <ArrowUpRight className="w-5 h-5 text-black transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
+          </button>
+
+          {/* Sub-Caption */}
+          <p className="mt-4 font-sans font-normal text-xs sm:text-sm text-gray-400 tracking-wide">
+            Walk-Ins Welcome Daily &middot; $0 Advance Deposit &middot; San Diego, CA
+          </p>
+
+          {/* Centered Brand Description */}
+          <p className="mt-7 font-sans font-normal text-sm sm:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed">
+            {site.branding.description ||
+              `${site.name} is San Diego's premier unisex barber shop and hair artistry lounge crafted by master artisans ${mika?.name ?? 'Mika'} and ${lusca?.name ?? 'Lusca'} at ${contact.address}.`}
+          </p>
+        </motion.div>
+
+        {/* 4-Column Directory Grid — Bold Titles, Clean Non-Bold Links */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-14 pb-16 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-10 sm:gap-12"
+        >
+          
+          {/* Column 1: Artisans & Specialties */}
+          <div>
+            <h4 className="text-sm font-sans font-bold text-white mb-5 tracking-tight">
+              Master Artisans
+            </h4>
+            <ul className="space-y-3 font-sans font-normal text-sm text-gray-400">
+              {mika && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => onSelectBarber ? onSelectBarber(mika.id) : onNavigateToView?.('barbers')}
+                    className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
+                  >
+                    {mika.name} &middot; Women &amp; Braids
+                  </button>
+                </li>
+              )}
+              {lusca && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => onSelectBarber ? onSelectBarber(lusca.id) : onNavigateToView?.('barbers')}
+                    className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
+                  >
+                    {lusca.name} &middot; Men &amp; Fades
+                  </button>
+                </li>
+              )}
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToView?.('services')}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
+                >
+                  Services &amp; Pricing
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToView?.('waitlist')}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
+                >
+                  Live Walk-In Queue
+                </button>
+              </li>
+            </ul>
           </div>
 
+          {/* Column 2: Quick Links */}
           <div>
-            <h4 className="text-xs uppercase tracking-[0.2em] font-black text-white mb-6">Navigation</h4>
-            <ul className="space-y-3 text-xs text-gray-300 uppercase tracking-wider font-medium">
+            <h4 className="text-sm font-sans font-bold text-white mb-5 tracking-tight">
+              Quick Links
+            </h4>
+            <ul className="space-y-3 font-sans font-normal text-sm text-gray-400">
               <li>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigateToView?.('home')} 
-                  className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase"
+                <button
+                  type="button"
+                  onClick={() => onNavigateToView?.('home')}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
                   Home
                 </button>
               </li>
               <li>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigateToView?.('barbers')} 
-                  className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase text-left"
+                <button
+                  type="button"
+                  onClick={() => onNavigateToView?.('barbers')}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
-                  {barbers.map((b) => b.name).join(' & ')} (Master Barbers)
+                  Master Barbers
                 </button>
               </li>
               <li>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigateToView?.('services')} 
-                  className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase text-left"
-                >
-                  Services & Pricing
-                </button>
-              </li>
-              <li>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigateToView?.('waitlist')} 
-                  className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase text-left"
-                >
-                  Live Walk-In Queue
-                </button>
-              </li>
-              <li>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigateToView?.('gallery')} 
-                  className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase"
+                <button
+                  type="button"
+                  onClick={() => onNavigateToView?.('gallery')}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
                   Portfolio
                 </button>
               </li>
               <li>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigateToView?.('reviews')} 
-                  className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase"
+                <button
+                  type="button"
+                  onClick={() => onNavigateToView?.('reviews')}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
                   Client Reviews
                 </button>
               </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Shop & Contact */}
+          <div>
+            <h4 className="text-sm font-sans font-bold text-white mb-5 tracking-tight">
+              Shop &amp; Hours
+            </h4>
+            <ul className="space-y-3 font-sans font-normal text-sm text-gray-400">
+              {hours.summary.slice(0, 2).map((line) => (
+                <li key={line} className="text-gray-400 font-normal">
+                  {line}
+                </li>
+              ))}
+              {contact.phones.map((line) => (
+                <li key={line.tel}>
+                  <a
+                    href={`tel:${line.tel}`}
+                    className="hover:text-white transition-colors block font-normal"
+                  >
+                    {line.label}: {line.display}
+                  </a>
+                </li>
+              ))}
               <li>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigateToView?.('route')} 
-                  className="hover:text-gold transition-colors bg-transparent border-none p-0 cursor-pointer uppercase"
+                <button
+                  type="button"
+                  onClick={() => onNavigateToView?.('route')}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
-                  Directions & Map
+                  Directions &amp; Map
                 </button>
               </li>
             </ul>
           </div>
 
+          {/* Column 4: Legal & Social */}
           <div>
-            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Hours of Operation</h4>
-            <ul className="space-y-3 text-[11px] text-gray-400 uppercase tracking-widest font-mono">
-              {hours.summary.map((line, i) => (
-                <li
-                  key={line}
-                  className={`pb-2 text-white font-bold ${i < hours.summary.length - 1 ? 'border-b border-white/10' : ''}`}
+            <h4 className="text-sm font-sans font-bold text-white mb-5 tracking-tight">
+              Legal &amp; Info
+            </h4>
+            <ul className="space-y-3 font-sans font-normal text-sm text-gray-400">
+              <li>
+                <button
+                  type="button"
+                  onClick={onOpenPolicies}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
-                  {line}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-[12px] uppercase tracking-[0.2em] font-black text-white mb-6">Contact & Location</h4>
-            <ul className="space-y-3 text-[11px] text-gray-400 tracking-wider">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <a 
-                  href={contact.mapsUrl || undefined} 
-                  target="_blank" 
+                  House Rules &amp; Policies
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={onOpenPolicies}
+                  className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
+                >
+                  Safety &amp; Hygiene
+                </button>
+              </li>
+              <li>
+                <a
+                  href={contact.mapsUrl || undefined}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-gold transition-colors"
+                  className="hover:text-white transition-colors block font-normal"
                 >
-                  {contact.address}
+                  4748 University Ave, SD
                 </a>
               </li>
-              <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <div className="space-y-1.5">
-                  {contact.phones.map((line) => (
-                    <div key={line.tel}>
-                      <span className="text-[10px] text-gray-400 font-sans block">{line.label}:</span>
-                      <a href={`tel:${line.tel}`} className="text-white hover:text-gold transition-colors font-mono font-bold block">
-                        {line.display}
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </li>
-              <li className="flex items-start gap-3 min-w-0 pt-1">
-                <Mail className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  {contact.emails.map((email) => (
-                    <a 
-                      key={email}
-                      href={`mailto:${email}`} 
-                      className="hover:text-gold transition-colors break-all text-[11px] leading-relaxed block font-mono text-white"
-                    >
-                      {email}
-                    </a>
-                  ))}
-                </div>
+              <li className="pt-1 flex items-center gap-4 text-gray-400">
+                {social.instagram && (
+                  <a
+                    href={social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-gold transition-colors"
+                    title="Instagram"
+                  >
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+                {social.tiktok && (
+                  <a
+                    href={social.tiktok}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-gold transition-colors"
+                    title="TikTok"
+                  >
+                    <TikTokIcon className="w-4 h-4" />
+                  </a>
+                )}
+                {social.youtube && (
+                  <a
+                    href={social.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-gold transition-colors"
+                    title="YouTube"
+                  >
+                    <Youtube className="w-4 h-4" />
+                  </a>
+                )}
+                {social.facebook && (
+                  <a
+                    href={social.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-gold transition-colors"
+                    title="Facebook"
+                  >
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                )}
+                {social.twitter && (
+                  <a
+                    href={social.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-gold transition-colors"
+                    title="X / Twitter"
+                  >
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                )}
               </li>
             </ul>
           </div>
 
-        </div>
+        </motion.div>
 
-        {/* Bottom Bar: Professional links without bubbles */}
-        <div className="pt-8 pb-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-5 font-mono text-xs text-gray-400">
-          <div className="text-center md:text-left">
-            <span>&copy; {new Date().getFullYear()} {site.name}</span>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            {/* 1. House Rules & Policies Real Link */}
+        {/* Bottom 3-Zone Bar: Left Brand | Center Copyright | Right PoweredByLevelUp (Untouched) */}
+        <div className="pt-8 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 items-center gap-4 font-sans font-normal text-xs sm:text-sm text-gray-500">
+          
+          {/* Left: Brand Logo / Short Name */}
+          <div className="flex items-center justify-center md:justify-start">
             <button
               type="button"
-              onClick={onOpenPolicies}
-              className="text-gray-300 hover:text-gold transition-colors font-mono uppercase tracking-wider text-xs flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0"
+              onClick={() => onNavigateToView?.('home')}
+              className="inline-flex items-center gap-2.5 bg-transparent border-none p-0 cursor-pointer group"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-gold" />
-              <span>House Rules & Policies</span>
+              {site.branding.logoUrl && (
+                <img
+                  src={site.branding.logoUrl}
+                  alt={site.branding.logoAlt}
+                  className="h-8 w-auto object-contain"
+                  referrerPolicy="no-referrer"
+                />
+              )}
+              <span className="font-sans font-black text-base tracking-tight text-white group-hover:text-gold transition-colors uppercase">
+                {site.branding.shortName || 'FINAL STOP'}
+              </span>
             </button>
-
-            {site.showPoweredBy && (
-              <>
-                <span className="hidden sm:inline text-white/20">&bull;</span>
-                <PoweredByLevelUp domain={site.domain} />
-              </>
-            )}
           </div>
+
+          {/* Center: Copyright */}
+          <div className="text-center font-normal text-gray-500">
+            <span>&copy; {new Date().getFullYear()} {site.name}. All rights reserved.</span>
+          </div>
+
+          {/* Right: Built by LevelUp Ecosystem (Untouched) */}
+          <div className="flex items-center justify-center md:justify-end">
+            {site.showPoweredBy && <PoweredByLevelUp domain={site.domain} />}
+          </div>
+
         </div>
+
       </div>
     </footer>
   );

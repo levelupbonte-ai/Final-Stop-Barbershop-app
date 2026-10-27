@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Scissors, Clock, Award, Receipt, ChevronRight, Phone } from 'lucide-react';
+import { Clock, Receipt, ChevronRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import MobilePricingModal from './MobilePricingModal';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
@@ -9,9 +10,9 @@ interface TeamAndPricingProps {
   onNavigateToServices?: () => void;
 }
 
-export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: TeamAndPricingProps) {
+export default function TeamAndPricing({ onNavigateToBooking }: TeamAndPricingProps) {
   const [isMobilePricingOpen, setIsMobilePricingOpen] = useState(false);
-  const { barbers: BARBERS, services, site } = useSiteData();
+  const { services } = useSiteData();
   const PRICING_LIST = services.slice(0, 8).map((s) => ({
     id: s.id,
     name: s.name,
@@ -21,190 +22,104 @@ export default function TeamAndPricing({ onNavigateToBooking, onSelectBarber }: 
   }));
 
   return (
-    <section id="team-pricing" className="py-20 bg-[#0E0E10] relative border-t border-white/5">
+    <section id="team-pricing" className="py-24 bg-[#0B0B0E] relative border-t border-white/5 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <span className="text-gold text-[11px] uppercase tracking-[0.25em] font-mono font-bold block mb-3">
-            Master Barbers & Heritage
-          </span>
-          <h2 className="text-3xl md:text-5xl font-bold font-serif mb-4 text-white">
-            Our Master Barbers & Specialties
-          </h2>
-          <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
-          <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Excellence at {site.name} is embodied by {BARBERS.map((b) => b.name).join(' and ')}, our lead artisans. Click their profiles to explore their work and book your chair directly.
-          </p>
-        </div>
-
-        {/* 2 Barbers Cards - Clickable to view their dedicated profile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
-          {BARBERS.map((barber) => (
-            <div 
-              key={barber.id}
-              onClick={() => onSelectBarber?.(barber.id)}
-              className="bg-[#151517] border border-white/10 hover:border-gold transition-all duration-300 p-7 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer active:scale-[0.99] rounded-sm"
-              title={`Click to view ${barber.name}'s profile and cuts`}
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-gold/15 transition-colors pointer-events-none"></div>
-
-              <div>
-                {/* Stylized Vector Avatar & Info */}
-                <div className="flex items-center gap-5 mb-5">
-                  <div className="relative shrink-0">
-                    <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#202024] to-[#0A0A0B] border-2 border-gold/40 group-hover:border-gold flex flex-col items-center justify-center shadow-lg transition-colors">
-                      <span className="text-xl sm:text-2xl font-serif font-black text-gold tracking-wider">
-                        {barber.initials}
-                      </span>
-                      <Scissors className="w-3.5 h-3.5 text-gold/70 mt-0.5" />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 bg-black border border-gold/50 rounded-full p-1 text-gold">
-                      <Award className="w-3 h-3" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-serif font-bold text-white group-hover:text-gold transition-colors flex items-center gap-2">
-                      <span>{barber.name}</span>
-                      <ChevronRight className="w-4 h-4 text-gold opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                    </h3>
-                    <p className="text-xs text-gold font-medium mt-0.5">
-                      {barber.role}
-                    </p>
-                    <span className="text-xs text-gray-300 font-semibold block mt-1">
-                      {barber.experience} &bull; {barber.badge}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Specialty Description */}
-                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-5">
-                  {barber.specialty}
-                </p>
-              </div>
-
-              {/* Skills Tags & Click indicator */}
-              <div className="pt-4 border-t border-white/5 space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {barber.tags.map((tag, i) => (
-                    <span 
-                      key={i} 
-                      className="text-[11px] font-medium tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm group-hover:border-gold/30 transition-colors font-mono"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
-                  <a
-                    href={`tel:${barber.phoneRaw}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1.5 bg-black/60 hover:bg-gold hover:text-black text-gray-200 border border-white/15 hover:border-gold px-2.5 py-1 text-xs font-mono transition-all rounded-xs font-bold"
-                    title={`Call ${barber.name} directly`}
-                  >
-                    <Phone className="w-3 h-3 text-gold" />
-                    <span>Call: {barber.phone}</span>
-                  </a>
-
-                  <div className="flex items-center text-xs font-bold text-gold">
-                    <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                      <span>View profile</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pricing & Services List */}
-        <div className="bg-[#151517] border border-white/10 p-6 md:p-10 shadow-2xl rounded-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10 mb-6">
+        {/* Editorial Salon Menu — Fine Hairline Rows with Dotted Leaders */}
+        <motion.div
+          initial={{ opacity: 0, y: 36 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-8 border-b border-white/10 mb-4">
             <div>
-              <span className="text-gold text-[10px] uppercase font-mono tracking-widest font-bold block mb-1">
-                Transparent Pricing
+              <span className="text-gold text-[11px] uppercase font-mono tracking-[0.25em] font-bold block mb-2">
+                The Salon Menu &middot; Transparent Rates
               </span>
-              <h3 className="text-xl md:text-2xl font-serif font-bold text-white">
-                Services & Rates
+              <h3 className="text-2xl md:text-4xl font-serif font-bold text-white">
+                Signature <span className="italic text-gold">Services &amp; Craft</span>
               </h3>
             </div>
-            <div className="text-xs text-gray-400 font-mono bg-[#0A0A0B] px-3 py-1.5 border border-white/10 inline-block self-start sm:self-auto">
-              Pay in shop &bull; No advance booking fee
-            </div>
+            <span className="text-xs text-gray-400 font-mono">
+              Pay in shop &middot; $0 advance deposit
+            </span>
           </div>
 
-          {/* Desktop: Full 2-column Grid */}
-          <div className="hidden md:grid md:grid-cols-2 gap-4">
+          {/* Desktop: Unboxed 2-Column Editorial Menu */}
+          <div className="hidden md:grid md:grid-cols-2 gap-x-12 divide-y divide-white/[0.08]">
             {PRICING_LIST.map((item, idx) => (
-              <div 
+              <motion.div 
                 key={idx}
-                className="bg-[#0A0A0B] p-5 border border-white/10 hover:border-gold/40 transition-colors flex justify-between items-start"
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-30px' }}
+                transition={{ duration: 0.45, delay: (idx % 2) * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                onClick={() => onNavigateToBooking?.(item.name)}
+                className="py-5 px-3 -mx-3 rounded-xl hover:bg-white/[0.025] transition-all duration-200 cursor-pointer group border-b border-white/[0.08]"
               >
-                <div className="pr-4">
-                  <h4 className="text-base font-bold text-white mb-1.5">
-                    {item.name}
+                <div className="flex items-baseline justify-between gap-3 mb-1.5">
+                  <h4 className="text-lg font-serif font-bold text-white group-hover:text-gold transition-colors flex items-center gap-2">
+                    <span>{item.name}</span>
                   </h4>
-                  <p className="text-xs text-gray-300 leading-relaxed mb-3">
-                    {item.desc}
-                  </p>
-                  <span className="text-xs text-gray-400 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-gold" />
-                    <span>{item.duration}</span>
-                  </span>
-                </div>
-
-                <div className="text-right shrink-0">
-                  <span className="text-xl font-bold text-gold font-sans">
+                  <div className="flex-1 border-b border-dotted border-white/15 mx-2 relative -top-1" />
+                  <span className="text-xl font-serif font-bold text-gold tabular-nums shrink-0">
                     {item.price}
                   </span>
                 </div>
-              </div>
-            ))}
-          </div>
 
-          {/* Mobile: Top Signature Previews + Menu Expansion Button */}
-          <div className="block md:hidden space-y-3">
-            {PRICING_LIST.slice(0, 2).map((item, idx) => (
-              <div 
-                key={idx}
-                className="bg-[#0A0A0B] p-4 border border-white/10 flex justify-between items-start shadow-md"
-              >
-                <div className="flex-1 pr-3">
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <h4 className="text-sm font-bold text-white leading-snug">
-                      {item.name}
-                    </h4>
-                    <span className="text-base font-bold text-gold font-sans shrink-0">
-                      {item.price}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-300 leading-relaxed mb-2">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-xs text-gray-400 leading-relaxed line-clamp-1">
                     {item.desc}
                   </p>
-                  <span className="text-[11px] text-gray-400 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-gold" />
+                  <span className="text-[11px] text-gray-400 flex items-center gap-1 font-mono shrink-0 group-hover:text-gold transition-colors">
+                    <Clock className="w-3 h-3 text-gold" />
                     <span>{item.duration}</span>
                   </span>
                 </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Mobile: Editorial Rows + Menu Expansion Button */}
+          <div className="block md:hidden divide-y divide-white/10">
+            {PRICING_LIST.slice(0, 4).map((item, idx) => (
+              <div 
+                key={idx}
+                onClick={() => onNavigateToBooking?.(item.name)}
+                className="py-4 flex flex-col gap-1 cursor-pointer group"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <h4 className="text-base font-serif font-bold text-white group-hover:text-gold">
+                    {item.name}
+                  </h4>
+                  <div className="flex-1 border-b border-dotted border-white/15 mx-2 relative -top-1" />
+                  <span className="text-lg font-serif font-bold text-gold shrink-0 tabular-nums">
+                    {item.price}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed line-clamp-1">
+                  {item.desc}
+                </p>
+                <span className="text-[11px] text-gray-500 flex items-center gap-1.5 font-mono mt-0.5">
+                  <Clock className="w-3 h-3 text-gold" />
+                  <span>{item.duration}</span>
+                </span>
               </div>
             ))}
 
-            <div className="pt-2">
+            <div className="pt-5">
               <button
                 type="button"
                 onClick={() => setIsMobilePricingOpen(true)}
-                className="w-full bg-[#18181C] hover:bg-gold hover:text-black text-gold border border-gold/40 text-xs font-semibold uppercase tracking-wider py-3.5 px-4 flex items-center justify-center gap-2 transition-all shadow-xl active:scale-95 cursor-pointer group"
+                className="w-full btn-outline-gold rounded-full! text-xs py-3.5 px-4 group"
               >
-                <Receipt className="w-4 h-4 text-gold group-hover:text-black transition-colors" />
-                <span>View Full Service & Price Menu ({services.length})</span>
-                <ChevronRight className="w-4 h-4 text-gold group-hover:text-black transition-transform group-hover:translate-x-0.5" />
+                <Receipt className="w-4 h-4" />
+                <span>View Full Salon Menu ({services.length})</span>
+                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
       </div>
 

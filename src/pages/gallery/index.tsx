@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, Calendar, Phone, Sparkles, ZoomIn, Filter } from 'lucide-react';
-import CallShopModal from '../components/CallShopModal';
-import ImageLightboxModal, { LightboxImageItem } from '../components/ImageLightboxModal';
-import { useSiteData } from '../lib/site/SiteDataProvider';
+import { ArrowLeft, Calendar, Phone, ZoomIn } from 'lucide-react';
+import CallShopModal from '../../components/CallShopModal';
+import ImageLightboxModal, { LightboxImageItem } from '../../components/ImageLightboxModal';
+import { useSiteData } from '../../lib/site/SiteDataProvider';
 
 interface GalleryPageProps {
   onBackToHome: () => void;
@@ -32,12 +32,12 @@ export default function GalleryPage({
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
       {/* Header - Fixed/Sticky atop scrolling content */}
-      <header className="sticky top-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-[#09090B]/95 backdrop-blur-xl border-b border-white/10 py-4 shadow-lg">
+        <div className="w-full px-5 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
           <button
             type="button"
             onClick={onBackToHome}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-gold transition-colors py-1 cursor-pointer group bg-transparent border-none"
+            className="btn-obsidian text-xs px-3.5 py-2 group"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
             <span>Back to Home</span>
@@ -47,16 +47,17 @@ export default function GalleryPage({
             <button
               type="button"
               onClick={onNavigateToBarbers}
-              className="text-xs text-gray-400 hover:text-gold transition-colors hidden sm:inline-block"
+              className="btn-obsidian text-xs px-3.5 py-2 hidden sm:inline-flex"
             >
-              {teamNames} (Barbers)
+              <span>{teamNames}</span>
             </button>
             <button
               type="button"
               onClick={() => onNavigateToBooking()}
-              className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-sm cursor-pointer"
+              className="btn-gold text-xs px-4 py-2"
             >
-              Book Now
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Book Now</span>
             </button>
           </div>
         </div>
@@ -178,7 +179,6 @@ export default function GalleryPage({
 
                   <div className="pt-3 mt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono">
                     <span className="text-gold flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5" />
                       <span>Click to read description</span>
                     </span>
                     <span className="text-gray-400 group-hover:text-white transition-colors">&rarr;</span>

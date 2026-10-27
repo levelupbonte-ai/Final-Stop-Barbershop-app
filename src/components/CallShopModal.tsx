@@ -100,10 +100,10 @@ export default function CallShopModal({ isOpen, onClose }: CallShopModalProps) {
                   {line.description}
                 </p>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-white/5">
+                <div className="flex items-center gap-2.5 pt-2.5 border-t border-white/8">
                   <a
                     href={line.telHref}
-                    className="flex-1 bg-gold hover:bg-gold-light text-black text-xs font-semibold uppercase tracking-wider py-2 px-3 flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-98 cursor-pointer rounded-sm"
+                    className="flex-1 btn-gold text-xs py-2.5 px-3"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>Call Now</span>
@@ -112,7 +112,7 @@ export default function CallShopModal({ isOpen, onClose }: CallShopModalProps) {
                   <button
                     type="button"
                     onClick={() => handleCopy(line.numberDisplay, line.id)}
-                    className="bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 text-xs px-3 py-2 flex items-center gap-1 transition-colors cursor-pointer rounded-sm"
+                    className="btn-obsidian text-xs px-3.5 py-2.5"
                     title="Copy phone number"
                   >
                     {copiedNumber === line.id ? (
@@ -122,7 +122,7 @@ export default function CallShopModal({ isOpen, onClose }: CallShopModalProps) {
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5 text-gray-400" />
+                        <Copy className="w-3.5 h-3.5 text-gold" />
                         <span className="text-[11px]">Copy</span>
                       </>
                     )}

@@ -1,5 +1,4 @@
-import React from 'react';
-import { X, Calendar, Scissors, Award, Sparkles, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, Scissors, CheckCircle2 } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
 export interface LightboxImageItem {
@@ -78,7 +77,6 @@ export default function ImageLightboxModal({
             {/* Barber attribution */}
             {image.barber && (
               <div className="flex items-center gap-2 bg-[#1A1A20] border border-white/10 px-3 py-2 rounded-xs">
-                <Award className="w-4 h-4 text-gold shrink-0" />
                 <div className="text-xs font-mono">
                   <span className="text-gray-400">Crafted by: </span>
                   <strong className="text-gold">{image.barber}</strong>
