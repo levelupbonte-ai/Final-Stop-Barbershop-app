@@ -13,9 +13,7 @@ import {
   Mail,
   Scissors,
   Printer,
-  Sparkles,
   ArrowRight,
-  Star,
   Award
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -160,44 +158,9 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
   );
 
   return (
-    <div className="min-h-screen bg-[#070709] text-gray-200 flex flex-col w-full overflow-x-clip font-sans">
-      
-      {/* Top Full-Width Atelier Header */}
-      <header className="sticky top-0 z-50 bg-[#09090B]/90 backdrop-blur-2xl border-b border-white/[0.08] py-3.5 shadow-lg">
-        <div className="w-full px-5 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBackToHome}
-            className="btn-obsidian rounded-full! text-xs px-4 py-2 group"
-          >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
-            <span>Back to Salon</span>
-          </button>
-
-          <div className="flex items-center cursor-pointer" onClick={onBackToHome}>
-            <img
-              src={site.branding.logoUrl ?? undefined}
-              alt={site.branding.logoAlt}
-              className="h-9 md:h-11 w-auto object-contain"
-              referrerPolicy="no-referrer"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsCallModalOpen(true)}
-            className="btn-obsidian rounded-full! text-xs px-4 py-2"
-            title="Call our direct lines"
-          >
-            <Phone className="w-3.5 h-3.5 text-gold" />
-            <span className="hidden sm:inline">Direct Salon Lines</span>
-            <span className="sm:hidden">Call</span>
-          </button>
-        </div>
-      </header>
-
+    <div className="w-full overflow-x-clip font-sans">
       {/* Main Atelier Content */}
-      <main className="flex-1 py-10 sm:py-14 px-5 sm:px-8 lg:px-12 xl:px-16 w-full max-w-7xl mx-auto">
+      <div className="pt-28 sm:pt-36 pb-16 px-5 sm:px-8 lg:px-12 xl:px-16 w-full max-w-7xl mx-auto">
         
         {isSuccess ? (
           /* =========================================================================
@@ -1062,12 +1025,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
           </div>
         )}
 
-      </main>
-
-      {/* Booking Page Footer */}
-      <footer className="border-t border-white/10 py-6 px-6 bg-[#070709] text-center text-xs text-gray-500 w-full mt-12">
-        <p>&copy; {new Date().getFullYear()} {site.name} &bull; {site.contact.address}</p>
-      </footer>
+      </div>
 
       <CallShopModal 
         isOpen={isCallModalOpen}

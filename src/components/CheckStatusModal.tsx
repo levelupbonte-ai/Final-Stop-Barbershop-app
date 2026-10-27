@@ -8,8 +8,7 @@ import {
   RefreshCw, 
   User, 
   Scissors, 
-  Calendar,
-  Sparkles
+  Calendar
 } from 'lucide-react';
 import { errorMessage, fetchTicketStatus, formatTime12h } from '../lib/site/api';
 import { normalizeTicketCode } from '../lib/site/validation';

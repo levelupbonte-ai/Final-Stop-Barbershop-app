@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Clock, Scissors, Calendar, Sparkles, Check, Search } from 'lucide-react';
+import { X, Clock, Scissors, Calendar, Check, Search } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
 interface MobilePricingModalProps {

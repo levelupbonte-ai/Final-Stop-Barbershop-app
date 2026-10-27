@@ -3,7 +3,6 @@ import {
   X, 
   Clock, 
   CheckCircle2, 
-  Sparkles, 
   ShieldCheck,
   Send,
   Gift,
@@ -373,7 +372,7 @@ export default function WalkInHubModal({
             {promoSuccess ? (
               <div className="bg-[#0A0A0B] border border-gold/50 p-6 text-center space-y-4">
                 <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold text-gold flex items-center justify-center mx-auto">
-                  <Sparkles className="w-6 h-6" />
+                  <Gift className="w-6 h-6" />
                 </div>
                 <div>
                   <span className="text-gold font-mono font-bold text-xs uppercase block">

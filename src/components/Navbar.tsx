@@ -3,7 +3,7 @@ import { Menu, X, Calendar, Users, ChevronRight, ArrowUpRight } from 'lucide-rea
 import { motion, AnimatePresence } from 'motion/react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
-export type NavView = 'home' | 'barbers' | 'services' | 'waitlist' | 'gallery' | 'reviews' | 'route';
+export type NavView = 'home' | 'barbers' | 'services' | 'waitlist' | 'gallery' | 'reviews' | 'route' | 'policies';
 
 interface NavbarProps {
   currentView?: string;
@@ -41,6 +41,7 @@ export default function Navbar({
     { name: 'Portfolio', view: 'gallery' },
     { name: 'Reviews', view: 'reviews' },
     { name: 'Directions', view: 'route' },
+    { name: 'Policies', view: 'policies' },
   ];
 
   const handleLinkClick = (view: NavView) => {
@@ -61,10 +62,10 @@ export default function Navbar({
           : 'py-4 sm:py-5 bg-transparent border-b border-transparent'
       }`}
     >
-      <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 grid grid-cols-2 lg:grid-cols-[1fr_auto_1fr] items-center gap-4">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-6 xl:px-10 2xl:px-14 flex items-center justify-between gap-3 lg:gap-4 xl:gap-6">
         
-        {/* Zone 1 (Far Left): Brand Logo */}
-        <div className="flex items-center justify-start">
+        {/* Zone 1 (Far Left): Brand Logo — shrink-0 prevents any overlap */}
+        <div className="flex items-center justify-start shrink-0 xl:flex-1 min-w-fit">
           <button 
             type="button"
             onClick={() => handleLinkClick('home')}
@@ -74,16 +75,16 @@ export default function Navbar({
             <img
               src={site.branding.logoUrl ?? undefined}
               alt={site.branding.logoAlt}
-              className="h-9 sm:h-11 xl:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="h-9 sm:h-10 lg:h-10 xl:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               referrerPolicy="no-referrer"
             />
           </button>
         </div>
 
-        {/* Zone 2 (Exact Center): Glass Capsule Navigation */}
-        <div className="hidden lg:flex items-center justify-center">
-          <div className="p-1.5 flex items-center rounded-full bg-[#121216] border border-white/[0.09] shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]">
-            <ul className="flex items-center gap-1 whitespace-nowrap">
+        {/* Zone 2 (Exact Center): Glass Capsule Navigation — scales cleanly from lg to 2xl */}
+        <div className="hidden lg:flex items-center justify-center shrink-0">
+          <div className="p-1 xl:p-1.5 flex items-center rounded-full bg-[#121216]/95 backdrop-blur-xl border border-white/[0.09] shadow-[0_8px_32px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <ul className="flex items-center gap-0.5 xl:gap-1 whitespace-nowrap">
               {navLinks.map((link) => {
                 const isActive = currentView === link.view;
                 return (
@@ -91,7 +92,7 @@ export default function Navbar({
                     <button 
                       type="button"
                       onClick={() => handleLinkClick(link.view)}
-                      className={`text-[11px] uppercase tracking-[0.12em] font-bold transition-all duration-200 cursor-pointer border-none px-4 py-2 rounded-full relative whitespace-nowrap flex items-center gap-1.5 ${
+                      className={`text-[10px] xl:text-[11px] uppercase tracking-[0.06em] xl:tracking-[0.1em] 2xl:tracking-[0.12em] font-bold transition-all duration-200 cursor-pointer border-none px-2.5 xl:px-3.5 2xl:px-4 py-1.5 xl:py-2 rounded-full relative whitespace-nowrap flex items-center gap-1 xl:gap-1.5 ${
                         isActive 
                           ? 'bg-gradient-to-b from-[#E2C482] to-[#C5A059] text-black shadow-[0_4px_16px_rgba(197,160,89,0.4)]' 
                           : 'bg-transparent text-gray-300 hover:text-white hover:bg-white/[0.05]'
@@ -99,7 +100,7 @@ export default function Navbar({
                     >
                       <span>{link.name}</span>
                       {link.badge && (
-                        <span className={`text-[9px] font-mono tracking-wider px-1.5 py-0.5 rounded-full font-extrabold ${
+                        <span className={`text-[8px] xl:text-[9px] font-mono tracking-wider px-1.5 py-0.5 rounded-full font-extrabold ${
                           isActive
                             ? 'bg-black/20 text-black'
                             : 'text-gold bg-gold/15 border border-gold/35'
@@ -116,11 +117,11 @@ export default function Navbar({
         </div>
 
         {/* Zone 3 (Far Right): Single Primary Action + Mobile Hamburger */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-2.5 sm:gap-3 shrink-0 xl:flex-1 min-w-fit">
           <button
             type="button"
             onClick={() => onNavigateToBooking?.()}
-            className="btn-gold rounded-full! text-[11px] xl:text-xs px-4 sm:px-6 py-2.5 whitespace-nowrap shrink-0 group"
+            className="btn-gold rounded-full! text-[10px] sm:text-[11px] xl:text-xs px-3.5 sm:px-5 xl:px-6 py-2 sm:py-2.5 whitespace-nowrap shrink-0 group"
           >
             <Calendar className="w-3.5 h-3.5 shrink-0" />
             <span>Book Now</span>

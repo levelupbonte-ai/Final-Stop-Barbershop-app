@@ -49,7 +49,7 @@ export const SEO_DATA: Record<string, PageSEO> = {
     keywords: 'barber portfolio san diego, braid styles gallery, fade haircuts pictures san diego'
   },
   reviews: {
-    title: 'Client Reviews & Ratings (4.9 Stars) | Final Stop Barber Shop San Diego',
+    title: 'Client Reviews & Ratings (5.0 Verified) | Final Stop Barber Shop San Diego',
     description: 'Read real verified client reviews for Final Stop Barber Shop. Loved for gentle braiding by Mika, crisp razor lines by Lusca, and our welcoming community atmosphere.',
     canonicalPath: '/reviews',
     keywords: 'final stop barber shop reviews, best reviewed barber san diego, customer ratings'
@@ -59,6 +59,12 @@ export const SEO_DATA: Record<string, PageSEO> = {
     description: 'Get turn-by-turn directions, bus routes, and parking details for Final Stop Barber Shop located at 4748 University Ave, San Diego, CA 92105.',
     canonicalPath: '/route',
     keywords: 'final stop barber shop location, university ave barber shop directions, parking near 4748 university ave'
+  },
+  policies: {
+    title: 'Safety, Hygiene & House Policies | Final Stop Barber Shop & Salon San Diego',
+    description: 'Review hospital-grade sterilization standards, hair preparedness guidelines, punctuality rules, and $0 deposit payment policies at Final Stop Barber Shop.',
+    canonicalPath: '/policies',
+    keywords: 'barber shop hygiene san diego, salon house rules, final stop barber shop policies'
   },
   'not-found': {
     title: '404 Page Not Found | Final Stop Barber Shop & Salon',

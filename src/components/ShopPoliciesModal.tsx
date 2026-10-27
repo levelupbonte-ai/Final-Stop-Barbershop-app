@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Shield, Sparkles, AlertCircle, Clock, HeartHandshake, CheckCircle2, X, Scissors } from 'lucide-react';
+import { Shield, AlertCircle, Clock, HeartHandshake, CheckCircle2, X, Scissors } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import ScrollIndicator from './ScrollIndicator';
 
@@ -52,7 +52,7 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
           {/* Rule 1: Sterilization & Hygiene Standards */}
           <div className="bg-[#18181D] border border-white/10 p-4 rounded-xs">
             <div className="flex items-center gap-2 text-gold font-serif font-bold text-sm mb-2">
-              <Sparkles className="w-4 h-4 shrink-0" />
+              <Shield className="w-4 h-4 shrink-0" />
               <span>1. Hospital-Grade Hygiene & Sterilization</span>
             </div>
             <p className="text-gray-300 mb-2">

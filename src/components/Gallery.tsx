@@ -89,7 +89,7 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             onClick={() => setSelectedImage(featuredBanner)}
-            className="mb-12 card-luxury overflow-hidden relative group cursor-pointer"
+            className="mb-14 rounded-[2.75rem] border border-white/10 hover:border-gold/50 overflow-hidden relative group cursor-pointer shadow-[0_30px_80px_rgba(0,0,0,0.85)] transition-all duration-500"
           >
             <div className="relative aspect-[16/9] md:aspect-[21/9] w-full overflow-hidden">
               <img 
@@ -100,12 +100,12 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
               
-              <div className="absolute top-4 right-4 bg-black/75 backdrop-blur-md border border-gold/40 rounded-full px-3.5 py-1.5 flex items-center gap-2 text-gold text-xs font-mono">
+              <div className="absolute top-6 right-6 bg-black/70 backdrop-blur-md border border-gold/40 rounded-full px-4 py-1.5 flex items-center gap-2 text-gold text-xs font-mono">
                 <ZoomIn className="w-3.5 h-3.5" />
-                <span>Click to view showcase</span>
+                <span>Inspect Showcase</span>
               </div>
 
-              <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="absolute bottom-7 left-7 right-7 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                   <span className="text-gold font-mono text-xs uppercase tracking-widest block mb-1">
                     {galleryBanner.eyebrow}
@@ -119,7 +119,7 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
                 </div>
 
                 <div className="shrink-0">
-                  <span className="btn-gold rounded-full! text-xs px-5 py-3">
+                  <span className="btn-gold rounded-full! text-xs px-6 py-3">
                     <Scissors className="w-3.5 h-3.5" />
                     <span>Inspect Styles</span>
                   </span>
@@ -129,8 +129,8 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
           </motion.div>
         )}
 
-        {/* Grid of Clickable Images with Smooth Scroll-Reveal Animations */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Sculptural Editorial Lookbook Grid — Alternating Arch Silhouettes & Full-Bleed Overlays */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
           {filteredItems.map((item, idx) => {
             const member = barbers.find((b) => b.name === item.barber);
             const barberDisplay = member
@@ -146,6 +146,9 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
               description: item.description,
             };
 
+            // Center column items on desktop get a signature haute-couture Arch Silhouette
+            const isArch = idx % 3 === 1;
+
             return (
               <motion.div 
                 key={item.id || idx}
@@ -154,9 +157,13 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.6, delay: (idx % 3) * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setSelectedImage(lightboxItem)}
-                className="group relative card-luxury overflow-hidden cursor-pointer flex flex-col hover:-translate-y-1.5"
+                className={`group relative overflow-hidden cursor-pointer border border-white/10 hover:border-gold/55 transition-all duration-500 hover:-translate-y-2 shadow-[0_24px_60px_rgba(0,0,0,0.75)] ${
+                  isArch
+                    ? 'rounded-t-[10rem] rounded-b-[2.25rem] lg:mt-6'
+                    : 'rounded-[2.5rem]'
+                }`}
               >
-                <div className="relative aspect-[4/5] w-full overflow-hidden bg-black/40">
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#0D0D11]">
                   <img 
                     src={item.imageUrl} 
                     alt={item.title} 
@@ -164,38 +171,38 @@ export default function Gallery({ onBookAppointment }: GalleryProps) {
                     referrerPolicy="no-referrer"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity"></div>
+                  {/* Silky Multi-Stop Editorial Scrim */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity" />
                   
-                  {/* Category Label */}
-                  <div className="absolute top-3.5 left-3.5 bg-black/75 backdrop-blur-md border border-white/15 rounded-full text-gray-200 text-[10px] uppercase font-mono px-3 py-1 tracking-wider font-semibold">
-                    {item.category}
-                  </div>
-
-                  {/* Zoom Badge */}
-                  <div className="absolute top-3.5 right-3.5 w-9 h-9 rounded-full bg-gold text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-lg transform group-hover:scale-105">
-                    <ZoomIn className="w-4 h-4" />
-                  </div>
-
-                  {/* Bottom Image Overlay Details */}
-                  <div className="absolute bottom-3.5 left-4 right-4 text-white">
-                    <span className="text-[10px] text-gold font-mono uppercase tracking-widest block mb-0.5">
-                      {item.barber === 'Both' ? 'Storefront' : `By ${item.barber}`}
+                  {/* Top Unboxed Whisper Kicker + Floating Circular Zoom */}
+                  <div className="absolute top-5 left-6 right-5 flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-gold/95 font-bold drop-shadow">
+                      {item.category}
                     </span>
-                    <h4 className="text-base font-serif font-bold text-white group-hover:text-gold transition-colors line-clamp-1">
+
+                    <div className="w-10 h-10 rounded-full bg-black/55 backdrop-blur-md border border-gold/40 group-hover:bg-gold group-hover:text-black text-gold flex items-center justify-center transition-all duration-300 shadow-lg">
+                      <ZoomIn className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  {/* Sculpted Bottom Overlay Content (No Boxy Footer) */}
+                  <div className="absolute bottom-0 inset-x-0 p-6 sm:p-7 flex flex-col justify-end">
+                    <span className="text-[10px] text-gold font-mono uppercase tracking-[0.22em] block mb-1">
+                      {item.barber === 'Both' ? 'San Diego Atelier' : `Artisan · ${item.barber}`}
+                    </span>
+                    <h4 className="text-lg sm:text-xl font-serif font-bold text-white group-hover:text-gold transition-colors mb-2 line-clamp-1">
                       {item.title}
                     </h4>
-                  </div>
-                </div>
-
-                {/* Card Body with Description */}
-                <div className="p-4 flex-1 flex flex-col justify-between border-t border-white/8 bg-[#111115]">
-                  <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed mb-3">
-                    {item.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between pt-2.5 border-t border-white/8 text-[11px] font-mono">
-                    <span className="text-gold font-semibold">Inspect &amp; Book Style</span>
-                    <span className="text-gray-400 group-hover:text-gold transition-colors">View Work &rarr;</span>
+                    <p className="text-xs text-gray-300/90 line-clamp-2 leading-relaxed mb-4">
+                      {item.description}
+                    </p>
+                    
+                    <div className="pt-3 border-t border-white/15 flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-gold font-semibold">Inspect &amp; Book Craft</span>
+                      <span className="text-white/80 group-hover:text-gold group-hover:translate-x-1 transition-all">
+                        View Look &rarr;
+                      </span>
+                    </div>
                   </div>
                 </div>
               </motion.div>

@@ -6,6 +6,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import Lenis from 'lenis';
 
+// Shared Top & Bottom Site Shell
+import Navbar, { NavView } from './components/Navbar';
+import Footer from './components/Footer';
+
 // Dedicated page folders (each interface in its own folder under src/pages/)
 import HomePage from './pages/home';
 import BarberProfilePage from './pages/barber-profile';
@@ -16,6 +20,7 @@ import GalleryPage from './pages/gallery';
 import ReviewsPage from './pages/reviews';
 import BookingPage from './pages/booking';
 import RoutePlannerPage from './pages/route';
+import PoliciesPage from './pages/policies';
 import NotFoundPage from './pages/not-found';
 
 // Modals
@@ -36,6 +41,7 @@ export type ActiveView =
   | 'route' 
   | 'gallery' 
   | 'reviews'
+  | 'policies'
   | 'not-found';
 
 interface ParsedLocation {
@@ -69,7 +75,8 @@ function parseBrowserLocation(validBarberIds: string[]): ParsedLocation {
       hashView === 'booking' ||
       hashView === 'route' ||
       hashView === 'gallery' ||
-      hashView === 'reviews'
+      hashView === 'reviews' ||
+      hashView === 'policies'
     ) {
       return {
         view: hashView as ActiveView,
@@ -116,6 +123,14 @@ function parseBrowserLocation(validBarberIds: string[]): ParsedLocation {
   }
   if (pathname === '/reviews' || pathname === '/testimonials') {
     return { view: 'reviews' };
+  }
+  if (
+    pathname === '/policies' ||
+    pathname === '/rules' ||
+    pathname === '/safety' ||
+    pathname === '/security'
+  ) {
+    return { view: 'policies' };
   }
 
   return { view: 'not-found' };
@@ -241,7 +256,7 @@ export default function App() {
     setIsStatusModalOpen(true);
   };
 
-  // Render active page from its dedicated folder
+  // Render active page from its dedicated folder inside the shared site body
   const renderPage = () => {
     switch (currentView) {
       case 'barber-profile':
@@ -314,6 +329,14 @@ export default function App() {
           />
         );
 
+      case 'policies':
+        return (
+          <PoliciesPage
+            onNavigateToBooking={() => navigateTo('booking')}
+            onOpenCallModal={() => setIsCallModalOpen(true)}
+          />
+        );
+
       case 'not-found':
         return (
           <NotFoundPage
@@ -322,7 +345,7 @@ export default function App() {
             onNavigateToBooking={() => navigateTo('booking')}
             onOpenCheckStatus={() => handleOpenCheckStatus()}
             onOpenCallModal={() => setIsCallModalOpen(true)}
-            onOpenPolicies={() => setIsPoliciesOpen(true)}
+            onOpenPolicies={() => navigateTo('policies')}
           />
         );
 
@@ -336,17 +359,39 @@ export default function App() {
             onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
             onOpenCheckStatus={handleOpenCheckStatus}
             onOpenCallModal={() => setIsCallModalOpen(true)}
-            onOpenPolicies={() => setIsPoliciesOpen(true)}
+            onOpenPolicies={() => navigateTo('policies')}
           />
         );
     }
   };
 
   return (
-    <>
-      {renderPage()}
+    <div className="min-h-screen bg-dark-bg text-gray-200 flex flex-col justify-between">
+      {/* Persistent Top Navbar across all pages */}
+      <Navbar
+        currentView={currentView === 'barber-profile' ? 'barbers' : currentView}
+        onNavigateToBooking={(service) => navigateTo('booking', { service })}
+        onNavigateToView={(view: NavView) => navigateTo(view as ActiveView)}
+        onOpenCheckStatus={() => handleOpenCheckStatus()}
+        onOpenWaitlist={() => navigateTo('waitlist')}
+        onOpenCallModal={() => setIsCallModalOpen(true)}
+        isWaitlistOpen={isWaitlistOpen}
+      />
 
-      {/* Salon Policies & Safety Rules Modal */}
+      {/* Active Page Content in the Body */}
+      <main className="flex-1">
+        {renderPage()}
+      </main>
+
+      {/* Persistent Bottom Footer across all pages */}
+      <Footer
+        onNavigateToBooking={(barberId) => navigateTo('booking', { barberId })}
+        onNavigateToView={(view: NavView) => navigateTo(view as ActiveView)}
+        onSelectBarber={(barberId) => navigateTo('barber-profile', { barberId })}
+        onOpenPolicies={() => navigateTo('policies')}
+      />
+
+      {/* Salon Policies & Safety Rules Modal (fallback if triggered directly) */}
       <ShopPoliciesModal
         isOpen={isPoliciesOpen}
         onClose={() => setIsPoliciesOpen(false)}
@@ -379,6 +424,6 @@ export default function App() {
         isOpen={isCallModalOpen}
         onClose={() => setIsCallModalOpen(false)}
       />
-    </>
+    </div>
   );
 }

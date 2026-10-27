@@ -1,4 +1,4 @@
-import { Users, Calendar } from 'lucide-react';
+import { Users, Calendar, ArrowUpRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
@@ -19,138 +19,78 @@ export default function ClientStatusHub({
   const teamNames = barbers.map((b) => b.name).join(' & ');
 
   return (
-    <section id="client-status" className="py-20 bg-[#08080B] border-y border-white/10 relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
+    <section id="client-status" className="py-16 bg-[#09090C] relative overflow-hidden">
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
         
-        {/* Section Header */}
+        {/* Single Sculpted Panoramic Lounge Capsule — Zero Nested Rectangular Boxes */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.55 }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-white/10"
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="relative rounded-[3rem] overflow-hidden border border-gold/25 bg-gradient-to-br from-[#16151C] via-[#0E0E13] to-[#09090C] p-8 sm:p-12 lg:p-16 shadow-[0_32px_90px_rgba(0,0,0,0.8)]"
         >
-          <div>
-            <span className="text-gold text-[10px] font-mono uppercase tracking-[0.25em] font-bold block mb-2">
-              Real-Time Lounge Access
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-black font-sans uppercase text-white tracking-tight">
-              Walk-In Queue <span className="font-serif italic font-bold text-gold">&amp; Reservations</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
-              Join our live walk-in queue or reserve a dedicated appointment slot with {teamNames}.
-            </p>
-          </div>
-        </motion.div>
+          {/* Sculptural Ambient Glows */}
+          <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 bg-gold/15 rounded-full blur-[110px]" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px]" />
 
-        {/* Central Action Cards (No Check Ticket Status Card) */}
-        <div className={`grid grid-cols-1 gap-8 ${isWaitlistOpen ? 'md:grid-cols-2' : 'max-w-xl mx-auto'}`}>
-          
-          {/* Card 1: Same-Day Walk-In Waitlist */}
-          {isWaitlistOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.55 }}
-              className="card-luxury p-7 flex flex-col justify-between relative group"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-[#0A0A0D] border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-md">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <span className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 font-semibold">
-                    Queue Open
-                  </span>
-                </div>
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+            
+            {/* Left Editorial Narrative */}
+            <div className="lg:col-span-7 space-y-5">
+              <span className="text-gold text-[11px] font-mono uppercase tracking-[0.25em] font-bold block">
+                Real-Time Lounge Access &middot; San Diego
+              </span>
 
-                <h3 className="text-xl font-serif font-bold text-white mb-2 group-hover:text-gold transition-colors">
-                  Walk-In Queue (No Booking)
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mb-6">
-                  Visiting without an appointment? Join our live queue remotely to minimize time spent waiting in the lounge.
-                </p>
+              <h2 className="text-3xl sm:text-5xl font-black font-sans uppercase text-white tracking-tight leading-[1.04]">
+                Walk-In Queue <span className="font-serif italic font-bold text-gold">&amp; Private Chairs</span>
+              </h2>
 
-                <div className="bg-[#09090B] p-4 rounded-xl border border-white/8 space-y-2 mb-6 text-xs font-mono text-gray-400">
-                  <div className="flex items-center justify-between">
-                    <span>Estimated wait:</span>
-                    <span className="text-white font-bold tabular-nums">~ 10-15 min</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Active barbers:</span>
-                    <span className="text-emerald-400 font-bold">{barbers.map((b) => b.name).join(' · ')}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="button"
-                  onClick={onOpenWaitlist}
-                  className="w-full btn-outline-gold rounded-full! text-xs py-3.5 px-5"
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Join Live Walk-In Line</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Card 2: Schedule Advance Appointment */}
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.55, delay: 0.1 }}
-            className="card-luxury p-7 flex flex-col justify-between relative group"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-11 h-11 rounded-xl bg-[#0A0A0D] border border-gold/40 flex items-center justify-center text-gold shadow-md">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <span className="text-[11px] font-mono uppercase tracking-widest text-gold font-semibold">
-                  Recommended
-                </span>
-              </div>
-
-              <h3 className="text-xl font-serif font-bold text-white mb-2 group-hover:text-gold transition-colors">
-                Book Guaranteed Appointment
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-400 leading-relaxed mb-6">
-                Guaranteed zero wait: pick your custom date and time slot with {barbers.map((b) => b.name).join(' or ')}.
+              <p className="text-sm sm:text-base text-gray-300 max-w-xl leading-relaxed">
+                Reserve your exact hour with {teamNames} or step into our live walk-in line before arriving at the salon.
               </p>
 
-              <div className="bg-[#09090B] p-4 rounded-xl border border-white/8 space-y-2 mb-6 text-xs font-mono text-gray-400">
-                <div className="flex items-center justify-between">
-                  <span>Advance deposit:</span>
-                  <span className="text-emerald-400 font-bold">$0 &middot; Pay in person</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Confirmation:</span>
-                  <span className="text-white font-bold">Instant Pass &amp; Email</span>
-                </div>
+              {/* Unboxed Inline Specifications */}
+              <div className="pt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-mono text-gray-400">
+                <span className="text-emerald-400 font-semibold">$0 Advance Deposit</span>
+                <span className="text-white/20" aria-hidden="true">&middot;</span>
+                <span>Pay in Person After Cut</span>
+                <span className="text-white/20" aria-hidden="true">&middot;</span>
+                <span className="text-gold">Instant Pass Confirmation</span>
               </div>
             </div>
 
-            <div>
+            {/* Right Fluid Action Column */}
+            <div className="lg:col-span-5 flex flex-col sm:flex-row lg:flex-col gap-4 lg:pl-10 lg:border-l lg:border-white/10">
               <button
                 type="button"
                 onClick={onNavigateToBooking}
-                className="w-full btn-gold rounded-full! text-xs py-3.5 px-5"
+                className="w-full btn-gold rounded-full! py-4 px-7 text-xs sm:text-sm font-black group justify-between"
               >
-                <Calendar className="w-4 h-4" />
-                <span>Reserve Appointment</span>
+                <span className="inline-flex items-center gap-2.5">
+                  <Calendar className="w-4 h-4 text-black shrink-0" />
+                  <span>Reserve Your Chair</span>
+                </span>
+                <ArrowUpRight className="w-4 h-4 text-black transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
               </button>
-            </div>
-          </motion.div>
 
-        </div>
+              {isWaitlistOpen && (
+                <button
+                  type="button"
+                  onClick={onOpenWaitlist}
+                  className="w-full btn-obsidian rounded-full! py-4 px-7 text-xs sm:text-sm font-bold group justify-between"
+                >
+                  <span className="inline-flex items-center gap-2.5">
+                    <Users className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Join Live Walk-In Queue</span>
+                  </span>
+                  <span className="text-[11px] font-mono text-emerald-400 tabular-nums">~10-15m</span>
+                </button>
+              )}
+            </div>
+
+          </div>
+        </motion.div>
 
       </div>
     </section>

@@ -27,33 +27,36 @@ export default function FAQ() {
           <div className="h-1 w-20 bg-gold mx-auto rounded-full"></div>
         </motion.div>
 
-        <div className="space-y-3.5">
+        <div className="rounded-[2.75rem] bg-gradient-to-b from-white/[0.03] via-white/[0.01] to-transparent border border-white/[0.08] px-6 sm:px-12 py-4 divide-y divide-white/[0.08] shadow-[0_24px_70px_rgba(0,0,0,0.65)]">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
               <motion.div 
                 key={index}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.5, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
-                className={`card-luxury overflow-hidden transition-all duration-300 ${
-                  isOpen ? 'border-gold/45' : ''
-                }`}
+                transition={{ duration: 0.45, delay: index * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                className="py-2"
               >
                 <button
                   type="button"
-                  className="w-full px-6 py-5 text-left flex justify-between items-center gap-4 focus:outline-none hover:bg-white/[0.02] cursor-pointer transition-colors group"
+                  className="w-full py-5 text-left flex justify-between items-center gap-4 focus:outline-none cursor-pointer transition-colors group"
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                 >
-                  <span className={`font-medium text-base sm:text-lg transition-colors ${
-                    isOpen ? 'text-gold' : 'text-gray-100 group-hover:text-white'
-                  }`}>
-                    {faq.question}
-                  </span>
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                  <div className="flex items-baseline gap-4">
+                    <span className="text-xs font-serif italic text-gold/70 shrink-0 tabular-nums">
+                      0{index + 1}
+                    </span>
+                    <span className={`font-serif font-bold text-base sm:text-xl transition-colors ${
+                      isOpen ? 'text-gold' : 'text-gray-100 group-hover:text-gold'
+                    }`}>
+                      {faq.question}
+                    </span>
+                  </div>
+                  <span className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border transition-all ${
                     isOpen 
-                      ? 'bg-gold/15 border-gold/50 text-gold' 
+                      ? 'bg-gold text-black border-gold shadow-[0_0_20px_rgba(197,160,89,0.4)]' 
                       : 'bg-white/[0.03] border-white/10 text-gray-400 group-hover:border-gold/40 group-hover:text-gold'
                   }`}>
                     {isOpen ? (
@@ -72,7 +75,7 @@ export default function FAQ() {
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <div className="px-6 pb-5 text-gray-300/90 text-sm leading-relaxed border-t border-white/5 pt-4">
+                      <div className="pl-8 pr-4 pb-5 text-gray-300/90 text-sm leading-relaxed">
                         {faq.answer}
                       </div>
                     </motion.div>

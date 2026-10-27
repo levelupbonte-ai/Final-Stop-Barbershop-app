@@ -241,7 +241,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={onOpenPolicies}
+                  onClick={() => onNavigateToView ? onNavigateToView('policies') : onOpenPolicies?.()}
                   className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
                   House Rules &amp; Policies
@@ -250,7 +250,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={onOpenPolicies}
+                  onClick={() => onNavigateToView ? onNavigateToView('policies') : onOpenPolicies?.()}
                   className="hover:text-white transition-colors bg-transparent border-none p-0 cursor-pointer text-left font-normal"
                 >
                   Safety &amp; Hygiene

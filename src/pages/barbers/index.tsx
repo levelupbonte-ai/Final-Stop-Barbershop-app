@@ -1,14 +1,10 @@
-import { useState } from 'react';
 import { 
-  ArrowLeft, 
-  Calendar, 
   ChevronRight, 
   Phone, 
   Scissors, 
   Clock
 } from 'lucide-react';
 import { useSiteData } from '../../lib/site/SiteDataProvider';
-import CallShopModal from '../../components/CallShopModal';
 
 interface BarbersPageProps {
   onBackToHome: () => void;
@@ -18,222 +14,166 @@ interface BarbersPageProps {
 }
 
 export default function BarbersPage({
-  onBackToHome,
   onSelectBarber,
   onNavigateToBooking,
-  onOpenWaitlist
 }: BarbersPageProps) {
-  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const { barbers: MASTER_BARBERS } = useSiteData();
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-gray-200 flex flex-col font-sans">
-      
-      {/* Header - Fixed/Sticky atop scrolling content */}
-      <header className="sticky top-0 z-50 bg-[#09090B]/95 backdrop-blur-xl border-b border-white/10 py-4 shadow-lg">
-        <div className="w-full px-5 sm:px-8 lg:px-12 xl:px-16 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBackToHome}
-            className="btn-obsidian text-xs px-3.5 py-2 group"
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 pb-16 w-full font-sans">
+      {/* Page Title */}
+      <div className="text-center max-w-3xl mx-auto mb-14">
+        <span className="text-gold font-mono text-xs uppercase tracking-[0.25em] font-bold block mb-2">
+          Master Barbers &amp; Co-Founders
+        </span>
+        <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white mb-4">
+          Two Craftsmen. Over 20 Years of Mastery Each.
+        </h1>
+        <div className="divider-gold-fade max-w-xs mx-auto mb-4"></div>
+        <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
+          At Final Stop Barber Shop, every scissor pass and straight razor stroke is grounded in more than two decades of dedicated craft. Click on either master barber to explore their signature styles and book your chair.
+        </p>
+      </div>
+
+      {/* 2 Sculptural Master Barber Vessels */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16">
+        {MASTER_BARBERS.map((barber) => (
+          <div
+            key={barber.id}
+            className="card-luxury rounded-t-[4rem]! rounded-b-[2.5rem]! p-7 sm:p-10 flex flex-col justify-between group relative overflow-hidden cursor-pointer hover:-translate-y-1.5"
+            onClick={() => onSelectBarber(barber.id)}
           >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-gold" />
-            <span>Back to Home</span>
-          </button>
+            <div className="absolute top-0 right-0 w-56 h-56 bg-gold/10 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-gold/20 transition-colors pointer-events-none"></div>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsCallModalOpen(true)}
-              className="btn-obsidian text-xs px-3.5 py-2"
-              title="Call our direct lines"
-            >
-              <Phone className="w-3.5 h-3.5 text-gold" />
-              <span className="hidden sm:inline">Call Barbers Direct</span>
-              <span className="sm:hidden">Call</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onNavigateToBooking()}
-              className="btn-gold text-xs px-4 py-2"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Book Appointment</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-12 w-full">
-        
-        {/* Page Title */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-gold font-mono text-xs uppercase tracking-[0.25em] font-bold block mb-2">
-            Master Barbers & Co-Founders
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-serif font-bold text-white mb-4">
-            Two Craftsmen. Over 20 Years of Mastery Each.
-          </h1>
-          <div className="h-1 w-20 bg-gold mx-auto rounded-full mb-4"></div>
-          <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-            At Final Stop Barber Shop, every scissor pass and straight razor stroke is grounded in more than two decades of dedicated craft. Click on either master barber to explore their signature styles and book your chair.
-          </p>
-        </div>
-
-        {/* 2 Clickable Master Barber Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-          {MASTER_BARBERS.map((barber) => (
-            <div
-              key={barber.id}
-              className="bg-[#141418] border border-white/10 hover:border-gold transition-all duration-300 p-6 sm:p-8 flex flex-col justify-between shadow-2xl group relative overflow-hidden cursor-pointer rounded-sm"
-              onClick={() => onSelectBarber(barber.id)}
-            >
-              <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-gold/15 transition-colors pointer-events-none"></div>
-
-              <div>
-                {/* Header with Avatar & Badge */}
-                <div className="flex items-start justify-between gap-4 mb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#24242A] to-[#0A0A0B] border-2 border-gold/40 group-hover:border-gold flex flex-col items-center justify-center shadow-lg transition-colors">
-                        <span className="text-2xl font-serif font-black text-gold tracking-wider">
-                          {barber.initials}
-                        </span>
-                        <Scissors className="w-3.5 h-3.5 text-gold/70 mt-0.5" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-gold uppercase tracking-wider bg-gold/10 px-2.5 py-0.5 mb-1">
-                        <span>Master Specialist</span>
-                      </div>
-                      <h2 className="text-2xl font-serif font-bold text-white group-hover:text-gold transition-colors">
-                        {barber.name}
-                      </h2>
-                      <p className="text-xs text-gray-400">
-                        {barber.role}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right hidden sm:block">
-                    <div className="flex items-center gap-1 text-gold justify-end">
-                      <span className="text-xs font-bold text-white">5.0 / 5.0</span>
-                    </div>
-                    <span className="text-[10px] text-gray-500 font-mono">380+ Google Reviews</span>
-                  </div>
-                </div>
-
-                {/* Tagline */}
-                <p className="text-xs sm:text-sm text-gold-light italic mb-4 font-serif">
-                  "{barber.tagline}"
-                </p>
-
-                {/* Bio snippet */}
-                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-6">
-                  {barber.bio.substring(0, 180)}...
-                </p>
-
-                {/* Specialties tags */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {barber.tags.map((tag, i) => (
-                    <span
-                      key={i}
-                      className="text-[11px] font-mono tracking-wide bg-white/5 text-gray-300 px-2.5 py-1 border border-white/10 rounded-sm group-hover:border-gold/30 transition-colors"
-                    >
-                      {tag}
+            <div>
+              {/* Header with Circular Medallion & Unboxed Kicker */}
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#24242A] to-[#0A0A0B] border border-gold/45 group-hover:border-gold flex flex-col items-center justify-center shadow-lg transition-colors shrink-0">
+                    <span className="text-2xl font-serif font-black text-gold tracking-wider">
+                      {barber.initials}
                     </span>
-                  ))}
+                    <Scissors className="w-3.5 h-3.5 text-gold/70 mt-0.5" />
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-mono font-bold text-gold uppercase tracking-[0.2em] block mb-1">
+                      Master Specialist
+                    </span>
+                    <h2 className="text-2xl font-serif font-bold text-white group-hover:text-gold transition-colors">
+                      {barber.name}
+                    </h2>
+                    <p className="text-xs text-gray-400">
+                      {barber.role}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Direct Line Badge */}
-                <div className="mb-4">
-                  <a
-                    href={`tel:${barber.phoneRaw}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1.5 bg-black/50 hover:bg-gold hover:text-black text-gold border border-gold/40 px-3 py-1.5 text-xs font-mono transition-all rounded-xs font-bold"
-                    title={`Call ${barber.name} directly`}
-                  >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Direct Call: {barber.phone}</span>
-                  </a>
+                <div className="text-right hidden sm:block">
+                  <span className="text-xs font-bold text-gold block tabular-nums">5.0 / 5.0</span>
+                  <span className="text-[10px] text-gray-500 font-mono">Verified Craft</span>
                 </div>
               </div>
 
-              {/* Card Footer with Click Action */}
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                <span className="text-xs font-bold text-gold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  <span>View Full Profile & Techniques</span>
-                  <ChevronRight className="w-4 h-4" />
-                </span>
+              {/* Tagline */}
+              <p className="text-xs sm:text-sm text-gold-light italic mb-4 font-serif">
+                &ldquo;{barber.tagline}&rdquo;
+              </p>
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNavigateToBooking(barber.id);
-                  }}
-                  className="bg-gold/10 hover:bg-gold text-gold hover:text-black border border-gold/40 text-xs font-bold px-3 py-1.5 uppercase tracking-wider transition-all cursor-pointer rounded-xs"
+              {/* Bio snippet */}
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-6">
+                {barber.bio.substring(0, 180)}...
+              </p>
+
+              {/* Unboxed Specialties Metadata */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-6 text-[11px] font-mono text-gray-300">
+                {barber.tags.map((tag, i) => (
+                  <span key={i} className="inline-flex items-center gap-2">
+                    {i > 0 && <span className="text-gold/50">&middot;</span>}
+                    <span>{tag}</span>
+                  </span>
+                ))}
+              </div>
+
+              {/* Direct Line Pill */}
+              <div className="mb-6">
+                <a
+                  href={`tel:${barber.phoneRaw}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="btn-obsidian rounded-full! px-4 py-2 text-xs font-mono"
+                  title={`Call ${barber.name} directly`}
                 >
-                  Book with {barber.name}
-                </button>
+                  <Phone className="w-3.5 h-3.5 text-gold" />
+                  <span>Direct Call: {barber.phone}</span>
+                </a>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Why Master Barbering Matters Section */}
-        <div className="bg-[#121215] border border-white/10 p-6 sm:p-10 mb-12 rounded-sm">
-          <div className="text-center max-w-2xl mx-auto mb-8">
-            <span className="text-gold font-mono text-[11px] uppercase tracking-widest font-bold block mb-1">
-              The Art of Barbering
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white">
-              Why Master Craftsmanship Matters
-            </h2>
-          </div>
+            {/* Card Footer with Pill CTA */}
+            <div className="pt-5 border-t border-white/10 flex items-center justify-between gap-3">
+              <span className="text-xs font-bold text-gold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span>Explore Profile</span>
+                <ChevronRight className="w-4 h-4" />
+              </span>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            <div className="p-5 bg-[#17171C] border border-white/5 rounded-xs">
-              <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-3">
-                <Scissors className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white mb-2">Facial Bone Architecture</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Behind the chair, we calculate fade gradients and beard symmetry precisely matched to your cranial structure.
-              </p>
-            </div>
-
-            <div className="p-5 bg-[#17171C] border border-white/5 rounded-xs">
-              <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-3">
-                <Clock className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white mb-2">Unwavering Consistency</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                No bad days, no rushed appointments. You get the same elite caliber of finish on every single visit.
-              </p>
-            </div>
-
-            <div className="p-5 bg-[#17171C] border border-white/5 rounded-xs">
-              <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-3">
-                <Scissors className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white mb-2">All Hair Types & Textures</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Straight, wavy, coarse, curly, locs, or braids: complete mastery across all ethnic hair textures without scalp damage.
-              </p>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigateToBooking(barber.id);
+                }}
+                className="btn-gold rounded-full! text-xs px-5 py-2.5"
+              >
+                <span>Book with {barber.name}</span>
+              </button>
             </div>
           </div>
+        ))}
+      </div>
+
+      {/* Sculpted Craftsmanship Pavilion */}
+      <div className="rounded-[2.75rem] bg-gradient-to-b from-white/[0.03] via-white/[0.01] to-transparent border border-white/10 p-8 sm:p-12">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <span className="text-gold font-mono text-[11px] uppercase tracking-widest font-bold block mb-1">
+            The Art of Barbering
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white">
+            Why Master Craftsmanship Matters
+          </h2>
         </div>
 
-      </main>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center divide-y sm:divide-y-0 sm:divide-x divide-white/10">
+          <div className="pt-6 sm:pt-0 sm:px-6">
+            <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-4">
+              <Scissors className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-serif font-bold text-white mb-2">Facial Bone Architecture</h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Behind the chair, we calculate fade gradients and beard symmetry precisely matched to your cranial structure.
+            </p>
+          </div>
 
-      <CallShopModal 
-        isOpen={isCallModalOpen} 
-        onClose={() => setIsCallModalOpen(false)} 
-      />
+          <div className="pt-6 sm:pt-0 sm:px-6">
+            <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-4">
+              <Clock className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-serif font-bold text-white mb-2">Unwavering Consistency</h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              No bad days, no rushed appointments. You get the same elite caliber of finish on every single visit.
+            </p>
+          </div>
+
+          <div className="pt-6 sm:pt-0 sm:px-6">
+            <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mx-auto mb-4">
+              <Scissors className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-serif font-bold text-white mb-2">All Hair Types &amp; Textures</h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Straight, wavy, coarse, curly, locs, or braids: complete mastery across all ethnic hair textures without scalp damage.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Briefcase, X, Check, Calendar, Users, Building, Phone, Mail, FileText, Sparkles, Send } from 'lucide-react';
+import { Briefcase, X, Check, Calendar, Users, Building, Phone, Mail, FileText, Send } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import { errorMessage as toErrorMessage, submitForm } from '../lib/site/api';
 import { LIMITS, check, formSchema, quoteDetailsSchema } from '../lib/site/validation';
