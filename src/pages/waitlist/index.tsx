@@ -1,10 +1,10 @@
-import { useState, useEffect, FormEvent } from 'react';
-import { 
-  Clock, 
-  Users, 
-  CheckCircle2, 
-  Phone, 
-  RefreshCw, 
+import { useState, useEffect, useMemo, FormEvent } from 'react';
+import {
+  Clock,
+  Users,
+  CheckCircle2,
+  Phone,
+  RefreshCw,
   Scissors
 } from 'lucide-react';
 import CallShopModal from '../../components/CallShopModal';
@@ -12,6 +12,13 @@ import { useSiteData } from '../../lib/site/SiteDataProvider';
 import { errorMessage, fetchPublicWaitlist, joinWaitlist } from '../../lib/site/api';
 import { LIMITS, check, normalizeTicketCode, waitlistSchema } from '../../lib/site/validation';
 import { useSubmitLock } from '../../lib/site/useSubmitLock';
+import {
+  SPECIALIST_UNIVERSES,
+  SpecialistKey,
+  getBarberForSpecialist,
+  getServiceSpecialist,
+  resolveSpecialistKey
+} from '../../lib/site/specialist';
 import type { PublicQueueEntry } from '../../types/content';
 
 interface StoredTicket {
@@ -44,16 +51,35 @@ export default function WaitlistPage({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
 
+  // Two-Universe Specialist Selection (Lusca vs Mika)
+  const [activeSpecialist, setActiveSpecialist] = useState<SpecialistKey>(() =>
+    resolveSpecialistKey(initialBarber, undefined, OFFICIAL_SERVICES)
+  );
+
+  const activeUniverseMeta = SPECIALIST_UNIVERSES[activeSpecialist];
+  const activeBarberProfile = useMemo(
+    () => getBarberForSpecialist(barbers, activeSpecialist),
+    [barbers, activeSpecialist]
+  );
+
+  const specialistServices = useMemo(() => {
+    const filtered = OFFICIAL_SERVICES.filter((s) => getServiceSpecialist(s) === activeSpecialist);
+    return filtered.length > 0 ? filtered : OFFICIAL_SERVICES;
+  }, [OFFICIAL_SERVICES, activeSpecialist]);
+
   // Form states
   const [clientName, setClientName] = useState('');
   const [clientPhone, setClientPhone] = useState('');
   const [clientEmail, setClientEmail] = useState('');
-  const [selectedBarber, setSelectedBarber] = useState(
-    initialBarber && barbers.some((b) => b.id === initialBarber) ? initialBarber : ''
-  );
-  const [selectedService, setSelectedService] = useState(OFFICIAL_SERVICES[0]?.id ?? '');
+  const [selectedService, setSelectedService] = useState(specialistServices[0]?.id ?? '');
   const [activeTicket, setActiveTicket] = useState<StoredTicket | null>(null);
   const submitOnce = useSubmitLock();
+
+  useEffect(() => {
+    if (!specialistServices.some((s) => s.id === selectedService)) {
+      setSelectedService(specialistServices[0]?.id ?? '');
+    }
+  }, [activeSpecialist, specialistServices, selectedService]);
 
   const fetchQueue = async () => {
     setIsLoading(true);
@@ -97,12 +123,13 @@ export default function WaitlistPage({
   const handleJoin = (e: FormEvent) => {
     e.preventDefault();
     return submitOnce(async () => {
+      const teamMemberSlug = activeBarberProfile?.id ?? activeSpecialist;
       const input = {
         name: clientName,
         phone: clientPhone,
         email: clientEmail,
         serviceSlug: selectedService || null,
-        teamMemberSlug: selectedBarber || null
+        teamMemberSlug
       };
       const valid = check(waitlistSchema, input);
       if (!valid.ok || !valid.data.phone) {
@@ -117,8 +144,8 @@ export default function WaitlistPage({
         const stored: StoredTicket = {
           ticketCode: ticket.ticketCode,
           name: valid.data.name,
-          barber: barbers.find((b) => b.id === selectedBarber)?.name ?? 'First Available',
-          service: OFFICIAL_SERVICES.find((s) => s.id === selectedService)?.name ?? '',
+          barber: activeBarberProfile?.name ?? activeUniverseMeta.name,
+          service: specialistServices.find((s) => s.id === selectedService)?.name ?? '',
           position: ticket.position,
           estMinutes: ticket.estMinutes
         };
@@ -149,7 +176,7 @@ export default function WaitlistPage({
         </h1>
         <div className="divider-gold-fade max-w-xs mx-auto mb-4"></div>
         <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-          No appointment? Check into the live walk-in queue. Monitor your exact place in line and head to the shop as your turn nears.
+          Choose your specialist (**Lusca** for Men&rsquo;s Barbering or **Mika** for Women&rsquo;s Braids &amp; Locs) and check into the live walk-in queue.
         </p>
       </div>
 
@@ -166,7 +193,7 @@ export default function WaitlistPage({
                 Ticket #{activeTicket.ticketCode} &bull; {activeTicket.name}
               </h2>
               <p className="text-xs text-gray-400 mt-1">
-                Barber: <span className="text-gold font-bold">{activeTicket.barber}</span> &bull; Service: {activeTicket.service}
+                Specialist: <span className="text-gold font-bold">{activeTicket.barber}</span> &bull; Service: {activeTicket.service}
               </p>
             </div>
 
@@ -243,11 +270,13 @@ export default function WaitlistPage({
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-mono font-bold text-sm ${
-                        item.status === 'in_chair'
-                          ? 'bg-gold text-black'
-                          : 'bg-white/10 text-gold border border-white/10'
-                      }`}>
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-mono font-bold text-sm ${
+                          item.status === 'in_chair'
+                            ? 'bg-gold text-black'
+                            : 'bg-white/10 text-gold border border-white/10'
+                        }`}
+                      >
                         #{idx + 1}
                       </div>
 
@@ -261,7 +290,8 @@ export default function WaitlistPage({
                           )}
                         </div>
                         <span className="text-xs text-gray-400 block mt-0.5">
-                          Barber: <strong className="text-gold">{item.teamMemberName ?? 'First Available'}</strong>{item.serviceName ? <> &bull; {item.serviceName}</> : null}
+                          Specialist: <strong className="text-gold">{item.teamMemberName ?? 'Assigned Artisan'}</strong>
+                          {item.serviceName ? <> &bull; {item.serviceName}</> : null}
                         </span>
                       </div>
                     </div>
@@ -285,11 +315,58 @@ export default function WaitlistPage({
               <Scissors className="w-4 h-4 text-gold" />
               <span>Join Live Walk-In Line</span>
             </h2>
-            <p className="text-xs text-gray-400 mb-6">
-              Enter your details to generate your queue pass.
+            <p className="text-xs text-gray-400 mb-5">
+              Select your specialist universe below to see their exclusive services.
             </p>
 
             <form onSubmit={handleJoin} className="space-y-4 font-mono text-xs">
+              {/* Specialist Selector Pills (Lusca vs Mika) */}
+              <div>
+                <label className="block text-gold text-[11px] uppercase font-bold mb-2">
+                  1. Choose Your Specialist *
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['lusca', 'mika'] as SpecialistKey[]).map((specKey) => {
+                    const meta = SPECIALIST_UNIVERSES[specKey];
+                    const isSelected = activeSpecialist === specKey;
+                    return (
+                      <button
+                        key={specKey}
+                        type="button"
+                        onClick={() => setActiveSpecialist(specKey)}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-gold text-black border-gold font-bold shadow-md'
+                            : 'bg-white/[0.03] text-gray-300 border-white/15 hover:border-gold/40'
+                        }`}
+                      >
+                        <span className="block text-xs font-serif font-bold">{meta.name}</span>
+                        <span className={`block text-[10px] mt-0.5 ${isSelected ? 'text-black/80' : 'text-gray-400'}`}>
+                          {specKey === 'lusca' ? "Men's Cuts & Beard" : "Women's Braids & Locs"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gold text-[11px] uppercase font-bold mb-1.5">
+                  2. {activeUniverseMeta.name}&rsquo;s Exclusive Services *
+                </label>
+                <select
+                  value={selectedService}
+                  onChange={(e) => setSelectedService(e.target.value)}
+                  className="w-full bg-[#0E0D12] border border-white/15 px-4 py-3 text-white focus:border-gold focus:outline-none rounded-2xl"
+                >
+                  {specialistServices.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.price} - {s.duration})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-gray-400 text-[11px] uppercase mb-1.5">Full Name *</label>
                 <input
@@ -320,7 +397,9 @@ export default function WaitlistPage({
               </div>
 
               <div>
-                <label className="block text-gray-400 text-[11px] uppercase mb-1.5">Email Address (for pass confirmation)</label>
+                <label className="block text-gray-400 text-[11px] uppercase mb-1.5">
+                  Email Address (for pass confirmation)
+                </label>
                 <input
                   type="email"
                   value={clientEmail}
@@ -333,37 +412,11 @@ export default function WaitlistPage({
                 />
               </div>
 
-              <div>
-                <label className="block text-gray-400 text-[11px] uppercase mb-1.5">Preferred Barber *</label>
-                <select
-                  value={selectedBarber}
-                  onChange={(e) => setSelectedBarber(e.target.value)}
-                  className="w-full bg-[#0E0D12] border border-white/15 px-4 py-3 text-white focus:border-gold focus:outline-none rounded-2xl"
-                >
-                  <option value="">First Available Master Barber (Fastest)</option>
-                  {barbers.map((b) => (
-                    <option key={b.id} value={b.id}>{b.name} ({b.role})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-gray-400 text-[11px] uppercase mb-1.5">Select Service *</label>
-                <select
-                  value={selectedService}
-                  onChange={(e) => setSelectedService(e.target.value)}
-                  className="w-full bg-[#0E0D12] border border-white/15 px-4 py-3 text-white focus:border-gold focus:outline-none rounded-2xl"
-                >
-                  {OFFICIAL_SERVICES.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.price} - {s.duration})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {submitError && (
-                <p role="alert" className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 px-4 py-2.5 rounded-2xl">
+                <p
+                  role="alert"
+                  className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 px-4 py-2.5 rounded-2xl"
+                >
                   {submitError}
                 </p>
               )}
@@ -372,7 +425,11 @@ export default function WaitlistPage({
                 disabled={isSubmitting || !isWaitlistOpen}
                 className="w-full btn-gold rounded-full! py-3.5 text-xs mt-2 disabled:opacity-50"
               >
-                <span>{isSubmitting ? 'Generating Pass...' : 'Get My Digital Queue Pass'}</span>
+                <span>
+                  {isSubmitting
+                    ? 'Generating Pass...'
+                    : `Join ${activeUniverseMeta.name}'s Walk-In Queue`}
+                </span>
               </button>
             </form>
           </div>
@@ -381,7 +438,7 @@ export default function WaitlistPage({
           <div className="card-luxury rounded-[2rem]! p-6 font-mono text-xs">
             <span className="text-gold font-bold uppercase block mb-1">Need Immediate Assistance?</span>
             <p className="text-gray-400 text-[11px] mb-4">
-              Call our direct line to verify exact walk-in volume right now.
+              Call {activeUniverseMeta.name} directly to verify walk-in volume right now.
             </p>
             <button
               type="button"
@@ -389,16 +446,13 @@ export default function WaitlistPage({
               className="w-full btn-obsidian rounded-full! py-3 text-xs"
             >
               <Phone className="w-3.5 h-3.5 text-gold" />
-              <span>Call {site.contact.phones[0]?.display}</span>
+              <span>Call {activeBarberProfile?.phone || site.contact.phones[0]?.display}</span>
             </button>
           </div>
         </div>
       </div>
 
-      <CallShopModal 
-        isOpen={isCallModalOpen} 
-        onClose={() => setIsCallModalOpen(false)} 
-      />
+      <CallShopModal isOpen={isCallModalOpen} onClose={() => setIsCallModalOpen(false)} />
     </div>
   );
 }

@@ -1,20 +1,19 @@
-import { useState, useEffect } from 'react';
-import { 
-  ArrowLeft, 
-  Calendar as CalendarIcon, 
-  Check, 
-  Clock, 
-  Loader2, 
-  Phone, 
-  MapPin, 
+import { useState, useEffect, useMemo } from 'react';
+import {
+  ArrowLeft,
+  Calendar as CalendarIcon,
+  Check,
+  Clock,
+  Loader2,
+  Phone,
+  MapPin,
   ChevronLeft,
   ChevronRight,
   User,
   Mail,
   Scissors,
   Printer,
-  ArrowRight,
-  Award
+  ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addDays, startOfToday } from 'date-fns';
@@ -23,7 +22,15 @@ import { useSiteData } from '../../lib/site/SiteDataProvider';
 import { bookAppointment, errorMessage, formatTime12h } from '../../lib/site/api';
 import { BOOKING_WINDOW_DAYS, LIMITS, bookingSchema, check } from '../../lib/site/validation';
 import { useSubmitLock } from '../../lib/site/useSubmitLock';
-import type { BookingConfirmation } from '../../types/content';
+import {
+  SPECIALIST_UNIVERSES,
+  SpecialistKey,
+  getBarberForSpecialist,
+  getGalleryItemSpecialist,
+  getServiceSpecialist,
+  resolveSpecialistKey
+} from '../../lib/site/specialist';
+import type { BookingConfirmation, GalleryItem } from '../../types/content';
 
 interface BookingPageProps {
   onBackToHome: () => void;
@@ -32,34 +39,104 @@ interface BookingPageProps {
 }
 
 export default function BookingPage({ onBackToHome, initialBarber, initialService }: BookingPageProps) {
-  // Step navigation: 1 = Craft Menu, 2 = Artisan & Time, 3 = Guest Details, 4 = Confirm Pass
+  const { services: SERVICES, barbers, gallery, site } = useSiteData();
+  const TIME_SLOTS = site.booking.timeSlots;
+
+  // Determine initial specialist ('lusca' for men's cuts/fades, 'mika' for women's braids/locs)
+  // Prioritize initialService if provided so clicking a braid service always opens Mika's universe
+  const [activeSpecialist, setActiveSpecialist] = useState<SpecialistKey>(() =>
+    resolveSpecialistKey(initialService ? undefined : initialBarber, initialService, SERVICES)
+  );
+
+  // Step navigation: 1 = Specialist & Craft Menu, 2 = Date & Time, 3 = Guest Details, 4 = Confirm Pass
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const { services: SERVICES, barbers, gallery, site } = useSiteData();
-  const CATEGORIES = ['All', ...Array.from(new Set(SERVICES.map((s) => s.category)))];
-  const TIME_SLOTS = site.booking.timeSlots;
-  const BARBERS = [
-    { id: 'any', name: 'First Available Master Artist', role: 'Fastest Chair Availability', phone: '', initials: 'FS' },
-    ...barbers.map((b) => ({ id: b.id, name: b.name, role: b.role, phone: b.phone, initials: b.initials }))
-  ];
 
-  // Form State
-  const [selectedServiceId, setSelectedServiceId] = useState(
-    initialService && SERVICES.some(s => s.id === initialService) ? initialService : SERVICES[0]?.id
+  // Filter services strictly for the chosen specialist (never mix Lusca and Mika)
+  const specialistServices = useMemo(() => {
+    const filtered = SERVICES.filter((s) => getServiceSpecialist(s) === activeSpecialist);
+    return filtered.length > 0 ? filtered : SERVICES;
+  }, [SERVICES, activeSpecialist]);
+
+  // Filter gallery models strictly for the chosen specialist
+  const specialistGallery = useMemo(() => {
+    const filtered = gallery.filter((g) => getGalleryItemSpecialist(g) === activeSpecialist);
+    return filtered.length > 0 ? filtered : gallery;
+  }, [gallery, activeSpecialist]);
+
+  const activeBarberProfile = useMemo(
+    () => getBarberForSpecialist(barbers, activeSpecialist),
+    [barbers, activeSpecialist]
   );
+
+  const CATEGORIES = useMemo(
+    () => ['All', ...Array.from(new Set(specialistServices.map((s) => s.category)))],
+    [specialistServices]
+  );
+
+  // Selected Service & Selected Visual Model
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(() => {
+    if (initialService) {
+      const byIdOrName = SERVICES.find(
+        (s) =>
+          s.id.toLowerCase() === initialService.toLowerCase() ||
+          s.name.toLowerCase() === initialService.toLowerCase()
+      );
+      if (byIdOrName) return byIdOrName.id;
+    }
+    const initialPool = SERVICES.filter(
+      (s) =>
+        getServiceSpecialist(s) ===
+        resolveSpecialistKey(initialService ? undefined : initialBarber, initialService, SERVICES)
+    );
+    return initialPool[0]?.id ?? SERVICES[0]?.id ?? '';
+  });
+
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+
+  // Sync specialist if initialService or initialBarber prop changes
+  useEffect(() => {
+    if (initialService) {
+      const targetSpec = resolveSpecialistKey(undefined, initialService, SERVICES);
+      setActiveSpecialist(targetSpec);
+      const matched = SERVICES.find(
+        (s) =>
+          s.id.toLowerCase() === initialService.toLowerCase() ||
+          s.name.toLowerCase() === initialService.toLowerCase()
+      );
+      if (matched) {
+        setSelectedServiceId(matched.id);
+      }
+    } else if (initialBarber) {
+      const targetSpec = resolveSpecialistKey(initialBarber, undefined, SERVICES);
+      setActiveSpecialist(targetSpec);
+    }
+  }, [initialBarber, initialService, SERVICES]);
+
+  // Ensure selectedServiceId always belongs to the active specialist
+  useEffect(() => {
+    setSelectedCategory('All');
+    setSelectedModelId(null);
+    if (!specialistServices.some((s) => s.id === selectedServiceId)) {
+      setSelectedServiceId(specialistServices[0]?.id ?? '');
+    }
+  }, [activeSpecialist, specialistServices, selectedServiceId]);
+
   const [selectedDate, setSelectedDate] = useState(format(startOfToday(), 'yyyy-MM-dd'));
   const [selectedTime, setSelectedTime] = useState(TIME_SLOTS[0] ?? '');
-  const [selectedBarber, setSelectedBarber] = useState(
-    initialBarber && barbers.some((b) => b.id === initialBarber) ? initialBarber : 'any'
-  );
   const [weekOffset, setWeekOffset] = useState(0);
 
-  // Guest Information (For Ticket and Reservation Number)
+  // Guest Information
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [specialNotes, setSpecialNotes] = useState('');
-  const [formErrors, setFormErrors] = useState<{ name?: string; email?: string; phone?: string; notes?: string }>({});
+  const [formErrors, setFormErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+    notes?: string;
+  }>({});
   const submitOnce = useSubmitLock();
 
   // Submission & Result State
@@ -73,24 +150,88 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
-  const selectedService = SERVICES.find(s => s.id === selectedServiceId) || SERVICES[0];
+  const selectedService =
+    specialistServices.find((s) => s.id === selectedServiceId) || specialistServices[0];
 
-  // Match an authentic portfolio artwork image to the currently selected service / category
-  const getArtImageForService = (serviceName?: string, category?: string) => {
-    if (!gallery || gallery.length === 0) return null;
+  // Match a model from the active specialist's portfolio only
+  const getSpecialistArtForService = (
+    serviceName?: string,
+    category?: string
+  ): GalleryItem | null => {
+    if (!specialistGallery || specialistGallery.length === 0) return null;
+    if (selectedModelId) {
+      const explicitModel = specialistGallery.find((g) => g.id === selectedModelId);
+      if (explicitModel) return explicitModel;
+    }
     const text = `${serviceName ?? ''} ${category ?? ''}`.toLowerCase();
-    if (text.includes('braid') || text.includes('loc') || text.includes('cornrow') || text.includes('twist')) {
-      return gallery.find((g) => g.barber.toLowerCase().includes('mika') || g.category.toLowerCase().includes('braid')) || gallery[0];
+    if (activeSpecialist === 'mika') {
+      if (text.includes('loc') || text.includes('retwist') || text.includes('dread')) {
+        return (
+          specialistGallery.find(
+            (g) =>
+              g.title.toLowerCase().includes('loc') ||
+              g.category.toLowerCase().includes('loc')
+          ) || specialistGallery[0]
+        );
+      }
+      if (text.includes('cornrow') || text.includes('stitch') || text.includes('feed')) {
+        return (
+          specialistGallery.find(
+            (g) =>
+              g.title.toLowerCase().includes('cornrow') ||
+              g.title.toLowerCase().includes('feed')
+          ) || specialistGallery[0]
+        );
+      }
+      if (text.includes('boho') || text.includes('curl')) {
+        return (
+          specialistGallery.find(
+            (g) =>
+              g.title.toLowerCase().includes('boho') ||
+              g.title.toLowerCase().includes('curl')
+          ) || specialistGallery[0]
+        );
+      }
+      return specialistGallery[0];
+    } else {
+      if (text.includes('beard') || text.includes('shave') || text.includes('razor')) {
+        return (
+          specialistGallery.find(
+            (g) =>
+              g.title.toLowerCase().includes('beard') ||
+              g.category.toLowerCase().includes('beard')
+          ) || specialistGallery[0]
+        );
+      }
+      if (text.includes('taper')) {
+        return (
+          specialistGallery.find((g) => g.title.toLowerCase().includes('taper')) ||
+          specialistGallery[0]
+        );
+      }
+      return specialistGallery[0];
     }
-    if (text.includes('beard') || text.includes('shave')) {
-      return gallery.find((g) => g.title.toLowerCase().includes('beard') || g.category.toLowerCase().includes('beard')) || gallery[1] || gallery[0];
-    }
-    return gallery.find((g) => g.barber.toLowerCase().includes('lusca') || g.category.toLowerCase().includes('fade')) || gallery[0];
   };
 
-  const activeArtItem = getArtImageForService(selectedService?.name, selectedService?.category);
+  const activeArtItem = getSpecialistArtForService(
+    selectedService?.name,
+    selectedService?.category
+  );
 
-  const currentWeekDays = Array.from({ length: 7 }).map((_, i) => 
+  // When a client clicks a visual model card proposed by the specialist, match it to one of that specialist's services
+  const handleSelectSpecialistModel = (model: GalleryItem) => {
+    setSelectedModelId(model.id);
+    const titleWords = model.title.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+    const matchedService = specialistServices.find((s) => {
+      const target = `${s.name} ${s.category} ${s.description}`.toLowerCase();
+      return titleWords.some((w) => target.includes(w));
+    });
+    if (matchedService) {
+      setSelectedServiceId(matchedService.id);
+    }
+  };
+
+  const currentWeekDays = Array.from({ length: 7 }).map((_, i) =>
     addDays(startOfToday(), weekOffset * 7 + i)
   );
   const lastBookableDay = addDays(startOfToday(), BOOKING_WINDOW_DAYS);
@@ -100,7 +241,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
     serviceSlug: selectedService?.id,
     date: selectedDate,
     time: selectedTime,
-    teamMemberSlug: selectedBarber === 'any' ? null : selectedBarber,
+    teamMemberSlug: activeBarberProfile?.id ?? activeSpecialist,
     name: guestName,
     email: guestEmail,
     phone: guestPhone,
@@ -111,8 +252,18 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
   const validateStep3 = () => {
     type GuestField = 'name' | 'email' | 'phone' | 'notes';
     const errors: Partial<Record<GuestField, string>> = {};
-    const guest: Record<GuestField, string> = { name: guestName, email: guestEmail, phone: guestPhone, notes: specialNotes };
-    const neutral: Record<GuestField, string> = { name: 'Valid Name', email: '', phone: '', notes: '' };
+    const guest: Record<GuestField, string> = {
+      name: guestName,
+      email: guestEmail,
+      phone: guestPhone,
+      notes: specialNotes
+    };
+    const neutral: Record<GuestField, string> = {
+      name: 'Valid Name',
+      email: '',
+      phone: '',
+      notes: ''
+    };
     for (let i = 0; i < 4; i++) {
       const r = check(bookingSchema, { ...bookingInput(), ...guest });
       const field = r.field as GuestField | undefined;
@@ -153,15 +304,16 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
     window.print();
   };
 
-  const filteredServices = SERVICES.filter(
+  const filteredServices = specialistServices.filter(
     (service) => selectedCategory === 'All' || service.category === selectedCategory
   );
+
+  const activeUniverseMeta = SPECIALIST_UNIVERSES[activeSpecialist];
 
   return (
     <div className="w-full overflow-x-clip font-sans">
       {/* Main Atelier Content */}
       <div className="pt-28 sm:pt-36 pb-16 px-5 sm:px-8 lg:px-12 xl:px-16 w-full max-w-7xl mx-auto">
-        
         {isSuccess ? (
           /* =========================================================================
              CONFIRMED ATELIER PASS SCREEN
@@ -183,7 +335,9 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
               We Look Forward to Welcoming You
             </h1>
             <p className="text-gray-300 text-sm sm:text-base leading-relaxed max-w-md mx-auto mb-6">
-              Thank you <strong className="text-white">{guestName.trim().split(' ')[0]}</strong>. Your private chair is reserved. A copy of your pass has been sent to <strong className="text-gold">{guestEmail || guestPhone}</strong>.
+              Thank you <strong className="text-white">{guestName.trim().split(' ')[0]}</strong>. Your private chair with{' '}
+              <strong className="text-gold">{activeBarberProfile?.name ?? activeUniverseMeta.name}</strong> is reserved. A copy of your pass has been sent to{' '}
+              <strong className="text-gold">{guestEmail || guestPhone}</strong>.
             </p>
 
             {/* Atelier Pass Summary Strip */}
@@ -195,9 +349,17 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                 <span className="text-xs font-mono text-emerald-400">Pay at Shop ($0 Deposit)</span>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                <span className="text-white font-serif font-bold text-lg">{confirmedData?.serviceName}</span>
+                <div>
+                  <span className="text-white font-serif font-bold text-lg block">
+                    {confirmedData?.serviceName}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    Specialist: <strong className="text-gold">{activeBarberProfile?.name ?? activeUniverseMeta.name}</strong> ({activeUniverseMeta.universeTitle})
+                  </span>
+                </div>
                 <span className="text-gold font-mono font-bold">
-                  {confirmedData?.appointmentDate} &middot; {confirmedData ? formatTime12h(confirmedData.appointmentTime) : ''}
+                  {confirmedData?.appointmentDate} &middot;{' '}
+                  {confirmedData ? formatTime12h(confirmedData.appointmentTime) : ''}
                 </span>
               </div>
             </div>
@@ -238,32 +400,34 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
           </motion.div>
         ) : (
           /* =========================================================================
-             ARTISAN SALON ATELIER BOOKING EXPERIENCE (ZERO HEAVY BOXES)
+             TWO-WORLD SPECIALIST BOOKING EXPERIENCE (LUSCA MEN VS MIKA WOMEN/BRAIDS)
              ========================================================================= */
           <div>
-            
-            {/* Editorial Atelier Header + Visual Art Strip */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-10 border-b border-white/10 mb-10">
+            {/* Editorial Atelier Header */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-white/10 mb-8">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 text-gold font-mono text-[11px] uppercase tracking-[0.25em] font-bold mb-3">
-                  <span>The Artisan Atelier &middot; {site.name}</span>
+                  <span>{activeUniverseMeta.craftBadge} &middot; {site.name}</span>
                 </div>
                 <h1
                   className="font-serif italic text-white leading-[1.02] tracking-tight"
                   style={{ fontSize: 'clamp(2.25rem, 5vw, 4rem)' }}
                 >
-                  Reserve Your <span className="not-italic font-sans font-black uppercase text-gold">Master Chair</span>
+                  Reserve with{' '}
+                  <span className="not-italic font-sans font-black uppercase text-gold">
+                    {activeUniverseMeta.name}
+                  </span>
                 </h1>
                 <p className="text-gray-400 text-sm sm:text-base mt-3 leading-relaxed max-w-xl">
-                  Every haircut, zero skin fade, and protective braid style is handcrafted to your cranial structure and hair texture. Select your craft below.
+                  {activeUniverseMeta.description}
                 </p>
               </div>
 
-              {/* Minimalist Stepper (Unboxed Architectural Line) */}
+              {/* Minimalist Stepper */}
               <div className="flex items-center gap-3 sm:gap-5 shrink-0 overflow-x-auto pb-2 lg:pb-0">
                 {[
-                  { num: 1, label: 'Craft' },
-                  { num: 2, label: 'Schedule' },
+                  { num: 1, label: 'Specialist & Craft' },
+                  { num: 2, label: 'Date & Time' },
                   { num: 3, label: 'Guest' },
                   { num: 4, label: 'Confirm' }
                 ].map((s, idx) => {
@@ -309,27 +473,176 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
               </div>
             </div>
 
-            {/* 2-Column Split Atelier Layout: Left = Interactive Salon Menu / Steps, Right = Sticky Live Art & Chair Preview */}
+            {/* =====================================================================
+                DEDICATED TWO-UNIVERSE SPECIALIST SELECTOR (LUSCA VS MIKA)
+                ===================================================================== */}
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-sans font-bold uppercase tracking-[0.22em] text-gold">
+                  Step 01A &middot; Choose Your Dedicated Specialist Universe
+                </span>
+                <span className="text-xs text-gray-400 hidden sm:inline">
+                  Each master artisan offers their own exclusive menu &amp; models
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(['lusca', 'mika'] as SpecialistKey[]).map((specKey) => {
+                  const meta = SPECIALIST_UNIVERSES[specKey];
+                  const profile = getBarberForSpecialist(barbers, specKey);
+                  const isSelected = activeSpecialist === specKey;
+                  const count = SERVICES.filter((s) => getServiceSpecialist(s) === specKey).length;
+                  const modelCount = gallery.filter((g) => getGalleryItemSpecialist(g) === specKey).length;
+
+                  return (
+                    <button
+                      key={specKey}
+                      type="button"
+                      onClick={() => {
+                        setActiveSpecialist(specKey);
+                        if (currentStep !== 1) setCurrentStep(1);
+                      }}
+                      className={`text-left p-6 sm:p-7 rounded-[2.25rem] border transition-all duration-300 cursor-pointer relative overflow-hidden group ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-gold/[0.16] via-[#15141A] to-[#0C0C10] border-gold shadow-[0_20px_50px_rgba(197,160,89,0.22)]'
+                          : 'bg-[#101014]/90 border-white/10 hover:border-gold/40 hover:bg-white/[0.03]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`w-14 h-14 rounded-full flex flex-col items-center justify-center font-serif font-bold text-base border transition-all shrink-0 ${
+                              isSelected
+                                ? 'bg-gold text-black border-gold shadow-[0_0_20px_rgba(197,160,89,0.5)]'
+                                : 'bg-[#18181F] text-gold border-gold/30 group-hover:border-gold'
+                            }`}
+                          >
+                            <span>{profile?.initials ?? meta.name.slice(0, 2).toUpperCase()}</span>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.2em] text-gold">
+                                {meta.craftBadge}
+                              </span>
+                            </div>
+                            <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mt-0.5">
+                              {profile?.name ?? meta.name} &mdash;{' '}
+                              <span className="text-gold italic">{meta.universeTitle}</span>
+                            </h2>
+                            <p className="text-xs text-gray-300 mt-1">{meta.universeSubtitle}</p>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`px-3.5 py-1.5 rounded-full text-[10px] font-sans font-extrabold uppercase tracking-[0.18em] shrink-0 border transition-all ${
+                            isSelected
+                              ? 'bg-gold text-black border-gold'
+                              : 'border-white/15 text-gray-400 group-hover:text-white'
+                          }`}
+                        >
+                          {isSelected ? 'Active Universe' : 'Switch'}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 pt-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-400">
+                        <span>
+                          Exclusive Menu: <strong className="text-white">{count} Services</strong> &middot;{' '}
+                          <strong className="text-gold">{modelCount} Portfolio Models</strong>
+                        </span>
+                        {profile?.phone && (
+                          <span className="text-gray-300">Direct: {profile.phone}</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2-Column Split Atelier Layout: Left = Specialist Models & Craft Menu / Steps, Right = Sticky Live Art & Chair Preview */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-              
               {/* LEFT 7 COLUMNS: UNBOXED SALON MENU & STEPS */}
               <div className="lg:col-span-7">
-                
                 {/* ===============================================================
-                    STEP 1: THE ARTISAN SERVICE MENU (EDITORIAL LIST, NO BIG BOXES)
+                    STEP 1: SPECIALIST'S VISUAL MODELS + EXCLUSIVE SERVICE MENU
                     =============================================================== */}
                 {currentStep === 1 && (
                   <motion.div
+                    key={activeSpecialist}
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.45 }}
+                    transition={{ duration: 0.4 }}
                   >
-                    {/* Sleek Category Pills */}
+                    {/* Visual Models Proposed Exclusively by the Selected Specialist */}
+                    {specialistGallery.length > 0 && (
+                      <div className="mb-9">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.22em] text-gold block">
+                              Models Proposed by {activeUniverseMeta.name}
+                            </span>
+                            <h3 className="text-lg font-serif font-bold text-white">
+                              Select a Signature Model or Choose from {activeUniverseMeta.name}&rsquo;s Menu Below
+                            </h3>
+                          </div>
+                          <span className="text-[11px] text-gray-400">
+                            {specialistGallery.length} {activeUniverseMeta.name} styles
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+                          {specialistGallery.map((model) => {
+                            const isModelActive = activeArtItem?.id === model.id;
+                            return (
+                              <div
+                                key={model.id}
+                                onClick={() => handleSelectSpecialistModel(model)}
+                                className={`group relative aspect-[4/3] rounded-[1.5rem] overflow-hidden border cursor-pointer transition-all duration-300 ${
+                                  isModelActive
+                                    ? 'border-gold ring-2 ring-gold/40 shadow-[0_10px_30px_rgba(197,160,89,0.28)] scale-[1.01]'
+                                    : 'border-white/10 hover:border-gold/50 opacity-85 hover:opacity-100'
+                                }`}
+                              >
+                                <img
+                                  src={model.imageUrl}
+                                  alt={model.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                                <div className="absolute top-2.5 right-2.5">
+                                  <span
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all ${
+                                      isModelActive
+                                        ? 'bg-gold text-black shadow-md'
+                                        : 'bg-black/60 text-white/70 border border-white/20'
+                                    }`}
+                                  >
+                                    <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  </span>
+                                </div>
+                                <div className="absolute bottom-2.5 left-3 right-3">
+                                  <span className="text-[9px] font-sans font-extrabold uppercase tracking-[0.18em] text-gold block truncate">
+                                    {model.category}
+                                  </span>
+                                  <p className="text-xs font-serif font-bold text-white line-clamp-1">
+                                    {model.title}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Sleek Category Pills (Only Categories for Active Specialist) */}
                     <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar border-b border-white/10">
                       {CATEGORIES.map((cat) => {
-                        const count = cat === 'All'
-                          ? SERVICES.length
-                          : SERVICES.filter((s) => s.category === cat).length;
+                        const count =
+                          cat === 'All'
+                            ? specialistServices.length
+                            : specialistServices.filter((s) => s.category === cat).length;
                         const isActive = selectedCategory === cat;
                         return (
                           <button
@@ -342,24 +655,27 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                                 : 'bg-transparent text-gray-400 border-white/10 hover:text-white hover:border-white/25'
                             }`}
                           >
-                            <span>{cat}</span>
-                            <span className={`ml-1.5 text-[10px] opacity-75`}>({count})</span>
+                            <span>{cat === 'All' ? `All ${activeUniverseMeta.name} Services` : cat}</span>
+                            <span className="ml-1.5 text-[10px] opacity-75">({count})</span>
                           </button>
                         );
                       })}
                     </div>
 
-                    {/* Fine Salon Menu Rows — Separated by Hairline Dividers */}
+                    {/* Fine Salon Menu Rows — Filtered Exclusively to Active Specialist */}
                     <div className="divide-y divide-white/[0.08]">
                       {filteredServices.map((service, index) => {
-                        const isSelected = selectedServiceId === service.id;
+                        const isSelected = selectedService?.id === service.id;
                         return (
                           <motion.div
                             key={service.id}
                             initial={{ opacity: 0, y: 14 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.35, delay: Math.min(index * 0.03, 0.25) }}
-                            onClick={() => setSelectedServiceId(service.id)}
+                            onClick={() => {
+                              setSelectedServiceId(service.id);
+                              setSelectedModelId(null);
+                            }}
                             className={`group py-6 px-3 sm:px-5 -mx-3 sm:-mx-5 rounded-2xl transition-all duration-300 cursor-pointer ${
                               isSelected
                                 ? 'bg-gradient-to-r from-gold/[0.11] via-gold/[0.04] to-transparent'
@@ -397,7 +713,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                               {/* Dotted Menu Leader Line */}
                               <div className="hidden sm:block flex-1 border-b border-dotted border-white/15 mx-2 relative -top-1" />
 
-                              {/* Duration & Price + Instant Select Action */}
+                              {/* Duration & Price */}
                               <div className="flex items-center gap-4 shrink-0">
                                 <span className="text-xs font-mono text-gray-400 flex items-center gap-1">
                                   <Clock className="w-3 h-3 text-gold/70" />
@@ -436,7 +752,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                                     : 'bg-white/[0.05] text-gray-300 hover:bg-gold hover:text-black border border-white/10'
                                 }`}
                               >
-                                <span>Book Craft</span>
+                                <span>Book with {activeUniverseMeta.name}</span>
                                 <ArrowRight className="w-3 h-3" />
                               </button>
                             </div>
@@ -448,7 +764,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                 )}
 
                 {/* ===============================================================
-                    STEP 2: CHOOSE MASTER ARTISAN, DATE & TIME
+                    STEP 2: DATE & TIME FOR YOUR CHOSEN SPECIALIST
                     =============================================================== */}
                 {currentStep === 2 && (
                   <motion.div
@@ -457,68 +773,42 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                     transition={{ duration: 0.45 }}
                     className="space-y-10"
                   >
-                    {/* 1. Select Master Artisan */}
-                    <div>
-                      <span className="text-gold font-mono text-[11px] uppercase tracking-[0.22em] font-bold block mb-2">
-                        01 &middot; Master Artisan
-                      </span>
-                      <h2 className="text-2xl font-serif font-bold text-white mb-5">
-                        Choose Your Artist
-                      </h2>
-
-                      <div className="divide-y divide-white/10 border-y border-white/10">
-                        {BARBERS.map((barber) => {
-                          const isSelected = selectedBarber === barber.id;
-                          return (
-                            <div
-                              key={barber.id}
-                              onClick={() => setSelectedBarber(barber.id)}
-                              className={`py-4 px-4 flex items-center justify-between gap-4 cursor-pointer transition-all ${
-                                isSelected ? 'bg-gold/[0.09]' : 'hover:bg-white/[0.02]'
-                              }`}
-                            >
-                              <div className="flex items-center gap-4">
-                                <div
-                                  className={`w-12 h-12 rounded-full flex items-center justify-center font-serif font-bold text-sm border transition-all ${
-                                    isSelected
-                                      ? 'bg-gold text-black border-gold shadow-[0_0_16px_rgba(197,160,89,0.4)]'
-                                      : 'bg-[#121216] text-gold border-white/15'
-                                  }`}
-                                >
-                                  {barber.initials}
-                                </div>
-                                <div>
-                                  <h3 className={`font-serif font-bold text-base ${isSelected ? 'text-gold' : 'text-white'}`}>
-                                    {barber.name}
-                                  </h3>
-                                  <p className="text-xs text-gray-400">{barber.role}</p>
-                                </div>
-                              </div>
-
-                              <span
-                                className={`text-xs font-mono uppercase tracking-wider px-3.5 py-1.5 rounded-full border ${
-                                  isSelected
-                                    ? 'bg-gold text-black border-gold font-bold'
-                                    : 'border-white/15 text-gray-400'
-                                }`}
-                              >
-                                {isSelected ? 'Selected' : 'Select'}
-                              </span>
-                            </div>
-                          );
-                        })}
+                    {/* Dedicated Specialist Banner */}
+                    <div className="p-5 sm:p-6 rounded-[2rem] bg-gradient-to-r from-gold/[0.12] via-white/[0.02] to-transparent border border-gold/35 flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-gold text-black font-serif font-bold text-sm flex items-center justify-center shadow-[0_0_16px_rgba(197,160,89,0.4)]">
+                          {activeBarberProfile?.initials ?? activeUniverseMeta.name.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-sans font-extrabold uppercase tracking-[0.2em] text-gold block">
+                            Selected Specialist Chair
+                          </span>
+                          <h3 className="text-lg font-serif font-bold text-white">
+                            {activeBarberProfile?.name ?? activeUniverseMeta.name} &mdash;{' '}
+                            <span className="text-gold">{activeUniverseMeta.universeTitle}</span>
+                          </h3>
+                          <p className="text-xs text-gray-400">{selectedService?.name} ({selectedService?.price})</p>
+                        </div>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="text-xs font-sans font-bold uppercase tracking-wider text-gold hover:text-white border border-gold/30 rounded-full px-4 py-2 bg-transparent cursor-pointer"
+                      >
+                        Change Service / Specialist
+                      </button>
                     </div>
 
-                    {/* 2. Pick Date */}
+                    {/* 1. Pick Date */}
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <span className="text-gold font-mono text-[11px] uppercase tracking-[0.22em] font-bold block mb-1">
-                            02 &middot; Calendar
+                            01 &middot; Calendar
                           </span>
                           <h2 className="text-2xl font-serif font-bold text-white">
-                            Select Day
+                            Select Day with {activeUniverseMeta.name}
                           </h2>
                         </div>
                         <div className="flex items-center gap-2">
@@ -576,13 +866,13 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                       </div>
                     </div>
 
-                    {/* 3. Pick Time Slot */}
+                    {/* 2. Pick Time Slot */}
                     <div>
                       <span className="text-gold font-mono text-[11px] uppercase tracking-[0.22em] font-bold block mb-1">
-                        03 &middot; Time Slot
+                        02 &middot; Time Slot
                       </span>
                       <h2 className="text-2xl font-serif font-bold text-white mb-4">
-                        Available Chair Hours
+                        Available Chair Hours for {activeUniverseMeta.name}
                       </h2>
 
                       <div className="flex flex-wrap gap-2.5">
@@ -617,7 +907,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                         className="text-xs font-mono uppercase tracking-wider text-gray-400 hover:text-gold flex items-center gap-2 cursor-pointer bg-transparent border-none"
                       >
                         <ArrowLeft className="w-4 h-4" />
-                        <span>Back to Craft Menu</span>
+                        <span>Back to {activeUniverseMeta.name}&rsquo;s Menu</span>
                       </button>
 
                       <button
@@ -653,7 +943,8 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                         Your Guest Pass Details
                       </h2>
                       <p className="text-xs sm:text-sm text-gray-400">
-                        Enter your name and contact details so we can issue your reservation pass.
+                        Enter your name and contact details so we can issue your reservation pass with{' '}
+                        <strong className="text-gold">{activeBarberProfile?.name ?? activeUniverseMeta.name}</strong>.
                       </p>
                     </div>
 
@@ -753,7 +1044,11 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                             setSpecialNotes(e.target.value);
                             if (formErrors.notes) setFormErrors((prev) => ({ ...prev, notes: undefined }));
                           }}
-                          placeholder="e.g. Low drop fade, keep crown length, sensitive scalp..."
+                          placeholder={
+                            activeSpecialist === 'mika'
+                              ? 'e.g. Mid-back length knotless, boho human hair curls, gentle edges...'
+                              : 'e.g. Low drop skin fade, keep crown length, sharp razor beard line...'
+                          }
                           maxLength={LIMITS.notes}
                           className={`w-full bg-white/[0.03] border rounded-xl p-4 text-sm text-white placeholder-gray-500 outline-none transition-colors resize-none ${
                             formErrors.notes ? 'border-red-500' : 'border-white/15 focus:border-gold'
@@ -813,7 +1108,8 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                         Confirm Your Atelier Pass
                       </h2>
                       <p className="text-xs sm:text-sm text-gray-400">
-                        No advance deposit is required. You pay in shop only after your cut or style is completed.
+                        No advance deposit is required. You pay in shop only after your service with{' '}
+                        <strong className="text-gold">{activeBarberProfile?.name ?? activeUniverseMeta.name}</strong> is completed.
                       </p>
                     </div>
 
@@ -822,17 +1118,19 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                       <div className="flex items-center justify-between border-b border-dashed border-white/15 pb-5">
                         <div>
                           <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-gold block">
-                            {site.name}
+                            {site.name} &middot; {activeUniverseMeta.universeTitle}
                           </span>
                           <h3 className="text-2xl font-serif font-bold text-white mt-1">
-                            {selectedService.name}
+                            {selectedService?.name}
                           </h3>
                         </div>
                         <div className="text-right">
                           <span className="text-2xl sm:text-3xl font-serif font-bold text-gold block">
-                            {selectedService.price}
+                            {selectedService?.price}
                           </span>
-                          <span className="text-[11px] font-mono text-gray-400">{selectedService.duration}</span>
+                          <span className="text-[11px] font-mono text-gray-400">
+                            {selectedService?.duration}
+                          </span>
                         </div>
                       </div>
 
@@ -841,9 +1139,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                           <span className="text-[10px] font-mono uppercase tracking-widest text-gray-500 block mb-1">
                             Date &amp; Time
                           </span>
-                          <span className="text-white font-bold text-sm block">
-                            {selectedDate}
-                          </span>
+                          <span className="text-white font-bold text-sm block">{selectedDate}</span>
                           <span className="text-gold font-mono font-bold">
                             {formatTime12h(selectedTime)}
                           </span>
@@ -851,10 +1147,13 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
 
                         <div>
                           <span className="text-[10px] font-mono uppercase tracking-widest text-gray-500 block mb-1">
-                            Master Artisan
+                            Master Specialist
                           </span>
                           <span className="text-white font-bold text-sm block">
-                            {BARBERS.find((b) => b.id === selectedBarber)?.name || 'First Available'}
+                            {activeBarberProfile?.name ?? activeUniverseMeta.name}
+                          </span>
+                          <span className="text-gold text-[11px] block">
+                            {activeUniverseMeta.universeTitle}
                           </span>
                         </div>
 
@@ -863,7 +1162,9 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                             Guest Holder
                           </span>
                           <span className="text-white font-bold text-sm block">{guestName}</span>
-                          <span className="text-gray-400 font-mono text-[11px] break-all">{guestEmail}</span>
+                          <span className="text-gray-400 font-mono text-[11px] break-all">
+                            {guestEmail}
+                          </span>
                         </div>
                       </div>
 
@@ -877,7 +1178,10 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                     </div>
 
                     {submitError && (
-                      <p role="alert" className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 px-4 py-3 rounded-xl">
+                      <p
+                        role="alert"
+                        className="text-sm text-red-300 border border-red-500/40 bg-red-500/10 px-4 py-3 rounded-xl"
+                      >
                         {submitError}
                       </p>
                     )}
@@ -909,21 +1213,19 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                         ) : (
                           <>
                             <Check className="w-4 h-4 stroke-[3]" />
-                            <span>Confirm Appointment Now</span>
+                            <span>Confirm with {activeUniverseMeta.name}</span>
                           </>
                         )}
                       </button>
                     </div>
                   </motion.div>
                 )}
-
               </div>
 
               {/* RIGHT 5 COLUMNS: STICKY ARTISAN LOOKBOOK & LIVE CHAIR PREVIEW */}
               <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
                 <div className="rounded-3xl overflow-hidden border border-white/12 bg-[#0E0E12] shadow-[0_24px_60px_rgba(0,0,0,0.8)]">
-                  
-                  {/* Live Visual Hair Artistry Showcase */}
+                  {/* Live Visual Hair Artistry Showcase (Strictly From Active Specialist) */}
                   {activeArtItem && (
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
                       <AnimatePresence mode="wait">
@@ -941,14 +1243,14 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                       </AnimatePresence>
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E12] via-[#0E0E12]/30 to-transparent" />
 
-                      <div className="absolute top-3.5 left-3.5 bg-black/75 backdrop-blur-md border border-gold/40 rounded-full px-3 py-1 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-gold">
-                        <span>Signature Craft</span>
+                      <div className="absolute top-3.5 left-3.5 bg-black/75 backdrop-blur-md border border-gold/40 rounded-full px-3.5 py-1 flex items-center gap-1.5 text-[10px] font-sans font-extrabold uppercase tracking-widest text-gold">
+                        <span>{activeUniverseMeta.name} Exclusive Model</span>
                       </div>
 
                       <div className="absolute bottom-3 left-5 right-5 flex items-end justify-between gap-2">
                         <div>
                           <span className="text-[10px] font-mono uppercase tracking-widest text-gold block">
-                            Artistry Preview
+                            {activeUniverseMeta.universeTitle}
                           </span>
                           <p className="text-sm font-serif font-bold text-white line-clamp-1">
                             {activeArtItem.title}
@@ -963,6 +1265,15 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
 
                   {/* Selected Craft Details & Live Summary */}
                   <div className="p-6 space-y-5">
+                    <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/10">
+                      <span className="text-[11px] font-sans font-bold uppercase tracking-[0.18em] text-gray-400">
+                        Dedicated Specialist
+                      </span>
+                      <span className="text-xs font-serif font-bold text-gold">
+                        {activeBarberProfile?.name ?? activeUniverseMeta.name} ({activeUniverseMeta.universeTitle})
+                      </span>
+                    </div>
+
                     <div className="flex items-start justify-between gap-4 pb-4 border-b border-white/10">
                       <div>
                         <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-gold block mb-1">
@@ -985,7 +1296,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                     {selectedService?.inclusions && selectedService.inclusions.length > 0 && (
                       <div>
                         <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-400 block mb-2.5">
-                          Artisan Technique Includes
+                          {activeUniverseMeta.name}&rsquo;s Technique Includes
                         </span>
                         <ul className="space-y-2 text-xs text-gray-300">
                           {selectedService.inclusions.map((inc, i) => (
@@ -1008,7 +1319,7 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                         }}
                         className="w-full btn-gold rounded-full! text-xs py-4 font-black"
                       >
-                        <span>Choose Date &amp; Time</span>
+                        <span>Choose Date &amp; Time with {activeUniverseMeta.name}</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     )}
@@ -1019,19 +1330,12 @@ export default function BookingPage({ onBackToHome, initialBarber, initialServic
                   </div>
                 </div>
               </div>
-
             </div>
-
           </div>
         )}
-
       </div>
 
-      <CallShopModal 
-        isOpen={isCallModalOpen}
-        onClose={() => setIsCallModalOpen(false)}
-      />
-
+      <CallShopModal isOpen={isCallModalOpen} onClose={() => setIsCallModalOpen(false)} />
     </div>
   );
 }

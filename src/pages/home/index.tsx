@@ -21,7 +21,7 @@ export default function HomePage({
   onNavigateToView,
   onNavigateToBooking,
   onSelectBarber,
-  onOpenCheckStatus,
+  onOpenCheckStatus
 }: HomePageProps) {
   return (
     <div>
@@ -31,9 +31,9 @@ export default function HomePage({
         onSelectBarber={onSelectBarber}
       />
 
-      {/* Salon Menu & Pricing */}
+      {/* Salon Menu & Pricing (Separated by Lusca vs Mika) */}
       <TeamAndPricing
-        onNavigateToBooking={() => onNavigateToBooking()}
+        onNavigateToBooking={(service, barberId) => onNavigateToBooking({ service, barberId })}
         onSelectBarber={onSelectBarber}
         onNavigateToServices={() => onNavigateToView('services')}
       />
@@ -46,8 +46,10 @@ export default function HomePage({
         onNavigateToBooking={() => onNavigateToBooking()}
       />
 
-      {/* Realizations portfolio */}
-      <Gallery onBookAppointment={(service) => onNavigateToBooking({ service })} />
+      {/* Realizations portfolio (Separated by Lusca vs Mika) */}
+      <Gallery
+        onBookAppointment={(service, barberId) => onNavigateToBooking({ service, barberId })}
+      />
 
       {/* Google Reviews testimonials */}
       <Testimonials />

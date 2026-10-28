@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { Shield, AlertCircle, Clock, HeartHandshake, CheckCircle2, X, Scissors } from 'lucide-react';
+import { useRef } from 'react';
+import { Shield, AlertCircle, Clock, HeartHandshake, X, Scissors } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 import ScrollIndicator from './ScrollIndicator';
 
@@ -15,150 +15,150 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fadeIn font-sans">
       <div 
         ref={modalBodyRef}
-        className="bg-[#121215] border border-gold/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-sm shadow-2xl relative text-gray-300 scroll-smooth"
+        className="card-luxury rounded-[2.5rem]! border border-gold/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-[0_32px_90px_rgba(0,0,0,0.92)] relative text-gray-300 scroll-smooth"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 bg-[#121215]/98 backdrop-blur-md border-b border-white/10 p-5 flex items-center justify-between z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-gold/10 border border-gold/40 rounded-xs text-gold">
-              <Shield className="w-5 h-5" />
+        <div className="sticky top-0 bg-[#121116]/95 backdrop-blur-xl border-b border-white/10 px-6 py-5 flex items-center justify-between z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gold/15 border border-gold/40 rounded-full flex items-center justify-center text-gold shrink-0">
+              <Shield className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-serif font-bold text-white">
-                Salon Safety & House Policies
+              <h2 className="text-base sm:text-xl font-serif font-bold text-white">
+                Salon Safety &amp; House Policies
               </h2>
-              <p className="text-[11px] font-mono text-gold uppercase tracking-wider">
-                {site.name} &bull; {site.contact.address}
+              <p className="text-[10px] font-sans font-bold text-gold uppercase tracking-[0.2em]">
+                {site.name} &middot; {site.contact.address}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+            className="w-9 h-9 rounded-full bg-white/[0.06] hover:bg-gold text-gray-300 hover:text-black flex items-center justify-center transition-all cursor-pointer border border-white/10"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6 text-xs leading-relaxed">
+        <div className="p-6 sm:p-7 space-y-5 text-xs sm:text-sm leading-relaxed">
           
           {/* Rule 1: Sterilization & Hygiene Standards */}
-          <div className="bg-[#18181D] border border-white/10 p-4 rounded-xs">
-            <div className="flex items-center gap-2 text-gold font-serif font-bold text-sm mb-2">
+          <div className="bg-white/[0.025] border border-white/10 p-5 rounded-3xl">
+            <div className="flex items-center gap-2.5 text-gold font-serif font-bold text-sm sm:text-base mb-2.5">
               <Shield className="w-4 h-4 shrink-0" />
-              <span>1. Hospital-Grade Hygiene & Sterilization</span>
+              <span>1. Hospital-Grade Hygiene &amp; Sterilization</span>
             </div>
-            <p className="text-gray-300 mb-2">
-              The health and safety of our guests is paramount. We adhere to rigorous California State Board of Barbering & Cosmetology standards:
+            <p className="text-gray-300 mb-3 text-xs sm:text-sm">
+              The health and safety of our guests is paramount. We adhere to rigorous California State Board of Barbering &amp; Cosmetology standards:
             </p>
-            <ul className="space-y-1.5 text-gray-400 font-mono text-[11px]">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Single-Use Straight Razor Blades:</strong> Brand-new surgical steel razor blade unwrapped in front of you for every client neck shave and line-up.</span>
+            <ul className="space-y-2 text-gray-300 text-xs">
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span><strong className="text-white">Single-Use Straight Razor Blades:</strong> Brand-new surgical steel razor blade unwrapped in front of you for every client neck shave and line-up.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Autoclave & Barbicide Disinfection:</strong> All metal shears, clipper blades, and combs are sanitized between appointments.</span>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span><strong className="text-white">Autoclave &amp; Barbicide Disinfection:</strong> All metal shears, clipper blades, and combs are sanitized between appointments.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span>Fresh, freshly laundered cape and sanitary neck strips for every visitor.</span>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span>Freshly laundered cape and sanitary neck strips for every visitor.</span>
               </li>
             </ul>
           </div>
 
           {/* Rule 2: Scalp Cleanliness & Hair Preparedness */}
-          <div className="bg-[#18181D] border border-white/10 p-4 rounded-xs">
-            <div className="flex items-center gap-2 text-gold font-serif font-bold text-sm mb-2">
+          <div className="bg-white/[0.025] border border-white/10 p-5 rounded-3xl">
+            <div className="flex items-center gap-2.5 text-gold font-serif font-bold text-sm sm:text-base mb-2.5">
               <Scissors className="w-4 h-4 shrink-0" />
-              <span>2. Hair Preparedness & Scalp Health (Braids & Cuts)</span>
+              <span>2. Hair Preparedness &amp; Scalp Health (Braids &amp; Cuts)</span>
             </div>
-            <p className="text-gray-300 mb-2">
+            <p className="text-gray-300 mb-3 text-xs sm:text-sm">
               To achieve long-lasting, immaculate protective styling and precision cutting:
             </p>
-            <ul className="space-y-1.5 text-gray-400 font-mono text-[11px]">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
-                <span><strong>For Braids & Locs (Mika):</strong> Hair must be freshly washed, fully detangled, and dry (free of heavy glues, heavy grease, or synthetic bonding residue) unless wash add-on was reserved.</span>
+            <ul className="space-y-2 text-gray-300 text-xs">
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span><strong className="text-white">For Braids &amp; Locs (Mika):</strong> Hair must be freshly washed, fully detangled, and dry (free of heavy glues, heavy grease, or synthetic bonding residue) unless wash add-on was reserved.</span>
               </li>
-              <li className="flex items-start gap-2">
+              <li className="flex items-start gap-2.5">
                 <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                <span><strong>Scalp Health:</strong> Clients exhibiting open sores, active contagious scalp infections (lice, ringworm) cannot be serviced for safety compliance and will be politely rescheduled.</span>
+                <span><strong className="text-white">Scalp Health:</strong> Clients exhibiting open sores or active contagious scalp conditions cannot be serviced for safety compliance and will be politely rescheduled.</span>
               </li>
             </ul>
           </div>
 
           {/* Rule 3: Punctuality & 15-Minute Grace Period */}
-          <div className="bg-[#18181D] border border-white/10 p-4 rounded-xs">
-            <div className="flex items-center gap-2 text-gold font-serif font-bold text-sm mb-2">
+          <div className="bg-white/[0.025] border border-white/10 p-5 rounded-3xl">
+            <div className="flex items-center gap-2.5 text-gold font-serif font-bold text-sm sm:text-base mb-2.5">
               <Clock className="w-4 h-4 shrink-0" />
-              <span>3. Punctuality & 15-Minute Grace Period</span>
+              <span>3. Punctuality &amp; 15-Minute Grace Period</span>
             </div>
-            <p className="text-gray-300 mb-2">
-              We respect your time and the time of our master barbers:
+            <p className="text-gray-300 mb-3 text-xs sm:text-sm">
+              We respect your time and the schedule of our master artisans:
             </p>
-            <ul className="space-y-1.5 text-gray-400 font-mono text-[11px]">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+            <ul className="space-y-2 text-gray-300 text-xs">
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
                 <span>Please arrive 5 minutes prior to your scheduled reservation time.</span>
               </li>
-              <li className="flex items-start gap-2">
+              <li className="flex items-start gap-2.5">
                 <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                <span>If you are more than <strong>15 minutes late</strong> without phone notice, your reserved chair may be released to the next client in our live walk-in queue.</span>
+                <span>If you are more than <strong className="text-white">15 minutes late</strong> without phone notice, your reserved chair may be released to the next client in our live walk-in queue.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Free Cancellation:</strong> Please give us at least 2 hours notice via phone ({phoneList}) if you need to reschedule.</span>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span><strong className="text-white">Free Cancellation:</strong> Please give us at least 2 hours notice via phone ({phoneList}) if you need to reschedule.</span>
               </li>
             </ul>
           </div>
 
           {/* Rule 4: Children & Family Safety */}
-          <div className="bg-[#18181D] border border-white/10 p-4 rounded-xs">
-            <div className="flex items-center gap-2 text-gold font-serif font-bold text-sm mb-2">
+          <div className="bg-white/[0.025] border border-white/10 p-5 rounded-3xl">
+            <div className="flex items-center gap-2.5 text-gold font-serif font-bold text-sm sm:text-base mb-2.5">
               <HeartHandshake className="w-4 h-4 shrink-0" />
-              <span>4. Children, Youth & Atmosphere</span>
+              <span>4. Children, Youth &amp; Atmosphere</span>
             </div>
-            <p className="text-gray-300 mb-2">
+            <p className="text-gray-300 mb-3 text-xs sm:text-sm">
               Final Stop is a family-friendly community salon welcoming women, men, girls, and boys:
             </p>
-            <ul className="space-y-1.5 text-gray-400 font-mono text-[11px]">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
+            <ul className="space-y-2 text-gray-300 text-xs">
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
                 <span>Children under the age of 12 must be accompanied by an adult guardian at all times.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
-                <span>For child safety around high-speed clippers and sharp razor blades, children must remain calmly seated during their cut.</span>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span>For child safety around high-speed clippers and sharp razor blades, children must remain calmly seated during their service.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
                 <span>Zero tolerance for harassment, offensive language, or disrespect towards staff and fellow patrons.</span>
               </li>
             </ul>
           </div>
 
           {/* Rule 5: Payment & Pricing Transparency */}
-          <div className="bg-[#18181D] border border-white/10 p-4 rounded-xs">
-            <div className="flex items-center gap-2 text-gold font-serif font-bold text-sm mb-2">
+          <div className="bg-white/[0.025] border border-white/10 p-5 rounded-3xl">
+            <div className="flex items-center gap-2.5 text-gold font-serif font-bold text-sm sm:text-base mb-2.5">
               <Shield className="w-4 h-4 shrink-0" />
-              <span>5. Transparent Pricing & Payment Terms</span>
+              <span>5. Transparent Pricing &amp; Payment Terms</span>
             </div>
-            <ul className="space-y-1.5 text-gray-400 font-mono text-[11px]">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>No Hidden Fees:</strong> $0 deposit charged online. Full payment is due directly at the shop upon service satisfaction.</span>
+            <ul className="space-y-2 text-gray-300 text-xs">
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span><strong className="text-white">No Hidden Fees:</strong> $0 deposit charged online. Full payment is due directly at the shop upon service completion.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Accepted Methods:</strong> Cash, Visa, Mastercard, American Express, Apple Pay, Google Pay, and Zelle.</span>
+              <li className="flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold shrink-0 mt-1.5" />
+                <span><strong className="text-white">Accepted Methods:</strong> Cash, Visa, Mastercard, American Express, Apple Pay, Google Pay, and Zelle.</span>
               </li>
             </ul>
           </div>
@@ -166,13 +166,13 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
         </div>
 
         {/* Scroll down indicator */}
-        <div className="sticky bottom-14 left-0 right-0 z-10">
+        <div className="sticky bottom-16 left-0 right-0 z-10">
           <ScrollIndicator containerRef={modalBodyRef} label="Scroll down for more policies" />
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-[#121215] border-t border-white/10 p-4 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-[11px] font-mono text-gray-400">
+        <div className="sticky bottom-0 bg-[#121116]/95 backdrop-blur-xl border-t border-white/10 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs text-gray-400">
             Questions? Call {site.contact.phones.map((p, i) => (
               <span key={p.tel}>{i > 0 ? ' or ' : ''}<a href={`tel:${p.tel}`} className="text-gold font-bold hover:underline">{p.display}</a></span>
             ))}
@@ -180,7 +180,7 @@ export default function ShopPoliciesModal({ isOpen, onClose }: ShopPoliciesModal
           <button
             type="button"
             onClick={onClose}
-            className="bg-gold hover:bg-gold-light text-black text-xs font-bold uppercase tracking-wider px-5 py-2 rounded-xs cursor-pointer transition-all"
+            className="btn-gold rounded-full! text-xs px-6 py-2.5"
           >
             I Understand
           </button>

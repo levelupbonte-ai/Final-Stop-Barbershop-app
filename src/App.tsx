@@ -227,9 +227,7 @@ export default function App() {
     if (params?.barberId) {
       setSelectedBarberId(params.barberId);
     }
-    if (params?.service) {
-      setBookingService(params.service);
-    }
+    setBookingService(params?.service);
 
     let nextPath = '/';
     if (view === 'home') {
@@ -284,7 +282,9 @@ export default function App() {
         return (
           <ServicesPage
             onBackToHome={() => navigateTo('home')}
-            onNavigateToBooking={(serviceId) => navigateTo('booking', { service: serviceId })}
+            onNavigateToBooking={(serviceId, barberId) =>
+              navigateTo('booking', { service: serviceId, barberId })
+            }
             onNavigateToBarbers={() => navigateTo('barbers')}
           />
         );

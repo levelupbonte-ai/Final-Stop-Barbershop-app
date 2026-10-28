@@ -1,4 +1,4 @@
-import { X, Calendar, Scissors, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, Scissors, ShieldCheck, ArrowUpRight, MapPin } from 'lucide-react';
 import { useSiteData } from '../lib/site/SiteDataProvider';
 
 export interface LightboxImageItem {
@@ -28,90 +28,155 @@ export default function ImageLightboxModal({
   const { site } = useSiteData();
   if (!isOpen || !image) return null;
 
+  const combinedText = `${image.title || ''} ${image.category || ''} ${image.barber || ''} ${image.description || ''}`.toLowerCase();
+  const isBraidsOrLocs =
+    combinedText.includes('braid') ||
+    combinedText.includes('loc') ||
+    combinedText.includes('twist') ||
+    combinedText.includes('cornrow') ||
+    combinedText.includes('curl') ||
+    combinedText.includes('mika');
+
+  const craftPillars = isBraidsOrLocs
+    ? [
+        {
+          label: 'Tension-Free Partitioning',
+          detail: 'Precision geometric parting engineered to protect natural edges and follicular integrity.'
+        },
+        {
+          label: 'Botanical Scalp Infusion',
+          detail: 'Nourished with lightweight organic oils and sealed with a silky setting mousse finish.'
+        },
+        {
+          label: 'Long-Wear Protective Craft',
+          detail: 'Balanced weight distribution for effortless movement and lasting salon freshness.'
+        }
+      ]
+    : [
+        {
+          label: 'Micro-Graduated Blend',
+          detail: 'Seamless clipper-over-comb and zero-gap transition tailored to your cranial structure.'
+        },
+        {
+          label: 'Japanese Razor Contouring',
+          detail: 'Crisp perimeter architecture using a fresh single-use surgical straight razor blade.'
+        },
+        {
+          label: 'Eucalyptus Steam & Conditioning',
+          detail: 'Finished with a warm aromatic towel ritual and botanical skin-soothing tonic.'
+        }
+      ];
+
+  const eyebrowLabel = isBraidsOrLocs
+    ? 'Final Stop Salon · Protective Artistry'
+    : 'Final Stop Atelier · Master Barbering';
+
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-xl animate-fadeIn font-sans"
       onClick={onClose}
     >
       <div 
-        className="relative bg-[#121215] border border-gold/40 max-w-4xl w-full rounded-sm shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+        className="relative card-luxury rounded-[2.5rem]! border border-gold/35 max-w-5xl w-full shadow-[0_32px_90px_rgba(0,0,0,0.92)] overflow-hidden flex flex-col lg:flex-row max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
+        {/* Floating Circular Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 bg-black/70 hover:bg-gold text-white hover:text-black p-2 rounded-full transition-all border border-white/20 cursor-pointer"
+          className="absolute top-5 right-5 z-30 w-10 h-10 rounded-full bg-black/75 hover:bg-gold text-white hover:text-black flex items-center justify-center transition-all duration-300 border border-white/20 hover:border-gold cursor-pointer shadow-xl"
           aria-label="Close"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        {/* Image Preview Container */}
-        <div className="md:w-3/5 bg-black flex items-center justify-center relative overflow-hidden group min-h-[300px] md:min-h-[480px]">
+        {/* Left: Sculpted Editorial Portrait Preview */}
+        <div className="lg:w-[54%] bg-[#09090C] flex items-center justify-center relative overflow-hidden min-h-[280px] sm:min-h-[360px] lg:min-h-[540px]">
           <img
             src={image.src}
-            alt={image.alt || image.title || 'Barber Style'}
-            className="w-full h-full object-cover max-h-[60vh] md:max-h-[80vh]"
+            alt={image.alt || image.title || 'Signature Style'}
+            className="w-full h-full object-cover max-h-[48vh] lg:max-h-[90vh]"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm border border-white/15 px-3 py-1 text-[11px] font-mono text-gold uppercase tracking-wider">
-            {image.category || 'Signature Style'}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0F] via-transparent to-black/25 pointer-events-none" />
+
+          {/* Floating Category Capsule */}
+          <div className="absolute bottom-5 left-5 bg-black/75 backdrop-blur-md border border-gold/40 px-4 py-1.5 rounded-full text-[11px] font-sans font-bold text-gold uppercase tracking-[0.18em] shadow-lg">
+            {image.category || 'Signature Look'}
           </div>
         </div>
 
-        {/* Details & Description Container */}
-        <div className="md:w-2/5 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto bg-[#141418]">
-          <div className="space-y-4">
-            {/* Header info */}
+        {/* Right: Luxury Salon Dossier & Booking Panel */}
+        <div className="lg:w-[46%] p-6 sm:p-9 flex flex-col justify-between overflow-y-auto bg-gradient-to-b from-[#15141A] via-[#111015] to-[#0C0B0F]">
+          <div className="space-y-6">
+            {/* Editorial Kicker & Title */}
             <div>
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.2em] text-gold font-bold mb-2">
+              <div className="inline-flex items-center gap-2 text-[10px] font-sans uppercase tracking-[0.22em] text-gold font-bold mb-2.5">
                 <Scissors className="w-3.5 h-3.5" />
-                <span>Final Stop Barber Shop • Master Cut</span>
+                <span>{eyebrowLabel}</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-serif font-bold text-white leading-snug">
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white leading-tight tracking-tight">
                 {image.title || image.alt}
               </h2>
             </div>
 
-            {/* Barber attribution */}
+            {/* Sculpted Master Artisan Capsule */}
             {image.barber && (
-              <div className="flex items-center gap-2 bg-[#1A1A20] border border-white/10 px-3 py-2 rounded-xs">
-                <div className="text-xs font-mono">
-                  <span className="text-gray-400">Crafted by: </span>
-                  <strong className="text-gold">{image.barber}</strong>
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-gold/15 via-gold/[0.07] to-transparent border border-gold/30 px-4 py-2.5 rounded-full">
+                <div className="w-7 h-7 rounded-full bg-gold/20 border border-gold/40 flex items-center justify-center text-gold shrink-0">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
+                <div className="text-xs leading-snug pr-2">
+                  <span className="text-gray-400 uppercase tracking-[0.12em] text-[10px] font-semibold block">
+                    Master Artisan
+                  </span>
+                  <span className="text-gold font-bold tracking-wide">
+                    {image.barber}
+                  </span>
                 </div>
               </div>
             )}
 
-            {/* Description */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-mono uppercase tracking-wider text-gray-400 font-bold">
-                Style Description & Technique
-              </h4>
-              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                {image.description || 'Precision haircut executed with premium clippers, tailored scissor work, and traditional straight razor contouring for a crisp, long-lasting silhouette.'}
+            {/* Curated Technique Narrative */}
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-3">
+                <h4 className="text-[11px] font-sans uppercase tracking-[0.2em] text-gold/90 font-bold shrink-0">
+                  Artistry &amp; Technique
+                </h4>
+                <div className="h-px flex-1 bg-gradient-to-r from-gold/30 to-transparent" />
+              </div>
+              <p className="text-sm text-gray-200/90 leading-relaxed font-normal">
+                {image.description || 'Executed with bespoke sectioning, tailored proportion control, and luxury finishing rituals for a refined, long-lasting look.'}
               </p>
             </div>
 
-            {/* Service Highlights */}
-            <div className="border-t border-white/10 pt-4 space-y-2 text-xs text-gray-300 font-mono">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Hot towel eucalyptus steam finish</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Organic oils & scalp nourishment</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Clean lines sculpted with Japanese straight razor</span>
+            {/* Bespoke Salon Standards (Replaces basic typewriter checklist) */}
+            <div className="pt-2 space-y-3">
+              <h4 className="text-[11px] font-sans uppercase tracking-[0.2em] text-gray-400 font-bold">
+                Signature Salon Standards
+              </h4>
+              <div className="space-y-2.5">
+                {craftPillars.map((pillar) => (
+                  <div
+                    key={pillar.label}
+                    className="flex items-start gap-3 p-3 rounded-2xl bg-white/[0.025] border border-white/[0.06] hover:border-gold/25 transition-colors"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-gold mt-1.5 shrink-0 shadow-[0_0_8px_rgba(197,160,89,0.8)]" />
+                    <div className="text-xs leading-relaxed">
+                      <span className="text-white font-semibold tracking-wide block">
+                        {pillar.label}
+                      </span>
+                      <span className="text-gray-400 text-[11px]">
+                        {pillar.detail}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Action Button */}
+          {/* Primary Luxury Action Footer */}
           <div className="pt-6 mt-6 border-t border-white/10">
             <button
               type="button"
@@ -121,13 +186,15 @@ export default function ImageLightboxModal({
                   onBookStyle(image.title || image.alt, image.barber);
                 }
               }}
-              className="w-full bg-gold hover:bg-gold-light text-black py-3 px-4 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer rounded-sm"
+              className="w-full btn-gold rounded-full! py-3.5 px-6 text-xs flex items-center justify-center gap-2.5 group"
             >
               <Calendar className="w-4 h-4" />
-              <span>Book This Style</span>
+              <span>Reserve This Look</span>
+              <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
-            <p className="text-center text-[10px] text-gray-400 mt-2 font-mono">
-              Appointments & Walk-Ins Welcome • {site.contact.address}
+            <p className="text-center text-[11px] text-gray-400 mt-3 flex items-center justify-center gap-1.5 tracking-wide">
+              <MapPin className="w-3 h-3 text-gold shrink-0" />
+              <span>Appointments &amp; Walk-Ins Welcome &middot; {site.contact.address}</span>
             </p>
           </div>
         </div>
