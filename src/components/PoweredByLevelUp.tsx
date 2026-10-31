@@ -6,20 +6,24 @@ interface PoweredByLevelUpProps {
   className?: string;
 }
 
-const LEVELUP_URL = 'https://levelup-ecosystem.com';
+// The case study of this site on levelup-ecosystem.com.
+const LEVELUP_URL = 'https://levelup-ecosystem.com/work/final-stop';
 
 export default function PoweredByLevelUp({ domain, className = '' }: PoweredByLevelUpProps) {
-  const href = `${LEVELUP_URL}/?utm_source=${encodeURIComponent(domain || 'client-site')}&utm_medium=referral&utm_campaign=built_by`;
+  const href = `${LEVELUP_URL}?utm_source=${encodeURIComponent(domain || 'client-site')}&utm_medium=referral&utm_campaign=built_by`;
 
   return (
     <a
       href={href}
       target='_blank'
       rel='noopener'
-      aria-label='Built by LevelUp Ecosystem (opens in a new tab)'
+      title='Final Stop website by LevelUp Ecosystem'
+      aria-label='Website built by LevelUp Ecosystem (opens in a new tab)'
       className={`group inline-flex items-center gap-2 text-gray-500 hover:text-gray-200 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm ${className}`}
     >
       <span className='text-[10px] uppercase tracking-[0.2em] font-mono'>Built by</span>
+      {/* The logo below is an image: the studio name as text for search engines and screen readers. */}
+      <span className='sr-only'>LevelUp Ecosystem</span>
       <svg
         xmlns='http://www.w3.org/2000/svg'
         viewBox='0 0 1000 220'

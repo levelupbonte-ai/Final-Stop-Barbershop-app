@@ -29,6 +29,7 @@ import WalkInHubModal, { ModalMode } from './components/WalkInHubModal';
 import CallShopModal from './components/CallShopModal';
 import ShopPoliciesModal from './components/ShopPoliciesModal';
 import { useSiteData } from './lib/site/SiteDataProvider';
+import { trackPageview } from './lib/site/api';
 import { updateDocumentSEO } from './lib/seo';
 
 export type ActiveView = 
@@ -214,6 +215,12 @@ export default function App() {
       window.removeEventListener('hashchange', syncLocationState);
     };
   }, [syncLocationState]);
+
+  // Page view for the LevelUp dashboard, after the URL above is cleaned up;
+  // repeated renders of the same path are ignored by the tracker.
+  useEffect(() => {
+    trackPageview(window.location.pathname);
+  });
 
   // Global call modal listener
   useEffect(() => {

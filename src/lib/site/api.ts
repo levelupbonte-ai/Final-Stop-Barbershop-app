@@ -4,6 +4,7 @@
 // - Every response is validated at runtime before it reaches components.
 import { z } from 'zod';
 import { supabase, WEBSITE_ID, isSupabaseConfigured } from '../supabase';
+import { browserDoNotTrack, createPageviewTracker } from './analytics';
 import {
   bookingSchema,
   check,
@@ -624,6 +625,27 @@ async function requestConfirmationEmail(kind: 'appointment' | 'waitlist' | 'form
 // ---------------------------------------------------------------------------
 // Formatting helpers
 // ---------------------------------------------------------------------------
+
+// Page views (dashboard > Analytics). Fire-and-forget: never throws, never
+// blocks the page. The database answers true / false, never an error.
+const trackView = createPageviewTracker({
+  send: (payload) => {
+    if (!isSupabaseConfigured) return;
+    void Promise.resolve(supabase.rpc('track_pageview', { p_website_id: WEBSITE_ID, ...payload })).catch(() => {});
+  },
+  doNotTrack: browserDoNotTrack,
+  referrer: () => (typeof document === 'undefined' ? '' : document.referrer),
+  href: () => (typeof location === 'undefined' ? '' : location.href),
+  language: () => (typeof navigator === 'undefined' ? '' : navigator.language || '')
+});
+
+export function trackPageview(pathname: string): void {
+  try {
+    trackView(pathname);
+  } catch {
+    /* analytics never break the page */
+  }
+}
 
 export function formatTime12h(time: string): string {
   const [h, m] = time.split(':').map(Number);
