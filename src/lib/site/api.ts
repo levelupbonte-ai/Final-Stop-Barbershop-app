@@ -639,8 +639,20 @@ const trackView = createPageviewTracker({
   language: () => (typeof navigator === 'undefined' ? '' : navigator.language || '')
 });
 
+// Install heartbeat: tells the dashboard this site is connected (Developers >
+// "LevelUp tag: Active"). Once per page load, site ID and version only, no
+// visitor data, so it is sent even when analytics are off. The database only
+// accepts it from this site's own domains and stores at most one every 10 minutes.
+let pinged = false;
+function pingLevelUp(): void {
+  if (pinged || !isSupabaseConfigured) return;
+  pinged = true;
+  void Promise.resolve(supabase.rpc('tag_ping', { p_website_id: WEBSITE_ID, p_version: 'finalstop-1' })).catch(() => {});
+}
+
 export function trackPageview(pathname: string): void {
   try {
+    pingLevelUp();
     trackView(pathname);
   } catch {
     /* analytics never break the page */
