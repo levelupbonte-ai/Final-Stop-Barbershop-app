@@ -196,7 +196,6 @@ export default function PoliciesPage({
                       <span className="text-xl sm:text-2xl font-serif italic text-gold/75 select-none">
                         {section.index}
                       </span>
-                      <span className="w-8 h-[1px] bg-gold/30" />
                       <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-gold font-semibold">
                         {section.kicker}
                       </span>
